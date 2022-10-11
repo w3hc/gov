@@ -6,8 +6,8 @@ typechain
 typechain-types
 NOTES.md
 store.json
+package-lock.json
 
 #Hardhat files
 cache
 artifacts
-
