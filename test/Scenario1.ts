@@ -9,12 +9,10 @@ describe("Scenario #1", function () {
     
     const [deployer, alice, bob] = await ethers.getSigners();
 
-    // deploy nft contract
     const uri = "https://ipfs.io/ipfs/bafybeiberpia3qev7lvnusiiheqqfe57sk5r23gs6fh7v3v6vdcw6wrldq/metadata.json";
     const Sugar = await ethers.getContractFactory("Sugar");
     const sugar = await Sugar.deploy(alice.address, bob.address, uri);
 
-    // deploy dao contract
     const SSD = await ethers.getContractFactory("SSD");
     const ssd = await SSD.deploy(sugar.address);
 
