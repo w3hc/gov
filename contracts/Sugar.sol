@@ -16,6 +16,7 @@ contract Sugar is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ow
 
     Counters.Counter private _tokenIdCounter;
 
+    // TODO: add a list of addresses
     constructor(address _alice, address _bob, string memory _uri) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
         safeMint(_alice, _uri);
         safeMint(_bob, _uri);

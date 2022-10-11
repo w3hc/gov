@@ -19,6 +19,24 @@ npm i
 npx hardhat test
 ```
 
+## Deploy
+
+Create a `.env` on the model of `.env.example` and add your own keys.
+
+Deploy your NFT contract:
+
+```shell
+npx hardhat run scripts/deployNFT.ts --network goerli
+```
+
+It will create a `store.json` file in your root directory.
+
+Then deploy your Governor contract:
+
+```shell
+npx hardhat run scripts/deployGovernor.ts --network goerli
+```
+
 ## Resources
 
 - [Introducing OpenZeppelin Governor](https://blog.openzeppelin.com/governor-smart-contract/)

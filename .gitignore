@@ -5,6 +5,7 @@ coverage.json
 typechain
 typechain-types
 NOTES.md
+store.json
 
 #Hardhat files
 cache
