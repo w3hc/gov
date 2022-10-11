@@ -1,6 +1,6 @@
 # Signed Sealed Delivered
 
-Exploring Open Zeppelin's [Governor contract](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/docs/modules/ROOT/pages/governance.adoc).
+Exploring Open Zeppelin's [Governor contract](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/docs/modules/ROOT/pages/governance.adoc) in combination with NFTs.
 
 I used [https://wizard.openzeppelin.com/](https://wizard.openzeppelin.com/) to write 2 contracts:
 
