@@ -1,0 +1,12 @@
+{
+    "name": "Web3 Hackers Guild Test",
+    "author": "Web3 Hackers Guild Testers",
+    "description": "The owner of this NFT has a right to vote on the test DAO proposals.",
+    "image": "https://ipfs.io/ipfs/bafybeichjaz2dxyvsinz2nx4ho4dmx3qkgvtkitymaeh7jsguhrpbknsru/thistle-black-pixel.jpg",
+    "attributes": [
+        {
+            "trait_type": "Level",
+            "value": "1"
+        }
+    ]
+}
