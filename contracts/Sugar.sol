@@ -11,15 +11,31 @@ import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @custom:security-contact julien@strat.cc
-contract Sugar is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ownable, EIP712, ERC721Votes {
+contract Sugar is
+    ERC721,
+    ERC721Enumerable,
+    ERC721URIStorage,
+    ERC721Burnable,
+    Ownable,
+    EIP712,
+    ERC721Votes
+{
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
-    // TODO: add a list of addresses
-    constructor(address _alice, address _bob, string memory _uri) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
-        safeMint(_alice, _uri);
-        safeMint(_bob, _uri);
+    constructor(
+        address _alice,
+        address _bob,
+        string memory _uri
+    )
+        ERC721("Sugar", "SUGAR")
+        // Each individual NFT counts as 1 vote unit
+        EIP712("Sugar", "1")
+    {
+        safeMint(owner(), _uri); // id 0
+        safeMint(_alice, _uri); // id 1
+        safeMint(_bob, _uri); // id 2
     }
 
     function safeMint(address to, string memory uri) public onlyOwner {
@@ -29,39 +45,37 @@ contract Sugar is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ow
         _setTokenURI(tokenId, uri);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721, ERC721Enumerable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _afterTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721, ERC721Votes)
-    {
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Votes) {
         super._afterTokenTransfer(from, to, tokenId);
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

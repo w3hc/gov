@@ -25,8 +25,8 @@ describe("Signed Sealed Delivered", function () {
 
     it("Should own the right token IDs", async function () {
       const { sugar, alice, bob } = await loadFixture(deployContracts);
-      expect(await sugar.ownerOf(0)).to.equal(alice.address);
-      expect(await sugar.ownerOf(1)).to.equal(bob.address);
+      expect(await sugar.ownerOf(1)).to.equal(alice.address);
+      expect(await sugar.ownerOf(2)).to.equal(bob.address);
     });
 
     it("Should set the right token address", async function () {
