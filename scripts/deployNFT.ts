@@ -9,6 +9,8 @@ dotenv.config();
 
 async function main() {
   
+  // deployer = 0x70456d078950db075283931D9bE2E01B49f3e71e = "Goerli Super tester" addr
+  
   const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
   const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
 
