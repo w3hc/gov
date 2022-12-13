@@ -56,6 +56,7 @@ npx hardhat run scripts/transferOwnership.ts --network goerli
 
 - NFT contract: https://goerli.etherscan.io/address/0x38D7C280212CCd69BC52B615aA1f297aD3251e6e#code
 - Gov contract: https://goerli.etherscan.io/address/0x046206f6371DfEa5be8AB2aC212f029576220e4F#code
+- On Tally: https://www.tally.xyz/gov/eip155:5:0x046206f6371DfEa5be8AB2aC212f029576220e4F
 
 ## Resources
 
