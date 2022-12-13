@@ -7,6 +7,8 @@ const fs = require('fs');
 
 async function main() {
   
+  // deployer = 0x70456d078950db075283931D9bE2E01B49f3e71e = "Goerli Super tester" addr
+
   const SSD = await ethers.getContractFactory("SSD")
   const ssd = await SSD.deploy(store.sugarContractAddress)
   await ssd.deployed();
