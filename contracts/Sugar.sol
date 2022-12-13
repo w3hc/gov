@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.4;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -28,11 +28,7 @@ contract Sugar is
         address _alice,
         address _bob,
         string memory _uri
-    )
-        ERC721("Sugar", "SUGAR")
-        // Each individual NFT counts as 1 vote unit
-        EIP712("Sugar", "1")
-    {
+    ) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
         safeMint(owner(), _uri); // id 0
         safeMint(_alice, _uri); // id 1
         safeMint(_bob, _uri); // id 2
@@ -64,6 +60,10 @@ contract Sugar is
     function _burn(
         uint256 tokenId
     ) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    function govBurn(uint256 tokenId) public onlyOwner {
         super._burn(tokenId);
     }
 

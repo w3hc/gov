@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.4;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
@@ -9,6 +10,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFractio
 /// @custom:security-contact julien@strat.cc
 contract SSD is
     Governor,
+    GovernorSettings,
     GovernorCountingSimple,
     GovernorVotes,
     GovernorVotesQuorumFraction
@@ -17,16 +19,29 @@ contract SSD is
         IVotes _token
     )
         Governor("SSD")
+        GovernorSettings(1 /* 1 block */, 277 /* 1 hour */, 0)
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(20) // Quorum set to 20%
+        GovernorVotesQuorumFraction(20)
     {}
 
-    function votingDelay() public pure override returns (uint256) {
-        return 1; // Vote opens 1 block after proposal submission
+    // The following functions are overrides required by Solidity.
+
+    function votingDelay()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.votingDelay();
     }
 
-    function votingPeriod() public pure override returns (uint256) {
-        return 240; // 240 * 15 / 60 ≈ 1 hour
+    function votingPeriod()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.votingPeriod();
     }
 
     function quorum(
@@ -40,13 +55,22 @@ contract SSD is
         return super.quorum(blockNumber);
     }
 
-    // Test
-    function addMember(address newMember) public {
-        // mint
+    function proposalThreshold()
+        public
+        view
+        override(Governor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.proposalThreshold();
     }
 
-    // Test
-    function banMember(address newMember) public {
-        // burn
-    }
+    // // Test
+    // function addMember(address newMember) public {
+    //     // mint
+    // }
+
+    // // Test
+    // function banMember(address newMember) public {
+    //     // burn
+    // }
 }

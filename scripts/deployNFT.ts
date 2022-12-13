@@ -37,8 +37,9 @@ async function main() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("✅ cid:", cid)
-  console.log("✅ url:", "https://" + cid + ".ipfs.w3s.link/metadata.json")
+  console.log("NFT contract deployment in progress...")
+  console.log("cid:", cid)
+  console.log("url:", "https://" + cid + ".ipfs.w3s.link/metadata.json")
 
   const uri = "https://" + cid + ".ipfs.w3s.link/metadata.json";
 
@@ -49,7 +50,7 @@ async function main() {
 
   fs.writeFileSync(
     "store.json",
-    JSON.stringify({sugarContractAddress: sugar.address}, undefined, 2)
+    JSON.stringify({sugar: sugar.address}, undefined, 2)
   );
 
   console.log("Etherscan verification in progress...")
