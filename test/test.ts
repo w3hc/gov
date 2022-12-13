@@ -14,10 +14,6 @@ describe("Signed Sealed Delivered", function () {
     const sugar = await Sugar.deploy(alice.address, bob.address, uri);
 
     const SSD = await ethers.getContractFactory("SSD");
-    
-    // const ssd = await SSD.deploy(sugar.address, {
-    //   gasLimit: 29000000
-    // });
     const ssd = await SSD.deploy(sugar.address);
 
     // await sugar.transferOwnership(ssd.address);
@@ -29,8 +25,8 @@ describe("Signed Sealed Delivered", function () {
 
     it("Should own the right token IDs", async function () {
       const { sugar, alice, bob } = await loadFixture(deployContracts);
-      expect(await sugar.ownerOf(1)).to.equal(alice.address);
-      expect(await sugar.ownerOf(2)).to.equal(bob.address);
+      expect(await sugar.ownerOf(0)).to.equal(alice.address);
+      expect(await sugar.ownerOf(1)).to.equal(bob.address);
     });
 
     it("Should set the right token address", async function () {
@@ -49,22 +45,22 @@ describe("Signed Sealed Delivered", function () {
 
     it("Should add a new member", async function () {
       const { sugar, francis } = await loadFixture(deployContracts);
-      const uri = await sugar.tokenURI(1)
+      const uri = await sugar.tokenURI(0)
       await sugar.safeMint(francis.address, uri)
-      expect(await sugar.ownerOf(3)).to.equal(francis.address);
+      expect(await sugar.ownerOf(2)).to.equal(francis.address);
     }); 
 
     it("Should ban Francis", async function () {
       const { sugar, francis } = await loadFixture(deployContracts);
-      const uri = await sugar.tokenURI(1)
+      const uri = await sugar.tokenURI(0)
       await sugar.safeMint(francis.address, uri) 
-      await sugar.govBurn(3)
-      expect(sugar.ownerOf(3)).to.be.reverted;
+      await sugar.govBurn(2)
+      expect(sugar.ownerOf(2)).to.be.reverted;
     }); 
 
     /*
 
-    Delegate to self (proposer)
+    Delegate to self
     Propose
     Alice votes (castVote)
     Bob votes (castVote)
@@ -78,14 +74,18 @@ describe("Signed Sealed Delivered", function () {
       expect(await sugar.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    // it("Should submit a proposal", async function () {
-    //   const { sugar, alice, francis } = await loadFixture(deployContracts);
-    //   await sugar.connect(alice).delegate(alice.address)
+    it("Should submit a proposal", async function () {
+      const { sugar, alice } = await loadFixture(deployContracts);
+      await sugar.connect(alice).delegate(alice.address)
 
+      // https://docs.openzeppelin.com/contracts/4.x/api/governance#IGovernor-propose-address---uint256---bytes---string-
+      // propose(address[] targets, uint256[] values, bytes[] calldatas, string description) → uint256 proposalId
+      // https://goerli.etherscan.io/tx/0xa8a51ab7cba4288296448a867d1bd3b1f58ecd78b31fe34873acdad5330f37e5#eventlog
+      // hashproposal (read) first: https://goerli.etherscan.io/address/0x046206f6371dfea5be8ab2ac212f029576220e4f#readContract#F7
+      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol#L121
 
-
-    //   expect(await sugar.delegates(alice.address)).to.equal(alice.address);
-    // }); 
+      expect(await sugar.delegates(alice.address)).to.equal(alice.address);
+    }); 
 
   });
 });
