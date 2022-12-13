@@ -37,6 +37,15 @@ Then deploy your Governor contract:
 npx hardhat run scripts/deployGovernor.ts --network goerli
 ```
 
+## Examples
+
+### Dec 13, 2022
+
+- NFT contract (unverified): https://goerli.etherscan.io/address/0x1a2c4c1f092d02c7683e54fc3c2b1e2f9a64b0c2
+- Gov contract (verified): https://goerli.etherscan.io/address/0x21d19998062af0de5183963ff3adc1437b3f570a
+- On Tally: https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a
+- A proposal: https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a/proposal/83119082379285251585647399325637927665704855498295070431660405074826084622923
+
 ## Resources
 
 - [Introducing OpenZeppelin Governor](https://blog.openzeppelin.com/governor-smart-contract/)
