@@ -62,7 +62,30 @@ describe("Signed Sealed Delivered", function () {
       expect(sugar.ownerOf(3)).to.be.reverted;
     }); 
 
-    // TODO: Members can vote
+    /*
+
+    Delegate to self (proposer)
+    Propose
+    Alice votes (castVote)
+    Bob votes (castVote)
+    Execute
+
+    */
+
+    it("Should delegate to self", async function () {
+      const { sugar, alice, francis } = await loadFixture(deployContracts);
+      await sugar.connect(alice).delegate(alice.address)
+      expect(await sugar.delegates(alice.address)).to.equal(alice.address);
+    }); 
+
+    // it("Should submit a proposal", async function () {
+    //   const { sugar, alice, francis } = await loadFixture(deployContracts);
+    //   await sugar.connect(alice).delegate(alice.address)
+
+
+
+    //   expect(await sugar.delegates(alice.address)).to.equal(alice.address);
+    // }); 
 
   });
 });
