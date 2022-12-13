@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 const fs = require("fs");
+const hre = require("hardhat");
 import { Web3Storage, getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -48,6 +49,11 @@ async function main() {
     "store.json",
     JSON.stringify({sugarContractAddress: sugar.address}, undefined, 2)
   );
+
+  console.log("Etherscan verification in progress...")
+  await sugar.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
+  console.log("Etherscan verification done. ✅")
 
 }
 
