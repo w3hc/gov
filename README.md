@@ -4,8 +4,8 @@ Exploring Open Zeppelin's [Governor contract](https://github.com/OpenZeppelin/op
 
 I used [https://wizard.openzeppelin.com/](https://wizard.openzeppelin.com/) to write 2 contracts:
 
-- `SSD.sol`: the Governor contract
-- `Sugar.sol`: the NFT contract
+- `SSD.sol` is the Governor contract
+- `Sugar.sol` is the NFT contract
 
 ## Install
 
@@ -45,6 +45,8 @@ npx hardhat run scripts/deployGovernor.ts --network goerli
 - [Build Your DAO with OpenZeppelin Governor ft. ENS](https://www.youtube.com/watch?v=Lltt6j6Hmww) (Dec 2021 video)
 - [Build your governance easily with OpenZeppelin Contracts]() (Nov 2021 video)
 - [Tally Wiki](https://wiki.tally.xyz/docs)
+- [A Pocket Guide to DAO Frameworks](https://blog.tally.xyz/a-pocket-guide-to-dao-frameworks-8d7ad5af3a1b) (Oct 2022 post)
+- [Build an NFT DAO from Scratch || Tally Tutorial](https://www.youtube.com/watch?v=cAbHwCWJAG4)
 
 ## Support
 
