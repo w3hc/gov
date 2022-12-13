@@ -2,11 +2,14 @@ import { ethers } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 const fs = require("fs");
+const hre = require("hardhat");
 import { Web3Storage, getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
+  
+  // deployer = 0x70456d078950db075283931D9bE2E01B49f3e71e = "Goerli Super tester" addr
   
   const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
   const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
@@ -34,8 +37,9 @@ async function main() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("✅ cid:", cid)
-  console.log("✅ url:", "https://" + cid + ".ipfs.w3s.link/metadata.json")
+  console.log("NFT contract deployment in progress...")
+  console.log("cid:", cid)
+  console.log("url:", "https://" + cid + ".ipfs.w3s.link/metadata.json")
 
   const uri = "https://" + cid + ".ipfs.w3s.link/metadata.json";
 
@@ -46,8 +50,13 @@ async function main() {
 
   fs.writeFileSync(
     "store.json",
-    JSON.stringify({sugarContractAddress: sugar.address}, undefined, 2)
+    JSON.stringify({sugar: sugar.address}, undefined, 2)
   );
+
+  console.log("Etherscan verification in progress...")
+  await sugar.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
+  console.log("Etherscan verification done. ✅")
 
 }
 
