@@ -19,7 +19,7 @@ contract SSD is
         IVotes _token
     )
         Governor("SSD")
-        GovernorSettings(1 /* 1 block */, 277 /* 1 hour */, 0)
+        GovernorSettings(1 /* 1 block */, 277 /* 1 hour */, 1)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20)
     {}
