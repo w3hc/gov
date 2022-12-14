@@ -2,6 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { moveBlocks } from "../utils/move-blocks"
 
 describe("Signed Sealed Delivered", function () {
 
@@ -57,21 +58,28 @@ describe("Signed Sealed Delivered", function () {
     }); 
 
     it("Should delegate to self", async function () {
-      const { sugar, alice, francis } = await loadFixture(deployContracts);
+      const { sugar, alice } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
       expect(await sugar.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    xit('Should submit a proposal', async function () {
+    it('Should submit a proposal', async function () {
 
-    const { sugar, ssd, alice } = await loadFixture(deployContracts);
+      // https://github.com/PatrickAlphaC/dao-template/blob/main/test/unit/testflow.test.ts#L34
+      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/76fca3aec8e6ce2caf1c9c9a2c8396fe0882591a/test/governance/Governor.test.js
+
+      const { sugar, ssd, alice } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
+
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const calldatas = [addMemberCall.toString()]
 
       const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
       const values = ["10000000000000"] // uint256[]
-      const calldatas = ["0x"] // bytes[]
+      // const calldatas = ["0x"] // bytes[]
       const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
       
+
       const hashProposal = await ssd.connect(alice).hashProposal(
         targets, 
         values, 
@@ -79,26 +87,30 @@ describe("Signed Sealed Delivered", function () {
         descriptionHash
       )
 
-      console.log(hashProposal.toString())
+      console.log("Proposal ID:", hashProposal.toString())
 
-      await ssd.connect(alice).propose(
+      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol#L245
+      const propose = await ssd.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         descriptionHash
       )
 
-      await time.increase(10);
+      // await propose.wait(1)
+      // await time.increase(10);
+      await moveBlocks(2)
+
+      console.log(propose)
+
+      // console.log(await ssd.state(hashProposal.toString()))
 
       await ssd.connect(alice).castVoteWithReason(
-        hashProposal.toString(),
+        hashProposal,
         1,
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
       )
 
-      await time.increase(300);
-      
-      expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
     });
 
     xit('Should cast a vote', async function () {
