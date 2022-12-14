@@ -17,6 +17,8 @@ describe("Signed Sealed Delivered", function () {
     const SSD = await ethers.getContractFactory("SSD");
     const ssd = await SSD.deploy(sugar.address);
 
+    await sugar.transferOwnership(ssd.address);
+
     return { ssd, sugar, deployer, alice, bob, francis };
   }
 
@@ -33,7 +35,7 @@ describe("Signed Sealed Delivered", function () {
       expect(await ssd.token()).to.equal(sugar.address);
     }); 
 
-    xit("Should transfer the NFT contract ownership", async function () {
+    it("Should transfer the NFT contract ownership", async function () {
       const { ssd, sugar } = await loadFixture(deployContracts);
       expect(await sugar.owner()).to.equal(ssd.address);
     }); 
@@ -41,21 +43,6 @@ describe("Signed Sealed Delivered", function () {
   });
 
   describe("Interactions", function () {
-
-    it("Should add a new member", async function () {
-      const { sugar, francis } = await loadFixture(deployContracts);
-      const uri = await sugar.tokenURI(0)
-      await sugar.safeMint(francis.address, uri)
-      expect(await sugar.ownerOf(2)).to.equal(francis.address);
-    }); 
-
-    it("Should ban Francis (govBurn)", async function () {
-      const { sugar, francis } = await loadFixture(deployContracts);
-      const uri = await sugar.tokenURI(0)
-      await sugar.safeMint(francis.address, uri) 
-      await sugar.govBurn(2) // to be replaced with a burn
-      expect(sugar.ownerOf(2)).to.be.reverted;
-    }); 
 
     it("Should delegate to self", async function () {
       const { sugar, alice } = await loadFixture(deployContracts);
@@ -68,11 +55,11 @@ describe("Signed Sealed Delivered", function () {
       const { sugar, ssd, alice, francis } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
 
-      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
-      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
-      const values = ["10000000000000"]
+      const targets = [sugar.address]
+      const values = ["0"]
       const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
 
       const propose = await ssd.connect(alice).propose(
@@ -98,14 +85,14 @@ describe("Signed Sealed Delivered", function () {
 
     it('Should cast a vote', async function () {
 
-      const { sugar, ssd, alice } = await loadFixture(deployContracts);
+      const { sugar, ssd, alice, francis } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
 
-      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
-      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
-      const values = ["10000000000000"]
+      const targets = [sugar.address]
+      const values = ["0"]
       const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
 
       const propose = await ssd.connect(alice).propose(
@@ -131,17 +118,15 @@ describe("Signed Sealed Delivered", function () {
 
       const { sugar, ssd, alice, francis, bob } = await loadFixture(deployContracts);
 
-      // await sugar.transferOwnership(ssd.address);
-
       await sugar.connect(alice).delegate(alice.address)
 
-      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
       const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"
 
-      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
-      const values = ["10000000000000"]
+      const targets = [sugar.address]
+      const values = ["0"]
 
       const propose = await ssd.connect(alice).propose(
         targets, 
@@ -168,9 +153,7 @@ describe("Signed Sealed Delivered", function () {
         values, 
         calldatas,
         desc
-      ) // Error: VM Exception while processing transaction: reverted with reason string 'Governor: call reverted without message'
-
-      console.log(execution)
+      )
 
     });
   });
