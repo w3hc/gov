@@ -1,5 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+// import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { moveBlocks } from "../utils/move-blocks"
@@ -65,31 +65,16 @@ describe("Signed Sealed Delivered", function () {
 
     it('Should submit a proposal', async function () {
 
-      // https://github.com/PatrickAlphaC/dao-template/blob/main/test/unit/testflow.test.ts#L34
-      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/76fca3aec8e6ce2caf1c9c9a2c8396fe0882591a/test/governance/Governor.test.js
-
-      const { sugar, ssd, alice } = await loadFixture(deployContracts);
+      const { sugar, ssd, alice, francis } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
 
       const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
-      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
-      const values = ["10000000000000"] // uint256[]
-      // const calldatas = ["0x"] // bytes[]
-      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
-      
+      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
+      const values = ["10000000000000"]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
 
-      const hashProposal = await ssd.connect(alice).hashProposal(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )
-
-      console.log("Proposal ID:", hashProposal.toString())
-
-      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol#L245
       const propose = await ssd.connect(alice).propose(
         targets, 
         values, 
@@ -97,31 +82,96 @@ describe("Signed Sealed Delivered", function () {
         descriptionHash
       )
 
-      // await propose.wait(1)
-      // await time.increase(10);
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
       await moveBlocks(2)
+      expect(await ssd.state(proposalId)).to.be.equal(1)
+      await expect(ssd.connect(francis).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )).to.be.revertedWith("Governor: proposer votes below proposal threshold")
 
-      console.log(propose)
+    });
 
-      // console.log(await ssd.state(hashProposal.toString()))
+    it('Should cast a vote', async function () {
 
-      await ssd.connect(alice).castVoteWithReason(
-        hashProposal,
-        1,
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
+      const { sugar, ssd, alice } = await loadFixture(deployContracts);
+      await sugar.connect(alice).delegate(alice.address)
+
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const calldatas = [addMemberCall.toString()]
+
+      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
+      const values = ["10000000000000"]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
+
+      const propose = await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
       )
 
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
+      await moveBlocks(2)
+
+      await ssd.connect(alice).castVote(proposalId,1)
+      expect(await ssd.hasVoted(proposalId, alice.address)).to.be.equal(true)
+
+      // TODO: Francis can't vote
+      
     });
 
-    xit('Should cast a vote', async function () {
-      // alice should vote
-      // bob should vote
-      // francis can't vote
-    });
+    it('Should execute the proposal', async function () {
 
-    xit('Should execute the proposal', async function () {
-      // francis executes
-    });
+      const { sugar, ssd, alice, francis, bob } = await loadFixture(deployContracts);
 
+      // await sugar.transferOwnership(ssd.address);
+
+      await sugar.connect(alice).delegate(alice.address)
+
+      const addMemberCall = await sugar.interface.encodeFunctionData('safeMint', [alice.address, "10000000000000"])
+      const calldatas = [addMemberCall.toString()]
+
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"
+
+      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"]
+      const values = ["10000000000000"]
+
+      const propose = await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
+      await moveBlocks(2)
+
+      await ssd.connect(alice).castVote(proposalId,1)
+
+      await ssd.connect(bob).castVote(proposalId,1)
+
+      await moveBlocks(1000)
+
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+
+      const execution = await ssd.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      ) // Error: VM Exception while processing transaction: reverted with reason string 'Governor: call reverted without message'
+
+      console.log(execution)
+
+    });
   });
 });
