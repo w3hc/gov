@@ -29,9 +29,8 @@ contract Sugar is
         address _bob,
         string memory _uri
     ) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
-        safeMint(owner(), _uri); // id 0
-        safeMint(_alice, _uri); // id 1
-        safeMint(_bob, _uri); // id 2
+        safeMint(_alice, _uri);
+        safeMint(_bob, _uri);
     }
 
     function safeMint(address to, string memory uri) public onlyOwner {

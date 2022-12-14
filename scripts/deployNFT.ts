@@ -22,6 +22,7 @@ async function main() {
       return new Web3Storage({ token: getAccessToken()! })
   }
 
+  // TODO: take the image from "./metadata/", form the json file, then upload to ipfs (uri must start with "ipfs://")
   const dir = "./metadata/"
 
   async function getFiles (file:any) {
