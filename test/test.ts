@@ -1,7 +1,9 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 // import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { SSD__factory } from "../typechain-types";
 
 describe("Signed Sealed Delivered", function () {
 
@@ -58,14 +60,13 @@ describe("Signed Sealed Delivered", function () {
       expect(sugar.ownerOf(2)).to.be.reverted;
     }); 
 
-    /*
-
+    /* TODO: 
     Delegate to self
     Propose
     Alice votes (castVote)
     Bob votes (castVote)
-    Execute
-
+    Francis can't vote
+    Execute 
     */
 
     it("Should delegate to self", async function () {
@@ -75,16 +76,41 @@ describe("Signed Sealed Delivered", function () {
     }); 
 
     it("Should submit a proposal", async function () {
-      const { sugar, alice } = await loadFixture(deployContracts);
+      const { sugar, ssd, alice } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
 
-      // https://docs.openzeppelin.com/contracts/4.x/api/governance#IGovernor-propose-address---uint256---bytes---string-
-      // propose(address[] targets, uint256[] values, bytes[] calldatas, string description) → uint256 proposalId
-      // https://goerli.etherscan.io/tx/0xa8a51ab7cba4288296448a867d1bd3b1f58ecd78b31fe34873acdad5330f37e5#eventlog
-      // hashproposal (read) first: https://goerli.etherscan.io/address/0x046206f6371dfea5be8ab2ac212f029576220e4f#readContract#F7
-      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/Governor.sol#L121
+      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
+      const values = ["10000000000000"] // uint256[]
+      const calldatas = ["0x"] // bytes[]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
+      
+      const hashProposal = await ssd.connect(alice).hashProposal(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )
 
-      expect(await sugar.delegates(alice.address)).to.equal(alice.address);
+      console.log(hashProposal.toString())
+
+      await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )
+
+      await time.increase(10);
+
+      await ssd.connect(alice).castVoteWithReason(
+        hashProposal.toString(),
+        1,
+        ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
+      )
+
+      // await time.increase(300);
+      
+      expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
     }); 
 
   });
