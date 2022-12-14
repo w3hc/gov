@@ -32,10 +32,10 @@ describe("Signed Sealed Delivered", function () {
       expect(await ssd.token()).to.equal(sugar.address);
     }); 
 
-    // it("Should transfer the NFT contract ownership to the Governor contract", async function () {
-    //   const { ssd, sugar } = await loadFixture(deployContracts);
-    //   expect(await sugar.owner()).to.equal(ssd.address);
-    // }); 
+    xit("Should transfer the NFT contract ownership", async function () {
+      const { ssd, sugar } = await loadFixture(deployContracts);
+      expect(await sugar.owner()).to.equal(ssd.address);
+    }); 
 
   });
 
@@ -56,58 +56,60 @@ describe("Signed Sealed Delivered", function () {
       expect(sugar.ownerOf(2)).to.be.reverted;
     }); 
 
-    /* TODO: 
-    Delegate to self
-    Propose
-    Alice votes (castVote)
-    Bob votes (castVote)
-    Francis can't vote
-    Execute 
-    */
-
     it("Should delegate to self", async function () {
       const { sugar, alice, francis } = await loadFixture(deployContracts);
       await sugar.connect(alice).delegate(alice.address)
       expect(await sugar.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    // it("Should submit a proposal", async function () {
-    //   const { sugar, ssd, alice } = await loadFixture(deployContracts);
-    //   await sugar.connect(alice).delegate(alice.address)
+    xit('Should submit a proposal', async function () {
 
-    //   const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
-    //   const values = ["10000000000000"] // uint256[]
-    //   const calldatas = ["0x"] // bytes[]
-    //   const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
+    const { sugar, ssd, alice } = await loadFixture(deployContracts);
+      await sugar.connect(alice).delegate(alice.address)
+
+      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
+      const values = ["10000000000000"] // uint256[]
+      const calldatas = ["0x"] // bytes[]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
       
-    //   const hashProposal = await ssd.connect(alice).hashProposal(
-    //     targets, 
-    //     values, 
-    //     calldatas, 
-    //     descriptionHash
-    //   )
+      const hashProposal = await ssd.connect(alice).hashProposal(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )
 
-    //   console.log(hashProposal.toString())
+      console.log(hashProposal.toString())
 
-    //   await ssd.connect(alice).propose(
-    //     targets, 
-    //     values, 
-    //     calldatas, 
-    //     descriptionHash
-    //   )
+      await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )
 
-    //   await time.increase(10);
+      await time.increase(10);
 
-    //   await ssd.connect(alice).castVoteWithReason(
-    //     hashProposal.toString(),
-    //     1,
-    //     ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
-    //   )
+      await ssd.connect(alice).castVoteWithReason(
+        hashProposal.toString(),
+        1,
+        ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
+      )
 
-    //   // await time.increase(300);
+      await time.increase(300);
       
-    //   expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
-    // }); 
+      expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
+    });
+
+    xit('Should cast a vote', async function () {
+      // alice should vote
+      // bob should vote
+      // francis can't vote
+    });
+
+    xit('Should execute the proposal', async function () {
+      // francis executes
+    });
 
   });
 });
