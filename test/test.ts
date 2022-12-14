@@ -1,9 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-// import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SSD__factory } from "../typechain-types";
 
 describe("Signed Sealed Delivered", function () {
 
@@ -19,6 +17,11 @@ describe("Signed Sealed Delivered", function () {
     const ssd = await SSD.deploy(sugar.address);
 
     // await sugar.transferOwnership(ssd.address);
+
+    // await sugar.setApprovalForAll(ssd.address, true);
+    // await time.increase(10);
+    // const approved = await sugar.getApproved(0)
+    // console.log("Operator:", approved)
 
     return { ssd, sugar, deployer, alice, bob, francis };
   }
@@ -52,11 +55,11 @@ describe("Signed Sealed Delivered", function () {
       expect(await sugar.ownerOf(2)).to.equal(francis.address);
     }); 
 
-    it("Should ban Francis", async function () {
+    it("Should ban Francis (govBurn)", async function () {
       const { sugar, francis } = await loadFixture(deployContracts);
       const uri = await sugar.tokenURI(0)
       await sugar.safeMint(francis.address, uri) 
-      await sugar.govBurn(2)
+      await sugar.govBurn(2) // to be replaced with a burn
       expect(sugar.ownerOf(2)).to.be.reverted;
     }); 
 
@@ -75,43 +78,43 @@ describe("Signed Sealed Delivered", function () {
       expect(await sugar.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    it("Should submit a proposal", async function () {
-      const { sugar, ssd, alice } = await loadFixture(deployContracts);
-      await sugar.connect(alice).delegate(alice.address)
+    // it("Should submit a proposal", async function () {
+    //   const { sugar, ssd, alice } = await loadFixture(deployContracts);
+    //   await sugar.connect(alice).delegate(alice.address)
 
-      const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
-      const values = ["10000000000000"] // uint256[]
-      const calldatas = ["0x"] // bytes[]
-      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
+    //   const targets = ["0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"] // address[]
+    //   const values = ["10000000000000"] // uint256[]
+    //   const calldatas = ["0x"] // bytes[]
+    //   const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }")) // bytes32
       
-      const hashProposal = await ssd.connect(alice).hashProposal(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )
+    //   const hashProposal = await ssd.connect(alice).hashProposal(
+    //     targets, 
+    //     values, 
+    //     calldatas, 
+    //     descriptionHash
+    //   )
 
-      console.log(hashProposal.toString())
+    //   console.log(hashProposal.toString())
 
-      await ssd.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )
+    //   await ssd.connect(alice).propose(
+    //     targets, 
+    //     values, 
+    //     calldatas, 
+    //     descriptionHash
+    //   )
 
-      await time.increase(10);
+    //   await time.increase(10);
 
-      await ssd.connect(alice).castVoteWithReason(
-        hashProposal.toString(),
-        1,
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
-      )
+    //   await ssd.connect(alice).castVoteWithReason(
+    //     hashProposal.toString(),
+    //     1,
+    //     ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: 'hey' } }"))
+    //   )
 
-      // await time.increase(300);
+    //   // await time.increase(300);
       
-      expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
-    }); 
+    //   expect(await ssd.proposalSnapshot(hashProposal.toString())).to.equal("0");
+    // }); 
 
   });
 });
