@@ -23,7 +23,9 @@ contract SSD is
     UUPSUpgradeable
 {
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(IVotesUpgradeable _token) {}
+    constructor(IVotesUpgradeable _token) {
+        initialize(_token);
+    }
 
     function initialize(IVotesUpgradeable _token) public initializer {
         __Governor_init("SSD");

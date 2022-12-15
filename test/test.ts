@@ -17,10 +17,6 @@ describe("Signed Sealed Delivered", function () {
     const SSD = await ethers.getContractFactory("SSD");
     const ssd = await SSD.deploy(sugar.address);
 
-    const init = await ssd.initialize(
-      sugar.address
-    )
-
     await sugar.transferOwnership(ssd.address);
 
     return { ssd, sugar, deployer, alice, bob, francis };

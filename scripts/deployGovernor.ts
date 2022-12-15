@@ -16,7 +16,7 @@ async function main() {
 
   console.log("Etherscan verification in progress...")
   await ssd.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: ssd.address, constructorArguments: [store.sugar], });
+  await hre.run("verify:verify", { network: "goerli", address: ssd.address, constructorArguments: [], });
   console.log("Etherscan verification done. ✅")
 
   fs.writeFileSync(
