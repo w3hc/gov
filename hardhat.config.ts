@@ -8,6 +8,10 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
   networks: {
+    hardhat: {
+      chainId: 1337,
+      allowUnlimitedContractSize: true
+    },
     goerli: {
       url: process.env.GOERLI_TESTNET_RPC_URL || "",
       accounts:
