@@ -57,16 +57,16 @@ npx hardhat run scripts/transferOwnership.ts --network goerli
 
 #### Goerli // Dec 13, 2022 // 8am
 
-- NFT contract (unverified): https://goerli.etherscan.io/address/0x1a2c4c1f092d02c7683e54fc3c2b1e2f9a64b0c2
-- Gov contract: https://goerli.etherscan.io/address/0x21d19998062af0de5183963ff3adc1437b3f570a
-- On Tally: https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a
-- A proposal: https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a/proposal/83119082379285251585647399325637927665704855498295070431660405074826084622923
+- [NFT contract](https://goerli.etherscan.io/address/0x1a2c4c1f092d02c7683e54fc3c2b1e2f9a64b0c2) (unverified)
+- [Gov contract](https://goerli.etherscan.io/address/0x21d19998062af0de5183963ff3adc1437b3f570a)
+- [On Tally](https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a)
+- [A proposal](https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a/proposal/83119082379285251585647399325637927665704855498295070431660405074826084622923)
 
 #### Goerli // Dec 13, 2022 // 3pm
 
-- NFT contract: https://goerli.etherscan.io/address/0x38D7C280212CCd69BC52B615aA1f297aD3251e6e#code
-- Gov contract: https://goerli.etherscan.io/address/0x046206f6371DfEa5be8AB2aC212f029576220e4F#code
-- On Tally: https://www.tally.xyz/gov/eip155:5:0x046206f6371DfEa5be8AB2aC212f029576220e4F
+- [NFT contract](https://goerli.etherscan.io/address/0x38D7C280212CCd69BC52B615aA1f297aD3251e6e#code)
+- [Gov contract](https://goerli.etherscan.io/address/0x046206f6371DfEa5be8AB2aC212f029576220e4F#code)
+- [On Tally](https://www.tally.xyz/gov/eip155:5:0x046206f6371DfEa5be8AB2aC212f029576220e4F)
 
 ## Resources
 
