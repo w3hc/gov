@@ -17,6 +17,10 @@ describe("Signed Sealed Delivered", function () {
     const SSD = await ethers.getContractFactory("SSD");
     const ssd = await SSD.deploy(sugar.address);
 
+    const init = await ssd.initialize(
+      sugar.address
+    )
+
     await sugar.transferOwnership(ssd.address);
 
     return { ssd, sugar, deployer, alice, bob, francis };
@@ -35,11 +39,15 @@ describe("Signed Sealed Delivered", function () {
       expect(await ssd.token()).to.equal(sugar.address);
     }); 
 
+    it("Should not be initializable twice", async function () {
+      const { ssd } = await loadFixture(deployContracts);
+      await expect(ssd.initialize("0x0000000000000000000000000000000000000008")).to.be.revertedWith("Initializable: contract is already initialized");
+    }); 
+
     it("Should transfer the NFT contract ownership", async function () {
       const { ssd, sugar } = await loadFixture(deployContracts);
       expect(await sugar.owner()).to.equal(ssd.address);
-    }); 
-
+    });
   });
 
   describe("Interactions", function () {
@@ -154,6 +162,18 @@ describe("Signed Sealed Delivered", function () {
         calldatas,
         desc
       )
+
+    });
+
+    xit("Should upgrade", async function () {
+      const { ssd, sugar } = await loadFixture(deployContracts);
+      expect(await ssd.token()).to.equal(sugar.address);
+
+      const newAddr = "0x0000000000000000000000000000000000000008"
+
+      // TODO: upgrade = transfer NFT contract ownership + switch address
+
+      // expect(await ssd.token()).to.equal(newAddr);
 
     });
   });
