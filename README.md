@@ -11,7 +11,7 @@ Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/cont
 - On-chain voting system (Governor)
 - Members vote to add or ban a member
 - Easy to config, deploy and run
-- Fully compatible with Tally, Safe and Hypercerts
+- Fully compatible with [Tally](https://www.tally.xyz/), [Safe](https://gnosis-safe.io/) and [Hypercerts](https://hypercerts.xyz/)
 - Extreme composability/modularity
 - Upgradeable/evolutive (UUPS)
 - Upgradeable governance settings
