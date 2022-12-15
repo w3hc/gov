@@ -23,7 +23,7 @@ async function main() {
   }
 
   // TODO: take the image from "./metadata/", form the json file, then upload to ipfs (uri must start with "ipfs://")
-  const dir = "./metadata/"
+  const dir = "./data/"
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
