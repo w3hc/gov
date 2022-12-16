@@ -75,6 +75,8 @@ npx hardhat run scripts/transferOwnership.ts --network goerli
 - [On Tally](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8)
 - [Added a new member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/74737614524205492522872223477272223259832790928180497603067039466740454929975) (view [`execute` tx](https://goerli.etherscan.io/tx/0x448090a1894ae462286d16936dea31568bdcb8e2419163847abba05fe504d372) on Etherscan)
 - [Voted a new 'constitution'](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/draft/86d3f17c-95d3-45cd-9f70-37a038deb787) (view [`execute` tx](https://goerli.etherscan.io/tx/0x706a688f90f15ca87489ab7fe9c7f43a262528e080f5f91f8d052551b651c11b) on Etherscan)
+- [Banned a member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/96099062218160360479194831606171326344070977529876809123195778620797177507210) (view [`execute` tx](https://goerli.etherscan.io/tx/0x94b985740bbf2c2df7dba547058a968ad72647e88e4d9b6571a91dce9a1e220d) on Etherscan)
+- [Simple payment](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/71480291215620329031097614919392162006618096196398581448882068916682628149737) (view [`execute` tx](https://goerli.etherscan.io/tx/0x70c2ab2fcccc9e001cf820bd29b37cedae7e7884f55988c0c211b7a24e4143ad) on Etherscan)
 
 ## Resources
 
