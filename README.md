@@ -73,8 +73,8 @@ npx hardhat run scripts/transferOwnership.ts --network goerli
 - [Gov contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code)
 - [Vault contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code) ([Github repo](https://github.com/julienbrg/vman/tree/vault))
 - [On Tally](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8)
-- [Added a new member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/74737614524205492522872223477272223259832790928180497603067039466740454929975)
-- [Voted a new 'constitution'](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/draft/86d3f17c-95d3-45cd-9f70-37a038deb787)
+- [Added a new member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/74737614524205492522872223477272223259832790928180497603067039466740454929975) (view [`execute` tx](https://goerli.etherscan.io/tx/0x448090a1894ae462286d16936dea31568bdcb8e2419163847abba05fe504d372) on Etherscan)
+- [Voted a new 'constitution'](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/draft/86d3f17c-95d3-45cd-9f70-37a038deb787) (view [`execute` tx](https://goerli.etherscan.io/tx/0x706a688f90f15ca87489ab7fe9c7f43a262528e080f5f91f8d052551b651c11b) on Etherscan)
 
 ## Resources
 
