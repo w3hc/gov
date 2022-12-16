@@ -15,7 +15,6 @@ Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/cont
 - Extreme composability/modularity
 - Upgradeable/evolutive (UUPS)
 - Upgradeable governance settings
-- 24/7 tech support
 
 ## Install
 
@@ -67,6 +66,15 @@ npx hardhat run scripts/transferOwnership.ts --network goerli
 - [NFT contract](https://goerli.etherscan.io/address/0x38D7C280212CCd69BC52B615aA1f297aD3251e6e#code)
 - [Gov contract](https://goerli.etherscan.io/address/0x046206f6371DfEa5be8AB2aC212f029576220e4F#code)
 - [On Tally](https://www.tally.xyz/gov/eip155:5:0x046206f6371DfEa5be8AB2aC212f029576220e4F)
+
+#### Goerli // Dec 16, 2022 // 11am
+
+- [NFT contract](https://goerli.etherscan.io/address/0x8B47B6f462B66b62E22243A6CefEbb5281894F0e#code)
+- [Gov contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code)
+- [Vault contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code) ([Github repo](https://github.com/julienbrg/vman/tree/vault))
+- [On Tally](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8)
+- [Added a new member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/74737614524205492522872223477272223259832790928180497603067039466740454929975)
+- [Voted a new 'constitution'](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/draft/86d3f17c-95d3-45cd-9f70-37a038deb787)
 
 ## Resources
 
