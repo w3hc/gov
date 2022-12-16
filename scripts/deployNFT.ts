@@ -95,9 +95,9 @@ async function main() {
     JSON.stringify({sugar: sugar.address}, undefined, 2)
   );
 
-  // console.log("Etherscan verification in progress...")
-  // await sugar.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
+  console.log("Etherscan verification in progress...")
+  await sugar.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
   console.log("Etherscan verification done. ✅")
 
 }
