@@ -22,10 +22,11 @@ contract SSD is
     OwnableUpgradeable,
     UUPSUpgradeable
 {
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(IVotesUpgradeable _token) {
         initialize(_token);
     }
+
+    address public manifesto = 0x6D50c1Be45C48b3D754C9267feAd57f00B0F485C;
 
     function initialize(IVotesUpgradeable _token) public initializer {
         __Governor_init("SSD");
