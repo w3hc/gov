@@ -18,6 +18,7 @@ describe("Signed Sealed Delivered", function () {
     const ssd = await SSD.deploy(sugar.address);
 
     await sugar.transferOwnership(ssd.address);
+    await sugar.connect(bob).setApprovalForAll(ssd.address, true); // https://docs.openzeppelin.com/contracts-cairo/0.5.1/erc721#setapprovalforall
 
     return { ssd, sugar, deployer, alice, bob, francis };
   }
@@ -44,6 +45,7 @@ describe("Signed Sealed Delivered", function () {
       const { ssd, sugar } = await loadFixture(deployContracts);
       expect(await sugar.owner()).to.equal(ssd.address);
     });
+
   });
 
   describe("Interactions", function () {
@@ -158,6 +160,52 @@ describe("Signed Sealed Delivered", function () {
         calldatas,
         desc
       )
+
+    });
+
+    it('Should burn the NFT', async function () {
+
+      const { sugar, ssd, alice, bob } = await loadFixture(deployContracts);
+
+      await sugar.connect(alice).delegate(alice.address)
+
+      const banMemberCall = await sugar.interface.encodeFunctionData('govBurn', [1])
+
+      const calldatas = [banMemberCall.toString()]
+
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Bye bye!' } }"
+
+      const targets = [sugar.address]
+      const values = ["0"]
+
+      const propose = await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
+      await moveBlocks(2)
+
+      await ssd.connect(alice).castVote(proposalId,1)
+
+      await moveBlocks(1000)
+
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+
+      await ssd.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+
+      await moveBlocks(10)
+
+      await expect(sugar.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID")
 
     });
 
