@@ -85,15 +85,15 @@ async function main() {
     JSON.stringify({manifesto: manifestoUri}, undefined, 2)
   );
 
-  // const Sugar = await ethers.getContractFactory("Sugar")
-  // const sugar = await Sugar.deploy(alice, bob, uri)
-  // await sugar.deployed();
-  // console.log("NFT contract deployed at", msg(sugar.address), "✅")
+  const Sugar = await ethers.getContractFactory("Sugar")
+  const sugar = await Sugar.deploy(alice, bob, uri)
+  await sugar.deployed();
+  console.log("NFT contract deployed at", msg(sugar.address), "✅")
 
-  // fs.writeFileSync(
-  //   "store.json",
-  //   JSON.stringify({sugar: sugar.address}, undefined, 2)
-  // );
+  fs.writeFileSync(
+    "store.json",
+    JSON.stringify({sugar: sugar.address}, undefined, 2)
+  );
 
   // console.log("Etherscan verification in progress...")
   // await sugar.deployTransaction.wait(6)
