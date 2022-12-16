@@ -6,6 +6,7 @@ typechain
 typechain-types
 NOTES.md
 store.json
+manifesto.json
 package-lock.json
 
 #Hardhat files

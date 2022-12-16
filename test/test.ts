@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 // import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { moveBlocks } from "../utils/move-blocks"
+import { moveBlocks } from "./utils/move-blocks"
 
 describe("Signed Sealed Delivered", function () {
 
