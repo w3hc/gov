@@ -67,7 +67,7 @@ contract Sugar is
     }
 
     function govBurn(uint256 tokenId) public onlyOwner {
-        super._burn(tokenId);
+        _burn(tokenId);
     }
 
     function tokenURI(
