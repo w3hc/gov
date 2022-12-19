@@ -2,8 +2,11 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
 import "@nomiclabs/hardhat-etherscan";
+import '@openzeppelin/hardhat-upgrades';
 
 dotenv.config();
+const { GOERLI_TESTNET_RPC_URL, DEPLOYER_DAO_TESTER_PRIVATE_KEY, ETHERSCAN_API_KEY } =
+  process.env;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -21,13 +24,13 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true
     },
     goerli: {
-      url: process.env.GOERLI_TESTNET_RPC_URL || "",
+      url: GOERLI_TESTNET_RPC_URL || "",
       accounts:
-        process.env.DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [process.env.DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
+      DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
     },
   }, 
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_API_KEY,
   },
 };
 

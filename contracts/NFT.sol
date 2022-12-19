@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @custom:security-contact julien@strat.cc
-contract Sugar is
+contract NFT is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,
@@ -25,12 +25,12 @@ contract Sugar is
     Counters.Counter private _tokenIdCounter;
 
     constructor(
-        address _alice,
-        address _bob,
+        address[] memory _firstMembers,
         string memory _uri
-    ) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
-        safeMint(_alice, _uri);
-        safeMint(_bob, _uri);
+    ) ERC721("Membership NFT", "MEMBER") EIP712("Membership NFT", "1") {
+        for (uint i; i < _firstMembers.length; i++) {
+            safeMint(_firstMembers[i], _uri);
+        }
     }
 
     function safeMint(address to, string memory uri) public onlyOwner {

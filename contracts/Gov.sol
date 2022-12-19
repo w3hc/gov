@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 /// @custom:security-contact julien@strat.cc
-contract SSD is
+contract Gov is
     Initializable,
     GovernorUpgradeable,
     GovernorSettingsUpgradeable,
@@ -26,10 +26,8 @@ contract SSD is
         initialize(_token);
     }
 
-    address public manifesto = 0x6D50c1Be45C48b3D754C9267feAd57f00B0F485C;
-
     function initialize(IVotesUpgradeable _token) public initializer {
-        __Governor_init("SSD");
+        __Governor_init("Gov");
         __GovernorSettings_init(1, 200, 1);
         __GovernorCountingSimple_init();
         __GovernorVotes_init(_token);

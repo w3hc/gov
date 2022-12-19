@@ -2,8 +2,8 @@
 
 Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
-- `SSD.sol` is the **Governor** contract
-- `Sugar.sol` is the **NFT** contract
+- `Gov.sol` is the **Governor** contract
+- `NFT.sol` is the **NFT** contract
 
 ## Features
 
@@ -30,53 +30,26 @@ npx hardhat test
 
 ## Deploy
 
-Create a `.env` on the model of `.env.example` and add your own keys.
+1. Create a `.env` on the model of `.env.example` and add your own keys
+2. In the `/metadata` directory, edit the `MANIFESTO.md` file and replace the `lode-runner-lightblue.png` image
 
-Deploy your NFT contract:
-
-```shell
-npx hardhat run scripts/deployNFT.ts --network goerli
-```
-
-It will create a `store.json` file in your root directory.
-
-Deploy your Governor contract:
+Then:
 
 ```shell
-npx hardhat run scripts/deployGovernor.ts --network goerli
+npx hardhat deploy
 ```
 
-Then, transfer the ownership of the NFT contract to the Governor contract:
+## Latest deployment
 
-```shell
-npx hardhat run scripts/transferOwnership.ts --network goerli
+_Goerli // Dec 19, 2022 // 2pm utc_
+
+```json
+{
+  "nft": "0x0B87DFd4B39F19912De22100e2c65FB01ed331A9",
+  "gov": "0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597",
+  "manifesto": "0x57e0Fd5a712930Fc45346e6999c58D89be07768D"
+}
 ```
-
-## Deployments
-
-#### Goerli // Dec 13, 2022 // 8am
-
-- [NFT contract](https://goerli.etherscan.io/address/0x1a2c4c1f092d02c7683e54fc3c2b1e2f9a64b0c2) (unverified)
-- [Gov contract](https://goerli.etherscan.io/address/0x21d19998062af0de5183963ff3adc1437b3f570a)
-- [On Tally](https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a)
-- [A proposal](https://www.tally.xyz/gov/eip155:5:0x21d19998062AF0dE5183963ff3aDc1437B3F570a/proposal/83119082379285251585647399325637927665704855498295070431660405074826084622923)
-
-#### Goerli // Dec 13, 2022 // 3pm
-
-- [NFT contract](https://goerli.etherscan.io/address/0x38D7C280212CCd69BC52B615aA1f297aD3251e6e#code)
-- [Gov contract](https://goerli.etherscan.io/address/0x046206f6371DfEa5be8AB2aC212f029576220e4F#code)
-- [On Tally](https://www.tally.xyz/gov/eip155:5:0x046206f6371DfEa5be8AB2aC212f029576220e4F)
-
-#### Goerli // Dec 16, 2022 // 11am
-
-- [NFT contract](https://goerli.etherscan.io/address/0x8B47B6f462B66b62E22243A6CefEbb5281894F0e#code)
-- [Gov contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code)
-- [Vault contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code) ([Github repo](https://github.com/julienbrg/vman/tree/vault))
-- [On Tally](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8)
-- [Added a new member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/74737614524205492522872223477272223259832790928180497603067039466740454929975) (view [`execute` tx](https://goerli.etherscan.io/tx/0x448090a1894ae462286d16936dea31568bdcb8e2419163847abba05fe504d372) on Etherscan)
-- [Voted a new 'constitution'](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/draft/86d3f17c-95d3-45cd-9f70-37a038deb787) (view [`execute` tx](https://goerli.etherscan.io/tx/0x706a688f90f15ca87489ab7fe9c7f43a262528e080f5f91f8d052551b651c11b) on Etherscan)
-- [Banned a member](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/96099062218160360479194831606171326344070977529876809123195778620797177507210) (view [`execute` tx](https://goerli.etherscan.io/tx/0x94b985740bbf2c2df7dba547058a968ad72647e88e4d9b6571a91dce9a1e220d) on Etherscan)
-- [Simple payment](https://www.tally.xyz/gov/eip155:5:0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8/proposal/71480291215620329031097614919392162006618096196398581448882068916682628149737) (view [`execute` tx](https://goerli.etherscan.io/tx/0x70c2ab2fcccc9e001cf820bd29b37cedae7e7884f55988c0c211b7a24e4143ad) on Etherscan)
 
 ## Resources
 
