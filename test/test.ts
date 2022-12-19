@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
 
 describe("Signed Sealed Delivered", function () {
@@ -20,6 +20,8 @@ describe("Signed Sealed Delivered", function () {
     const Manifesto = await ethers.getContractFactory("Manifesto");
     const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
 
+    // const Gov = await ethers.getContractFactory("Gov");
+    // const gov = await upgrades.deployProxy(Gov, [nft.address]);
     const Gov = await ethers.getContractFactory("Gov");
     const gov = await Gov.deploy(nft.address);
 
@@ -321,8 +323,6 @@ describe("Signed Sealed Delivered", function () {
 
       // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
       // https://docs.openzeppelin.com/upgrades-plugins/1.x/
-
-      // TODO: (1) deploy new implementation, (2) transfer NFT contract ownership, (3) propose, vote and execute upgrade
 
     });
   });
