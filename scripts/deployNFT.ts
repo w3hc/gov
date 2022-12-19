@@ -14,6 +14,11 @@ async function main() {
   const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
   const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
 
+  const firstMembers = [
+    alice, 
+    bob
+  ];
+
   function getAccessToken() {
     return process.env.WEB3STORAGE_TOKEN
   }
@@ -46,8 +51,8 @@ async function main() {
     "name": "gov Membership",
     "author": "gov",
     "description": "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/lode-runner-lightblue.png",
-    "manifesto": "ipfs://" + cid + "/MANIFESTO.template.md",
+    "image": "ipfs://" + cid + "/image.png",
+    "manifesto": "ipfs://" + cid + "/MANIFESTO.md",
     // "attributes": [
     //   {
     //     "trait_type": "Level",
@@ -77,14 +82,14 @@ async function main() {
   const uri = (await storeMetadata(makeFileObjects()));
   console.log("Metadata storage done. ✅", uri)
 
-  const manifestoUri = "https://" + cid + ".ipfs.w3s.linkdata/lode-runner-lightblue.png"
+  const manifestoUri = "https://" + cid + ".ipfs.w3s.linkdata/image.png"
   fs.writeFileSync(
     "manifesto.json",
     JSON.stringify({manifesto: manifestoUri}, undefined, 2)
   );
 
   const NFT = await ethers.getContractFactory("NFT")
-  const nft = await NFT.deploy(alice, bob, uri)
+  const nft = await NFT.deploy(firstMembers, uri)
   await nft.deployed();
   console.log("\nNFT deployed at", msg(nft.address), "✅")
 

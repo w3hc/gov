@@ -10,8 +10,12 @@ describe("Signed Sealed Delivered", function () {
     const [deployer, alice, bob, francis] = await ethers.getSigners();
 
     const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe";
+    const firstMembers = [
+      alice.address, 
+      bob.address
+    ];
     const NFT = await ethers.getContractFactory("NFT");
-    const nft = await NFT.deploy(alice.address, bob.address, uri);
+    const nft = await NFT.deploy(firstMembers, uri);
 
     const Manifesto = await ethers.getContractFactory("Manifesto");
     const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
@@ -259,7 +263,7 @@ describe("Signed Sealed Delivered", function () {
         desc
       )
 
-      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999710964551449754")
+      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999710960097490834")
 
     });
 

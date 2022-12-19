@@ -25,12 +25,12 @@ contract NFT is
     Counters.Counter private _tokenIdCounter;
 
     constructor(
-        address _alice,
-        address _bob,
+        address[] memory _firstMembers,
         string memory _uri
     ) ERC721("Membership NFT", "MEMBER") EIP712("Membership NFT", "1") {
-        safeMint(_alice, _uri);
-        safeMint(_bob, _uri);
+        for (uint i; i < _firstMembers.length; i++) {
+            safeMint(_firstMembers[i], _uri);
+        }
     }
 
     function safeMint(address to, string memory uri) public onlyOwner {
