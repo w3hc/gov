@@ -44,8 +44,8 @@ async function main() {
 
   console.log("\ncid:", cid)
 
-  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/MANIFESTO.template.md")
-  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/lode-runner-lightblue.png")
+  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/MANIFESTO.md")
+  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/image.png")
 
   const metadata = {
     "name": "gov Membership",
@@ -81,12 +81,6 @@ async function main() {
 
   const uri = (await storeMetadata(makeFileObjects()));
   console.log("Metadata storage done. ✅", uri)
-
-  const manifestoUri = "https://" + cid + ".ipfs.w3s.linkdata/image.png"
-  fs.writeFileSync(
-    "manifesto.json",
-    JSON.stringify({manifesto: manifestoUri}, undefined, 2)
-  );
 
   const NFT = await ethers.getContractFactory("NFT")
   const nft = await NFT.deploy(firstMembers, uri)
