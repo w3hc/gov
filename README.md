@@ -31,7 +31,7 @@ npx hardhat test
 ## Deploy
 
 1. Create a `.env` on the model of `.env.example` and add your own keys
-2. In the `/metadata` directory, edit the `MANIFESTO.md` file and replace the `lode-runner-lightblue.png` image
+2. In the `/metadata` directory, edit the `MANIFESTO.md` file and replace `image.png`
 
 Then:
 
@@ -41,15 +41,11 @@ npx hardhat deploy
 
 ## Latest deployment
 
-_Goerli // Dec 19, 2022 // 2pm utc_
+Deployed to Goerli on Dec 19, 2022 at 1.50pm UTC:
 
-```json
-{
-  "nft": "0x0B87DFd4B39F19912De22100e2c65FB01ed331A9",
-  "gov": "0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597",
-  "manifesto": "0x57e0Fd5a712930Fc45346e6999c58D89be07768D"
-}
-```
+- Gov: [0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597](https://goerli.etherscan.io/address/0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597#code)
+- NFT: [0x0B87DFd4B39F19912De22100e2c65FB01ed331A9](https://goerli.etherscan.io/address/0x0B87DFd4B39F19912De22100e2c65FB01ed331A9#code)
+- Manifesto: [0x57e0Fd5a712930Fc45346e6999c58D89be07768D](https://goerli.etherscan.io/address/0x57e0Fd5a712930Fc45346e6999c58D89be07768D#code)
 
 ## Resources
 
