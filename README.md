@@ -30,8 +30,14 @@ npx hardhat test
 
 ## Deploy
 
-1. Create a `.env` on the model of `.env.example` and add your own keys
-2. In the `/metadata` directory, edit the `MANIFESTO.md` file and replace `image.png`
+In your root directory:
+
+- Create a `.env` on the model of `.env.example` and add your own keys
+
+In the `/metadata` directory:
+
+- Edit the `MANIFESTO.md` file
+- Replace `image.png` with the image of your choice
 
 Then:
 
