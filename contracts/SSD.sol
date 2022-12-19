@@ -26,8 +26,6 @@ contract SSD is
         initialize(_token);
     }
 
-    address public manifesto = 0x6D50c1Be45C48b3D754C9267feAd57f00B0F485C;
-
     function initialize(IVotesUpgradeable _token) public initializer {
         __Governor_init("SSD");
         __GovernorSettings_init(1, 200, 1);
