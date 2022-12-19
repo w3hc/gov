@@ -209,6 +209,68 @@ describe("Signed Sealed Delivered", function () {
 
     });
 
+    it("Should transfer ETH to beneficiary", async function () {
+
+      const { sugar, ssd, alice, francis, bob } = await loadFixture(deployContracts);
+
+      await sugar.connect(alice).delegate(alice.address)
+
+      await francis.sendTransaction({
+        to: ssd.address,
+        value: ethers.utils.parseEther('0.0001')
+      });
+
+      const addMemberCall = "0x"
+      const calldatas = [addMemberCall.toString()]
+
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer 0.0001 ETH to Bob.' } }"
+
+      const targets = [alice.address]
+      const values = ["100000000000000"]
+
+      const propose = await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
+      await moveBlocks(2)
+
+      await ssd.connect(alice).castVote(proposalId,1)
+
+      await ssd.connect(bob).castVote(proposalId,1)
+
+      await moveBlocks(1000)
+
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+
+      // const bal = await ethers.provider.getBalance(alice.address)
+      // console.log(ethers.utils.formatEther(bal))
+
+      await ssd.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+
+      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.99969650164044202")
+
+    });
+
+    xit("Should transfer ERC-20 to beneficiary", async function () {
+    });
+
+    xit("Should transfer ERC-721 to beneficiary", async function () {
+    });
+
+    xit("Should transfer ERC-1155 to beneficiary", async function () {
+    });
+
     xit("Should upgrade", async function () {
       const { ssd, sugar } = await loadFixture(deployContracts);
       expect(await ssd.token()).to.equal(sugar.address);
