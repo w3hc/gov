@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @custom:security-contact julien@strat.cc
-contract Sugar is
+contract NFT is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,
@@ -28,7 +28,7 @@ contract Sugar is
         address _alice,
         address _bob,
         string memory _uri
-    ) ERC721("Sugar", "SUGAR") EIP712("Sugar", "1") {
+    ) ERC721("Membership NFT", "MEMBER") EIP712("Membership NFT", "1") {
         safeMint(_alice, _uri);
         safeMint(_bob, _uri);
     }

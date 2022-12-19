@@ -43,8 +43,8 @@ async function main() {
   console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/lode-runner-lightblue.png")
 
   const metadata = {
-    "name": "SSD Membership",
-    "author": "SSD",
+    "name": "gov Membership",
+    "author": "gov",
     "description": "The owner of this NFT has a right to vote on the test DAO proposals.",
     "image": "ipfs://" + cid + "/lode-runner-lightblue.png",
     "manifesto": "ipfs://" + cid + "/MANIFESTO.template.md",
@@ -83,20 +83,20 @@ async function main() {
     JSON.stringify({manifesto: manifestoUri}, undefined, 2)
   );
 
-  const Sugar = await ethers.getContractFactory("Sugar")
-  const sugar = await Sugar.deploy(alice, bob, uri)
-  await sugar.deployed();
-  console.log("\nNFT contract deployed at", msg(sugar.address), "✅")
+  const NFT = await ethers.getContractFactory("NFT")
+  const nft = await NFT.deploy(alice, bob, uri)
+  await nft.deployed();
+  console.log("\nNFT deployed at", msg(nft.address), "✅")
 
   fs.writeFileSync(
     "store.json",
-    JSON.stringify({sugar: sugar.address}, undefined, 2)
+    JSON.stringify({nft: nft.address}, undefined, 2)
   );
 
-  // console.log("Etherscan verification in progress...")
-  // await sugar.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
-  // console.log("Etherscan verification done. ✅")
+  console.log("Etherscan verification in progress...")
+  await nft.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [alice, bob, uri], });
+  console.log("Etherscan verification done. ✅")
 
 }
 

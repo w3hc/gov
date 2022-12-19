@@ -12,24 +12,24 @@ async function main() {
   console.log("\nManifesto deployment in progress...")
   const Manifesto = await ethers.getContractFactory("Manifesto");
   const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
-  console.log("\nManifesto contract deployed at", msg(manifesto.address), "✅");
+  console.log("\nManifesto deployed at", msg(manifesto.address), "✅");
 
-  await manifesto.transferOwnership(store.ssd)
-  console.log("\nOwnership transferred to", store.ssd)
+  await manifesto.transferOwnership(store.gov)
+  console.log("\nOwnership transferred to", store.gov)
 
   fs.writeFileSync(
     "store.json",
     JSON.stringify({
-      sugar: store.sugar, 
-      ssd: store.ssd,
+      nft: store.nft, 
+      gov: store.gov,
       manifesto: manifesto.address
     }, undefined, 2),
   ); 
 
-  // console.log("Etherscan verification in progress...")
-  // await manifesto.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: manifesto.address, constructorArguments: ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1"], });
-  // console.log("Etherscan verification done. ✅")
+  console.log("Etherscan verification in progress...")
+  await manifesto.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "goerli", address: manifesto.address, constructorArguments: ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1"], });
+  console.log("Etherscan verification done. ✅")
 
 }
 
