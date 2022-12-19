@@ -254,22 +254,18 @@ describe("Signed Sealed Delivered", function () {
 
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
-      const bal = await ethers.provider.getBalance(alice.address)
-
-      await gov.execute(
+      expect(await gov.execute(
         targets, 
         values, 
         calldatas,
         desc
-      )
-
-      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999710960097490834")
+      )).to.emit(proposalId, 'ProposalExecuted');
 
     });
 
     it("Should update the manifesto", async function () {
 
-      const { nft, gov, manifesto, alice, francis, bob } = await loadFixture(deployContracts);
+      const { nft, gov, manifesto, alice, bob } = await loadFixture(deployContracts);
 
       await nft.connect(alice).delegate(alice.address)
 
