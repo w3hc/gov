@@ -30,9 +30,10 @@ npx hardhat test
 
 ## Deploy
 
-Create a `.env` on the model of `.env.example` and add your own keys.
+1. Create a `.env` on the model of `.env.example` and add your own keys
+2. In the `/metadata` directory, edit the `MANIFESTO.md` file and replace the `lode-runner-lightblue.png` image
 
-Deploy your NFT contract:
+Then:
 
 ```shell
 npx hardhat deploy
@@ -40,7 +41,7 @@ npx hardhat deploy
 
 ## Latest deployment
 
-#### Goerli // Dec 16, 2022 // 11am
+_Goerli // Dec 16, 2022 // 11am_
 
 - [NFT contract](https://goerli.etherscan.io/address/0x8B47B6f462B66b62E22243A6CefEbb5281894F0e#code)
 - [Gov contract](https://goerli.etherscan.io/address/0xdA29B7D299e3a6A77f1ceB2fABC83399ABFc14B8#code)
