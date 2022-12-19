@@ -15,7 +15,7 @@ async function main() {
   console.log("\nManifesto deployed at", msg(manifesto.address), "✅");
 
   await manifesto.transferOwnership(store.gov)
-  console.log("\nOwnership transferred to", store.gov)
+  console.log("\nManifesto ownership transferred to", store.gov)
 
   fs.writeFileSync(
     "store.json",
