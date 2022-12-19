@@ -22,10 +22,10 @@ async function main() {
     }, undefined, 2),
   ); 
 
-  console.log("Etherscan verification in progress...")
-  await gov.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: gov.address, constructorArguments: [store.nft], });
-  console.log("Etherscan verification done. ✅")
+  // console.log("Etherscan verification in progress...")
+  // await gov.deployTransaction.wait(6)
+  // await hre.run("verify:verify", { network: "goerli", address: gov.address, constructorArguments: [store.nft], });
+  // console.log("Etherscan verification done. ✅")
 
   const [issuer] = await ethers.getSigners()
   const abiDir = __dirname + '/../artifacts/contracts';

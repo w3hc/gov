@@ -9,7 +9,7 @@ dotenv.config();
 
 async function main() {
   
-  console.log("NFT contract deployment in progress...")
+  console.log("\nStorage in progress...") 
   
   const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
   const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
@@ -82,6 +82,7 @@ async function main() {
   const uri = (await storeMetadata(makeFileObjects()));
   console.log("Metadata storage done. ✅", uri)
 
+  console.log("\nNFT deployment in progress...") 
   const NFT = await ethers.getContractFactory("NFT")
   const nft = await NFT.deploy(firstMembers, uri)
   await nft.deployed();
@@ -92,10 +93,10 @@ async function main() {
     JSON.stringify({nft: nft.address}, undefined, 2)
   );
 
-  console.log("Etherscan verification in progress...")
-  await nft.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
-  console.log("Etherscan verification done. ✅")
+  // console.log("Etherscan verification in progress...")
+  // await nft.deployTransaction.wait(6)
+  // await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
+  // console.log("Etherscan verification done. ✅")
 
 }
 
