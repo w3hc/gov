@@ -10,7 +10,7 @@ describe("Signed Sealed Delivered", function () {
     
     const [deployer, alice, bob, francis] = await ethers.getSigners();
 
-    const uri = "https://ipfs.io/ipfs/bafybeiberpia3qev7lvnusiiheqqfe57sk5r23gs6fh7v3v6vdcw6wrldq/metadata.json";
+    const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe";
     const Sugar = await ethers.getContractFactory("Sugar");
     const sugar = await Sugar.deploy(alice.address, bob.address, uri);
 
@@ -18,7 +18,6 @@ describe("Signed Sealed Delivered", function () {
     const ssd = await SSD.deploy(sugar.address);
 
     await sugar.transferOwnership(ssd.address);
-    await sugar.connect(bob).setApprovalForAll(ssd.address, true); // https://docs.openzeppelin.com/contracts-cairo/0.5.1/erc721#setapprovalforall
 
     return { ssd, sugar, deployer, alice, bob, francis };
   }
@@ -248,7 +247,7 @@ describe("Signed Sealed Delivered", function () {
 
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
-      // const bal = await ethers.provider.getBalance(alice.address)
+      const bal = await ethers.provider.getBalance(alice.address)
       // console.log(ethers.utils.formatEther(bal))
 
       await ssd.execute(
@@ -258,8 +257,11 @@ describe("Signed Sealed Delivered", function () {
         desc
       )
 
-      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.99969650164044202")
+      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999679477297103386")
 
+    });
+
+    xit("Should update the manifesto", async function () {
     });
 
     xit("Should transfer ERC-20 to beneficiary", async function () {
@@ -272,14 +274,58 @@ describe("Signed Sealed Delivered", function () {
     });
 
     xit("Should upgrade", async function () {
-      const { ssd, sugar } = await loadFixture(deployContracts);
+
+      const { ssd, sugar, alice } = await loadFixture(deployContracts);
       expect(await ssd.token()).to.equal(sugar.address);
 
-      const newAddr = "0x0000000000000000000000000000000000000008"
+      await sugar.connect(alice).delegate(alice.address)
 
-      // TODO: upgrade = transfer NFT contract ownership + switch address
+      const SSD2 = await ethers.getContractFactory("SSD");
+      const ssd2 = await SSD2.deploy(sugar.address);
 
-      // expect(await ssd.token()).to.equal(newAddr);
+      const call = await sugar.interface.encodeFunctionData('transferOwnership', [ssd2.address])
+
+      const call2 = await ssd.interface.encodeFunctionData('upgradeTo', [ssd2.address])
+
+      const calldatas = [call.toString(), call2.toString()]
+
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer ownership and upgrade.' } }"
+
+      const targets = [sugar.address, ssd.address]
+      const values = ["0", "0"]
+
+      const propose = await ssd.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+
+      await moveBlocks(2)
+
+      await ssd.connect(alice).castVote(proposalId,1)
+
+      await moveBlocks(1000)
+
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+
+      // reverted with reason string 'Function must be called through delegatecall' --> https://docs.openzeppelin.com/upgrades-plugins/1.x/
+      
+      // await ssd.execute(
+      //   targets, 
+      //   values, 
+      //   calldatas,
+      //   desc
+      // )
+
+      await moveBlocks(10)
+
+
+      // TODO: (1) deploy new implementation, (2) transfer NFT contract ownership, (3) propose, vote and execute upgrade
+
 
     });
   });
