@@ -4,13 +4,13 @@ Manifesto template.
 
 ## Statement of intent
 
-"We want to ..."
+**We want to ...**
 
 ## Criteria
 
 A new proposal MUST meet one of the following criteria:
 
-- Added a new criteria!
+- ...
 - ...
 - ...
 
@@ -33,7 +33,7 @@ A new proposal MUST meet one of the following criteria:
 
 ## Changelog
 
-#### v0.1
+#### v1
 
 - ...
 
