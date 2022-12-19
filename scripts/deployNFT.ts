@@ -9,8 +9,6 @@ dotenv.config();
 
 async function main() {
   
-  // deployer = 0x70456d078950db075283931D9bE2E01B49f3e71e = "Goerli Super tester" addr
-
   console.log("NFT contract deployment in progress...")
   
   const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
@@ -39,7 +37,7 @@ async function main() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("cid:", cid)
+  console.log("\ncid:", cid)
 
   console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/MANIFESTO.template.md")
   console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/lode-runner-lightblue.png")
@@ -88,17 +86,17 @@ async function main() {
   const Sugar = await ethers.getContractFactory("Sugar")
   const sugar = await Sugar.deploy(alice, bob, uri)
   await sugar.deployed();
-  console.log("NFT contract deployed at", msg(sugar.address), "✅")
+  console.log("\nNFT contract deployed at", msg(sugar.address), "✅")
 
   fs.writeFileSync(
     "store.json",
     JSON.stringify({sugar: sugar.address}, undefined, 2)
   );
 
-  console.log("Etherscan verification in progress...")
-  await sugar.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
-  console.log("Etherscan verification done. ✅")
+  // console.log("Etherscan verification in progress...")
+  // await sugar.deployTransaction.wait(6)
+  // await hre.run("verify:verify", { network: "goerli", address: sugar.address, constructorArguments: [alice, bob, uri], });
+  // console.log("Etherscan verification done. ✅")
 
 }
 

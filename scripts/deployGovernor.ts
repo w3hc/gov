@@ -6,13 +6,13 @@ const hre = require("hardhat");
 const fs = require('fs');
 
 async function main() {
-  
-  // deployer = 0x70456d078950db075283931D9bE2E01B49f3e71e = "Goerli Super tester" addr
 
+  console.log("\nGovernor deployment in progress...") 
+  
   const SSD = await ethers.getContractFactory("SSD")
   const ssd = await SSD.deploy(store.sugar)
   await ssd.deployed();
-  console.log("Governor contract address:", msg(ssd.address), "✅")  
+  console.log("\nGovernor deployed at", msg(ssd.address), "✅")  
 
   fs.writeFileSync(
     "store.json",
@@ -22,10 +22,25 @@ async function main() {
     }, undefined, 2),
   ); 
 
-  console.log("Etherscan verification in progress...")
-  await ssd.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: ssd.address, constructorArguments: [store.sugar], });
-  console.log("Etherscan verification done. ✅")
+  // console.log("Etherscan verification in progress...")
+  // await ssd.deployTransaction.wait(6)
+  // await hre.run("verify:verify", { network: "goerli", address: ssd.address, constructorArguments: [store.sugar], });
+  // console.log("Etherscan verification done. ✅")
+
+  const [issuer] = await ethers.getSigners()
+  const abiDir = __dirname + '/../artifacts/contracts';
+  const sugarAbiContract = abiDir + "/" + "Sugar.sol" + "/" + "Sugar" + ".json"  
+  let sugarAbi;
+  try {
+    sugarAbi = JSON.parse(fs.readFileSync(sugarAbiContract,{encoding:'utf8', flag:'r'}));
+  } catch (error) {
+    console.log(error)
+    return;
+  }
+  const sugar = new ethers.Contract(store.sugar, sugarAbi.abi, issuer)
+
+  await sugar.transferOwnership(ssd.address);
+  const newOwner = await sugar.owner()
   
 }
 

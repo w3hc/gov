@@ -1,5 +1,4 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-// import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
@@ -14,12 +13,16 @@ describe("Signed Sealed Delivered", function () {
     const Sugar = await ethers.getContractFactory("Sugar");
     const sugar = await Sugar.deploy(alice.address, bob.address, uri);
 
+    const Manifesto = await ethers.getContractFactory("Manifesto");
+    const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
+
     const SSD = await ethers.getContractFactory("SSD");
     const ssd = await SSD.deploy(sugar.address);
 
     await sugar.transferOwnership(ssd.address);
+    await manifesto.transferOwnership(ssd.address)
 
-    return { ssd, sugar, deployer, alice, bob, francis };
+    return { ssd, sugar, manifesto, deployer, alice, bob, francis };
   }
 
   describe("Deployment", function () {
@@ -153,7 +156,7 @@ describe("Signed Sealed Delivered", function () {
 
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
-      const execution = await ssd.execute(
+      await ssd.execute(
         targets, 
         values, 
         calldatas,
@@ -248,7 +251,6 @@ describe("Signed Sealed Delivered", function () {
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
       const bal = await ethers.provider.getBalance(alice.address)
-      // console.log(ethers.utils.formatEther(bal))
 
       await ssd.execute(
         targets, 
@@ -257,42 +259,23 @@ describe("Signed Sealed Delivered", function () {
         desc
       )
 
-      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999679477297103386")
+      expect (ethers.utils.formatEther(await ethers.provider.getBalance(alice.address))).to.equal("9999.999710964329166642")
 
     });
 
-    xit("Should update the manifesto", async function () {
-    });
+    it("Should update the manifesto", async function () {
 
-    xit("Should transfer ERC-20 to beneficiary", async function () {
-    });
-
-    xit("Should transfer ERC-721 to beneficiary", async function () {
-    });
-
-    xit("Should transfer ERC-1155 to beneficiary", async function () {
-    });
-
-    xit("Should upgrade", async function () {
-
-      const { ssd, sugar, alice } = await loadFixture(deployContracts);
-      expect(await ssd.token()).to.equal(sugar.address);
+      const { sugar, ssd, manifesto, alice, francis, bob } = await loadFixture(deployContracts);
 
       await sugar.connect(alice).delegate(alice.address)
 
-      const SSD2 = await ethers.getContractFactory("SSD");
-      const ssd2 = await SSD2.deploy(sugar.address);
+      const call = await manifesto.interface.encodeFunctionData('update', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v2"])
+      const calldatas = [call.toString()]
 
-      const call = await sugar.interface.encodeFunctionData('transferOwnership', [ssd2.address])
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Update our manifesto.' } }"
 
-      const call2 = await ssd.interface.encodeFunctionData('upgradeTo', [ssd2.address])
-
-      const calldatas = [call.toString(), call2.toString()]
-
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer ownership and upgrade.' } }"
-
-      const targets = [sugar.address, ssd.address]
-      const values = ["0", "0"]
+      const targets = [manifesto.address]
+      const values = ["0"]
 
       const propose = await ssd.connect(alice).propose(
         targets, 
@@ -308,24 +291,38 @@ describe("Signed Sealed Delivered", function () {
 
       await ssd.connect(alice).castVote(proposalId,1)
 
+      await ssd.connect(bob).castVote(proposalId,1)
+
       await moveBlocks(1000)
 
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
-      // reverted with reason string 'Function must be called through delegatecall' --> https://docs.openzeppelin.com/upgrades-plugins/1.x/
-      
-      // await ssd.execute(
-      //   targets, 
-      //   values, 
-      //   calldatas,
-      //   desc
-      // )
+      await ssd.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
 
-      await moveBlocks(10)
+    });
 
+    xit("Should transfer ERC-20 to beneficiary", async function () {
+    });
+
+    xit("Should transfer ERC-721 to beneficiary", async function () {
+    });
+
+    xit("Should transfer ERC-1155 to beneficiary", async function () {
+    });
+
+    xit("Should upgrade", async function () {
+
+      const { ssd, sugar, alice } = await loadFixture(deployContracts);
+
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
 
       // TODO: (1) deploy new implementation, (2) transfer NFT contract ownership, (3) propose, vote and execute upgrade
-
 
     });
   });
