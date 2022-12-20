@@ -38,10 +38,9 @@ async function main() {
     return;
   }
   const nft = new ethers.Contract(store.nft, nftAbi.abi, issuer)
+  await nft.transferOwnership(store.gov);
+  console.log("\nNFT ownership transferred to", store.gov)
 
-  await nft.transferOwnership(gov.address);
-  const newOwner = await nft.owner()
-  
 }
 
 main().catch((error) => {
