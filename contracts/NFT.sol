@@ -74,6 +74,10 @@ contract NFT is
         return super.tokenURI(tokenId);
     }
 
+    function setMetadata(uint256 tokenId, string memory uri) public onlyOwner {
+        _setTokenURI(tokenId, uri);
+    }
+
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(ERC721, ERC721Enumerable) returns (bool) {
