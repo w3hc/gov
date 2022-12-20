@@ -1,6 +1,6 @@
 # Manifesto
 
-Manifesto template.
+Oh wow, it looks like we've landed on Optimism!
 
 ## Statement of intent
 

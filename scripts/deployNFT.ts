@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 const fs = require("fs");
+const hre = require("hardhat");
 import { Web3Storage, Blob, File , getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -84,10 +85,10 @@ async function main() {
     JSON.stringify({nft: nft.address}, undefined, 2)
   );
 
-  // console.log("Etherscan verification in progress...")
-  // await nft.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
-  // console.log("Etherscan verification done. ✅")
+  console.log("Etherscan verification in progress...")
+  await nft.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "optimism-goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
+  console.log("Etherscan verification done. ✅")
 
 }
 

@@ -22,10 +22,10 @@ async function main() {
     }, undefined, 2),
   ); 
 
-  // console.log("Etherscan verification in progress...")
-  // await gov.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: gov.address, constructorArguments: [store.nft], });
-  // console.log("Etherscan verification done. ✅")
+  console.log("Etherscan verification in progress...")
+  await gov.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "optimism-goerli", address: gov.address, constructorArguments: [store.nft], });
+  console.log("Etherscan verification done. ✅")
 
   const [issuer] = await ethers.getSigners()
   const abiDir = __dirname + '/../artifacts/contracts';
@@ -38,8 +38,8 @@ async function main() {
     return;
   }
   const nft = new ethers.Contract(store.nft, nftAbi.abi, issuer)
-  await nft.transferOwnership(store.gov);
-  console.log("\nNFT ownership transferred to", store.gov)
+  await nft.transferOwnership(gov.address);
+  console.log("\nNFT ownership transferred to", gov.address)
 
 }
 
