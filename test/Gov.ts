@@ -139,6 +139,39 @@ describe("DAO Contracts", function () {
       expect(await nft.ownerOf(2)).to.equal(francis.address);
     });
 
+    it('Should set the nft metadata', async function () {
+      const { nft, gov, alice, francis, bob } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const newMetadata = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
+      const setMetadata = await nft.interface.encodeFunctionData('setMetadata', [1, newMetadata])
+      const calldatas = [setMetadata.toString()]
+
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [nft.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      expect(await nft.tokenURI(1)).to.equal(newMetadata);
+    });
+
     it('Should burn the NFT', async function () {
       const { nft, gov, alice } = await loadFixture(deployContracts);
       await nft.connect(alice).delegate(alice.address)
