@@ -235,6 +235,61 @@ describe("DAO Contracts", function () {
 
     });
 
+    it("Should upgrade Gov", async function () {
+      const { nft, gov, alice, bob } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const Gov = await ethers.getContractFactory("Gov");
+      const gov2 = await Gov.deploy(await gov.token())
+
+      const call = await nft.interface.encodeFunctionData('transferOwnership', [gov2.address])
+      const calldatas = [call.toString()]
+
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [nft.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+
+      expect(await gov2.token()).to.equal(nft.address);
+
+    });
+
+    xit("Should upgrade NFT", async function () {
+      const { nft, gov, alice, francis } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe";
+      
+      // replace by the current members
+      const firstMembers = [
+        francis.address, 
+      ];
+      const NFT = await ethers.getContractFactory("NFT");
+      const nft2 = await NFT.deploy(firstMembers, uri);
+
+      // ... 
+
+      expect(await gov.token()).to.equal(nft2.address);
+    });
+
     xit("Should transfer ERC-20 to beneficiary", async function () {
     });
 
@@ -242,10 +297,6 @@ describe("DAO Contracts", function () {
     });
 
     xit("Should transfer ERC-1155 to beneficiary", async function () {
-    });
-
-    xit("Should upgrade to new implementation", async function () {
-      // Upgrade without UUPS
     });
   });
 });

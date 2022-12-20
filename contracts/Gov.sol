@@ -19,12 +19,10 @@ contract Gov is
         IVotes _token
     )
         Governor("Gov")
-        GovernorSettings(1 /* 1 block */, 150 /* 30 minutes */, 1)
+        GovernorSettings(1, 150, 1)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20)
     {}
-
-    // The following functions are overrides required by Solidity.
 
     function votingDelay()
         public
