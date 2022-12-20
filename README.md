@@ -1,9 +1,9 @@
-# Signed Sealed Delivered
+# DAO Template
 
 Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
 - `Gov.sol` is the **Governor** contract
-- `NFT.sol` is the **NFT** contract
+- `NFT.sol` is the **NFT** contract (ERC-721)
 
 ## Features
 
