@@ -1,50 +1,35 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorSettingsUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorCountingSimpleUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/governance/extensions/GovernorVotesQuorumFractionUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
+import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
 /// @custom:security-contact julien@strat.cc
 contract Gov is
-    Initializable,
-    GovernorUpgradeable,
-    GovernorSettingsUpgradeable,
-    GovernorCountingSimpleUpgradeable,
-    GovernorVotesUpgradeable,
-    GovernorVotesQuorumFractionUpgradeable,
-    OwnableUpgradeable,
-    UUPSUpgradeable
+    Governor,
+    GovernorSettings,
+    GovernorCountingSimple,
+    GovernorVotes,
+    GovernorVotesQuorumFraction
 {
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
+    constructor(
+        IVotes _token
+    )
+        Governor("Gov")
+        GovernorSettings(1 /* 1 block */, 150 /* 30 minutes */, 1)
+        GovernorVotes(_token)
+        GovernorVotesQuorumFraction(20)
+    {}
 
-    function initialize(IVotesUpgradeable _token) public initializer {
-        __Governor_init("Gov");
-        __GovernorSettings_init(1, 200, 1);
-        __GovernorCountingSimple_init();
-        __GovernorVotes_init(_token);
-        __GovernorVotesQuorumFraction_init(20);
-        __Ownable_init();
-        __UUPSUpgradeable_init();
-    }
-
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyOwner {}
+    // The following functions are overrides required by Solidity.
 
     function votingDelay()
         public
         view
-        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
+        override(IGovernor, GovernorSettings)
         returns (uint256)
     {
         return super.votingDelay();
@@ -53,7 +38,7 @@ contract Gov is
     function votingPeriod()
         public
         view
-        override(IGovernorUpgradeable, GovernorSettingsUpgradeable)
+        override(IGovernor, GovernorSettings)
         returns (uint256)
     {
         return super.votingPeriod();
@@ -64,7 +49,7 @@ contract Gov is
     )
         public
         view
-        override(IGovernorUpgradeable, GovernorVotesQuorumFractionUpgradeable)
+        override(IGovernor, GovernorVotesQuorumFraction)
         returns (uint256)
     {
         return super.quorum(blockNumber);
@@ -73,7 +58,7 @@ contract Gov is
     function proposalThreshold()
         public
         view
-        override(GovernorUpgradeable, GovernorSettingsUpgradeable)
+        override(Governor, GovernorSettings)
         returns (uint256)
     {
         return super.proposalThreshold();

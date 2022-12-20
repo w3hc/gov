@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
 
 describe("DAO Contracts", function () {
@@ -21,7 +21,7 @@ describe("DAO Contracts", function () {
     const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
 
     const Gov = await ethers.getContractFactory("Gov");
-    const gov = await upgrades.deployProxy(Gov, [nft.address], {kind: "uups"});
+    const gov = await Gov.deploy(nft.address)
 
     await nft.transferOwnership(gov.address);
     await manifesto.transferOwnership(gov.address)
@@ -40,12 +40,7 @@ describe("DAO Contracts", function () {
     it("Should set the right token address", async function () {
       const { gov, nft } = await loadFixture(deployContracts);
       expect(await gov.token()).to.equal(nft.address);
-    }); 
-
-    it("Should not be initializable twice", async function () {
-      const { gov } = await loadFixture(deployContracts);
-      await expect(gov.initialize("0x0000000000000000000000000000000000000008")).to.be.revertedWith("Initializable: contract is already initialized");
-    }); 
+    });
 
     it("Should transfer the NFT contract ownership", async function () {
       const { gov, nft } = await loadFixture(deployContracts);
@@ -205,9 +200,7 @@ describe("DAO Contracts", function () {
     });
 
     it("Should transfer ETH to beneficiary", async function () {
-
       const { nft, gov, alice, francis, bob } = await loadFixture(deployContracts);
-
       await nft.connect(alice).delegate(alice.address)
 
       await francis.sendTransaction({
@@ -217,32 +210,22 @@ describe("DAO Contracts", function () {
 
       const addMemberCall = "0x"
       const calldatas = [addMemberCall.toString()]
-
       const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer 0.0001 ETH to Bob.' } }"
-
       const targets = [alice.address]
       const values = ["100000000000000"]
-
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         PROPOSAL_DESCRIPTION
       )
-
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
       await moveBlocks(2)
-
       await gov.connect(alice).castVote(proposalId,1)
-
       await gov.connect(bob).castVote(proposalId,1)
-
-      await moveBlocks(1000)
-
+      await moveBlocks(300)
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-
       expect(await gov.execute(
         targets, 
         values, 
@@ -262,48 +245,7 @@ describe("DAO Contracts", function () {
     });
 
     xit("Should upgrade to new implementation", async function () {
-      const { nft, gov, deployer, alice, bob } = await loadFixture(deployContracts);
-      await nft.connect(alice).delegate(alice.address)
-
-      const Gov = await ethers.getContractFactory("Gov");
-      // const gov2 = await upgrades.upgradeProxy(gov.address, Gov, {kind: "uups", useDeployedImplementation: true, constructorArgs: addr});
-      const newImplementation = await upgrades.upgradeProxy(gov.address, Gov, {kind: "uups", useDeployedImplementation: true});
-      await newImplementation.deployed()
-
-      await gov.transferOwnership(gov.address)
-
-      const upgradeCall = gov.interface.encodeFunctionData('upgradeTo', [newImplementation.address])
-      const calldatas = [upgradeCall.toString()]
-      const PROPOSAL_DESCRIPTION = ""
-      const targets = [gov.address]
-      const values = ["0"]
-      const propose = await gov.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        PROPOSAL_DESCRIPTION
-      )
-      const proposeReceipt = await propose.wait(1)
-      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
-      await gov.connect(alice).castVote(proposalId,1)
-      await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
-      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-
-      // I get a 'ERC1967Upgrade: new implementation is not UUPS' error
-      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/ERC1967/ERC1967Upgrade.sol#L95
-      // https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades#common-options 
-      await gov.execute(
-        targets, 
-        values, 
-        calldatas,
-        desc
-      )
-
+      // Upgrade without UUPS
     });
   });
 });
