@@ -41,8 +41,6 @@ contract Gov is
         address newImplementation
     ) internal override onlyOwner {}
 
-    // The following functions are overrides required by Solidity.
-
     function votingDelay()
         public
         view

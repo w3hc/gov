@@ -40,8 +40,6 @@ contract NFT is
         _setTokenURI(tokenId, uri);
     }
 
-    // The following functions are overrides required by Solidity.
-
     function _beforeTokenTransfer(
         address from,
         address to,
