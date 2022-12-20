@@ -20,10 +20,8 @@ describe("Signed Sealed Delivered", function () {
     const Manifesto = await ethers.getContractFactory("Manifesto");
     const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
 
-    // const Gov = await ethers.getContractFactory("Gov");
-    // const gov = await upgrades.deployProxy(Gov, [nft.address]);
     const Gov = await ethers.getContractFactory("Gov");
-    const gov = await Gov.deploy(nft.address);
+    const gov = await upgrades.deployProxy(Gov, [nft.address]);
 
     await nft.transferOwnership(gov.address);
     await manifesto.transferOwnership(gov.address)
@@ -65,27 +63,22 @@ describe("Signed Sealed Delivered", function () {
     }); 
 
     it('Should submit a proposal', async function () {
-
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
       await nft.connect(alice).delegate(alice.address)
 
       const addMemberCall = await nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
-
       const targets = [nft.address]
       const values = ["0"]
       const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
-
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         descriptionHash
       )
-
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
       await moveBlocks(2)
       expect(await gov.state(proposalId)).to.be.equal(1)
       await expect(gov.connect(francis).propose(
@@ -94,11 +87,9 @@ describe("Signed Sealed Delivered", function () {
         calldatas, 
         descriptionHash
       )).to.be.revertedWith("Governor: proposer votes below proposal threshold")
-
     });
 
     it('Should cast a vote', async function () {
-
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
       await nft.connect(alice).delegate(alice.address)
 
@@ -108,113 +99,155 @@ describe("Signed Sealed Delivered", function () {
       const targets = [nft.address]
       const values = ["0"]
       const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
-
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         descriptionHash
       )
-
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
       await moveBlocks(2)
-
       await gov.connect(alice).castVote(proposalId,1)
       expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(true)
-
-      // TODO: Francis can't vote
-      
     });
 
     it('Should execute the proposal', async function () {
-
       const { nft, gov, alice, francis, bob } = await loadFixture(deployContracts);
-
       await nft.connect(alice).delegate(alice.address)
 
       const addMemberCall = await nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
       const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"
-
       const targets = [nft.address]
       const values = ["0"]
-
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         PROPOSAL_DESCRIPTION
       )
-
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
       await moveBlocks(2)
-
       await gov.connect(alice).castVote(proposalId,1)
-
       await gov.connect(bob).castVote(proposalId,1)
-
-      await moveBlocks(1000)
-
+      await moveBlocks(300)
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-
       await gov.execute(
         targets, 
         values, 
         calldatas,
         desc
       )
-
     });
 
     it('Should burn the NFT', async function () {
+      const { nft, gov, alice } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const banMemberCall = await nft.interface.encodeFunctionData('govBurn', [1])
+      const calldatas = [banMemberCall.toString()]
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Bye bye!' } }"
+      const targets = [nft.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      await expect(nft.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID")
+    });
+
+    it("Should update the manifesto", async function () {
+
+      const { nft, gov, manifesto, alice, bob } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const call = await manifesto.interface.encodeFunctionData('update', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v2"])
+      const calldatas = [call.toString()]
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Update our manifesto.' } }"
+      const targets = [manifesto.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+    });
+
+    it("Should upgrade", async function () {
 
       const { nft, gov, alice, bob } = await loadFixture(deployContracts);
 
       await nft.connect(alice).delegate(alice.address)
 
-      const banMemberCall = await nft.interface.encodeFunctionData('govBurn', [1])
+      const Gov = await ethers.getContractFactory("Gov");
+      const gov2 = await upgrades.deployProxy(Gov, [nft.address]);
+      await gov2.deployed()
 
-      const calldatas = [banMemberCall.toString()]
+      await gov2.transferOwnership(gov.address)
+      await gov.transferOwnership(gov.address)
 
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Bye bye!' } }"
-
-      const targets = [nft.address]
+      const upgradeCall = gov.interface.encodeFunctionData('upgradeTo', [gov2.address])
+      const calldatas = [upgradeCall.toString()]
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [gov.address]
       const values = ["0"]
-
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
         PROPOSAL_DESCRIPTION
       )
-
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
       await moveBlocks(2)
-
       await gov.connect(alice).castVote(proposalId,1)
-
-      await moveBlocks(1000)
-
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
 
+      // I get this error: "reverted with reason string 'ERC1967Upgrade: new implementation is not UUPS'"
+      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/ERC1967/ERC1967Upgrade.sol#L95
+      // https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
       await gov.execute(
         targets, 
         values, 
         calldatas,
         desc
       )
-
-      await moveBlocks(10)
-
-      await expect(nft.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID")
-
+      
     });
 
     it("Should transfer ETH to beneficiary", async function () {
@@ -265,49 +298,6 @@ describe("Signed Sealed Delivered", function () {
 
     });
 
-    it("Should update the manifesto", async function () {
-
-      const { nft, gov, manifesto, alice, bob } = await loadFixture(deployContracts);
-
-      await nft.connect(alice).delegate(alice.address)
-
-      const call = await manifesto.interface.encodeFunctionData('update', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v2"])
-      const calldatas = [call.toString()]
-
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Update our manifesto.' } }"
-
-      const targets = [manifesto.address]
-      const values = ["0"]
-
-      const propose = await gov.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        PROPOSAL_DESCRIPTION
-      )
-
-      const proposeReceipt = await propose.wait(1)
-      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-
-      await moveBlocks(2)
-
-      await gov.connect(alice).castVote(proposalId,1)
-
-      await gov.connect(bob).castVote(proposalId,1)
-
-      await moveBlocks(1000)
-
-      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-
-      await gov.execute(
-        targets, 
-        values, 
-        calldatas,
-        desc
-      )
-
-    });
-
     xit("Should transfer ERC-20 to beneficiary", async function () {
     });
 
@@ -315,15 +305,6 @@ describe("Signed Sealed Delivered", function () {
     });
 
     xit("Should transfer ERC-1155 to beneficiary", async function () {
-    });
-
-    xit("Should upgrade", async function () {
-
-      const { gov, nft, alice } = await loadFixture(deployContracts);
-
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
-
     });
   });
 });

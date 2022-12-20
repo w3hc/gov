@@ -22,8 +22,9 @@ contract Gov is
     OwnableUpgradeable,
     UUPSUpgradeable
 {
-    constructor(IVotesUpgradeable _token) {
-        initialize(_token);
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        // _disableInitializers();
     }
 
     function initialize(IVotesUpgradeable _token) public initializer {
