@@ -39,7 +39,7 @@ In the `/metadata` directory:
 - Edit the `MANIFESTO.md` file
 - Replace `image.png` with the image of your choice
 
-Then:
+Then deploy to Goerli:
 
 ```shell
 npx hardhat deploy

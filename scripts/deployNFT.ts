@@ -2,7 +2,6 @@ import { ethers } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 const fs = require("fs");
-const hre = require("hardhat");
 import { Web3Storage, Blob, File , getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -44,21 +43,13 @@ async function main() {
 
   console.log("\ncid:", cid)
 
-  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/MANIFESTO.md")
   console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/image.png")
 
   const metadata = {
     "name": "gov Membership",
     "author": "gov",
     "description": "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/image.png",
-    "manifesto": "ipfs://" + cid + "/MANIFESTO.md",
-    // "attributes": [
-    //   {
-    //     "trait_type": "Level",
-    //     "value": "1"
-    //   }
-    // ]
+    "image": "ipfs://" + cid + "/image.png" 
   }
 
   function makeFileObjects() {
