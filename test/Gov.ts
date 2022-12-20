@@ -29,10 +29,19 @@ describe("DAO Contracts", function () {
     await nft.connect(alice).delegate(alice.address)
 
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
-    const erc20 = await ERC20Mock.deploy(ethers.utils.parseEther('10000'));
-    await erc20.transfer(gov.address, ethers.utils.parseEther('1'))
+    const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'));
+    await erc20Mock.transfer(gov.address, ethers.utils.parseEther('1'))
 
-    return { gov, nft, manifesto, deployer, alice, bob, francis, erc20 };
+    const ERC721Mock = await ethers.getContractFactory("ERC721Mock");
+    const erc721Mock = await ERC721Mock.deploy();
+    await erc721Mock.approve(gov.address, 1)
+    await erc721Mock.transferFrom(deployer.address, gov.address, 1)
+
+    const ERC1155Mock = await ethers.getContractFactory("ERC1155Mock");
+    const erc1155Mock = await ERC1155Mock.deploy();
+    await erc1155Mock.safeTransferFrom(deployer.address, gov.address, 1, 1, "0x")
+
+    return { gov, nft, manifesto, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock };
   }
 
   describe("Deployment", function () {
@@ -355,13 +364,13 @@ describe("DAO Contracts", function () {
     });
 
     it("Should transfer ERC-20 to beneficiary", async function () {
-      const { gov, alice, francis, bob, erc20 } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, erc20Mock } = await loadFixture(deployContracts);
 
-      const erc20Transfer = await erc20.interface.encodeFunctionData('transfer', [francis.address, ethers.utils.parseEther('1')])
-      const calldatas = [erc20Transfer.toString()]
+      const erc20MockTransfer = await erc20Mock.interface.encodeFunctionData('transfer', [francis.address, ethers.utils.parseEther('1')])
+      const calldatas = [erc20MockTransfer.toString()]
 
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"
-      const targets = [erc20.address]
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [erc20Mock.address]
       const values = ["0"]
       const propose = await gov.connect(alice).propose(
         targets, 
@@ -382,13 +391,69 @@ describe("DAO Contracts", function () {
         calldatas,
         desc
       )
-      expect(await erc20.balanceOf(francis.address)).to.equal(ethers.utils.parseEther('1'));
+      expect(await erc20Mock.balanceOf(francis.address)).to.equal(ethers.utils.parseEther('1'));
     });
 
-    xit("Should transfer ERC-721 to beneficiary", async function () {
+    it("Should transfer ERC-721 to beneficiary", async function () {
+      const { gov, alice, francis, bob, erc721Mock } = await loadFixture(deployContracts);
+
+      const erc721Transfer = await erc721Mock.interface.encodeFunctionData('transferFrom', [gov.address, francis.address, 1])
+      const calldatas = [erc721Transfer.toString()]
+
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [erc721Mock.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      expect(await erc721Mock.ownerOf(1)).to.equal(francis.address);
     });
 
-    xit("Should transfer ERC-1155 to beneficiary", async function () {
+    it("Should transfer ERC-1155 to beneficiary", async function () {
+      const { gov, alice, francis, bob, erc1155Mock } = await loadFixture(deployContracts);
+
+      const erc1155MockTransfer = await erc1155Mock.interface.encodeFunctionData('safeTransferFrom', [gov.address, francis.address, 1, 1, "0x"])
+      const calldatas = [erc1155MockTransfer.toString()]
+
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [erc1155Mock.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      expect(await erc1155Mock.balanceOf(francis.address, 1)).to.equal(1);
     });
   });
 });
