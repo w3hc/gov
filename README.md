@@ -13,7 +13,6 @@ Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/cont
 - Easy to config, deploy and run
 - Fully compatible with [Tally](https://www.tally.xyz/)
 - Extreme composability/modularity
-- Upgradeable/evolutive (UUPS)
 - Upgradeable governance settings
 
 ## Install
@@ -30,16 +29,7 @@ npx hardhat test
 
 ## Deploy
 
-In your root directory:
-
-- Create a `.env` on the model of `.env.example` and add your own keys
-
-In the `/metadata` directory:
-
-- Edit the `MANIFESTO.md` file
-- Replace `image.png` with the image of your choice
-
-Then deploy to Goerli:
+Create a `.env` on the model of `.env.example` and add your own keys, then deploy to Goerli:
 
 ```shell
 npx hardhat deploy
