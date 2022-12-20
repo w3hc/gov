@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
 
-describe("Signed Sealed Delivered", function () {
+describe("DAO Contracts", function () {
 
   async function deployContracts() {
     
@@ -21,7 +21,7 @@ describe("Signed Sealed Delivered", function () {
     const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
 
     const Gov = await ethers.getContractFactory("Gov");
-    const gov = await upgrades.deployProxy(Gov, [nft.address]);
+    const gov = await upgrades.deployProxy(Gov, [nft.address], {kind: "uups"});
 
     await nft.transferOwnership(gov.address);
     await manifesto.transferOwnership(gov.address)
@@ -204,52 +204,6 @@ describe("Signed Sealed Delivered", function () {
       )
     });
 
-    it("Should upgrade", async function () {
-
-      const { nft, gov, alice, bob } = await loadFixture(deployContracts);
-
-      await nft.connect(alice).delegate(alice.address)
-
-      const Gov = await ethers.getContractFactory("Gov");
-      const gov2 = await upgrades.deployProxy(Gov, [nft.address]);
-      await gov2.deployed()
-
-      await gov2.transferOwnership(gov.address)
-      await gov.transferOwnership(gov.address)
-
-      const upgradeCall = gov.interface.encodeFunctionData('upgradeTo', [gov2.address])
-      const calldatas = [upgradeCall.toString()]
-      const PROPOSAL_DESCRIPTION = ""
-      const targets = [gov.address]
-      const values = ["0"]
-      const propose = await gov.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        PROPOSAL_DESCRIPTION
-      )
-      const proposeReceipt = await propose.wait(1)
-      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
-      await gov.connect(alice).castVote(proposalId,1)
-      await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
-      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-
-      // I get this error: "reverted with reason string 'ERC1967Upgrade: new implementation is not UUPS'"
-      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/ERC1967/ERC1967Upgrade.sol#L95
-      // https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
-      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
-      await gov.execute(
-        targets, 
-        values, 
-        calldatas,
-        desc
-      )
-      
-    });
-
     it("Should transfer ETH to beneficiary", async function () {
 
       const { nft, gov, alice, francis, bob } = await loadFixture(deployContracts);
@@ -305,6 +259,51 @@ describe("Signed Sealed Delivered", function () {
     });
 
     xit("Should transfer ERC-1155 to beneficiary", async function () {
+    });
+
+    xit("Should upgrade to new implementation", async function () {
+      const { nft, gov, deployer, alice, bob } = await loadFixture(deployContracts);
+      await nft.connect(alice).delegate(alice.address)
+
+      const Gov = await ethers.getContractFactory("Gov");
+      // const gov2 = await upgrades.upgradeProxy(gov.address, Gov, {kind: "uups", useDeployedImplementation: true, constructorArgs: addr});
+      const newImplementation = await upgrades.upgradeProxy(gov.address, Gov, {kind: "uups", useDeployedImplementation: true});
+      await newImplementation.deployed()
+
+      await gov.transferOwnership(gov.address)
+
+      const upgradeCall = gov.interface.encodeFunctionData('upgradeTo', [newImplementation.address])
+      const calldatas = [upgradeCall.toString()]
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [gov.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+
+      // I get a 'ERC1967Upgrade: new implementation is not UUPS' error
+      // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/ERC1967/ERC1967Upgrade.sol#L95
+      // https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/hardhat-upgrades
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/
+      // https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades#common-options 
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+
     });
   });
 });

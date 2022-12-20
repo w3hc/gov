@@ -24,7 +24,7 @@ contract Gov is
 {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        // _disableInitializers();
+        _disableInitializers();
     }
 
     function initialize(IVotesUpgradeable _token) public initializer {
