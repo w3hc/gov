@@ -5,6 +5,10 @@ Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/cont
 - `Gov.sol` is the **Governor** contract
 - `NFT.sol` is the **NFT** contract (ERC-721)
 
+## Motivation
+
+Provide a DAO set of contracts that everyone can use. We want it to be easy to use, safe, complete, modular and scalable.
+
 ## Features
 
 - DAO membership NFTS (ERC-721)
@@ -35,13 +39,26 @@ Create a `.env` on the model of `.env.example` and add your own keys, then deplo
 npx hardhat deploy
 ```
 
+Alternatively, you can run these three commands:
+
+```shell
+npx hardhat run scripts/deployNFT.ts --network optimism-goerli
+npx hardhat run scripts/deployGovernor.ts --network optimism-goerli
+npx hardhat run scripts/deployManifesto.ts --network optimism-goerli
+```
+
+## Supported networks
+
+- Goerli Testnet (`goerli`)
+- Optimism Testnet (`optimism-goerli`)
+
 ## Latest deployment
 
-Deployed to Goerli on Dec 19, 2022 at 1.50pm UTC:
+Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on Dec 20, 2022 at 7.45pm UTC:
 
-- Gov: [0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597](https://goerli.etherscan.io/address/0xF2E65cb449b75b8DF34F24AEDD1f4Ef4b4339597#code)
-- NFT: [0x0B87DFd4B39F19912De22100e2c65FB01ed331A9](https://goerli.etherscan.io/address/0x0B87DFd4B39F19912De22100e2c65FB01ed331A9#code)
-- Manifesto: [0x57e0Fd5a712930Fc45346e6999c58D89be07768D](https://goerli.etherscan.io/address/0x57e0Fd5a712930Fc45346e6999c58D89be07768D#code)
+- NFT: [0xe6BCD785b90dc16d667B022cc871c046587d9Ac5](https://goerli-optimism.etherscan.io/address/0xe6BCD785b90dc16d667B022cc871c046587d9Ac5#code)
+- Gov: [0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd](https://goerli-optimism.etherscan.io/address/0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd#code)
+- Manifesto: [0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C](https://goerli-optimism.etherscan.io/address/0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C#code)
 
 ## Resources
 

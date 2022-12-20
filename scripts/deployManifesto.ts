@@ -26,11 +26,11 @@ async function main() {
     }, undefined, 2),
   ); 
 
-  // console.log("Etherscan verification in progress...")
-  // await manifesto.deployTransaction.wait(6)
-  // await hre.run("verify:verify", { network: "goerli", address: manifesto.address, constructorArguments: ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1"], });
-  // console.log("Etherscan verification done. ✅")
-
+  console.log("Etherscan verification in progress...")
+  await manifesto.deployTransaction.wait(6)
+  await hre.run("verify:verify", { network: "optimism-goerli", address: manifesto.address, constructorArguments: ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1"], });
+  console.log("Etherscan verification done. ✅")
+  
 }
 
 main().catch((error) => {
