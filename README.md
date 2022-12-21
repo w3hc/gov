@@ -39,9 +39,9 @@ npx hardhat run scripts/deployManifesto.ts --network goerli
 
 ## Supported networks
 
-- Goerli Testnet (goerli)
-- Optimism Testnet (optimism-goerli)
-- Optimism (optimism)
+- Goerli Testnet
+- Optimism Testnet
+- Optimism
 
 ## Latest deployment
 
