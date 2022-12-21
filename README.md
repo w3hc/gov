@@ -66,7 +66,7 @@ Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on De
 - [Build your governance easily with OpenZeppelin Contracts]() (Nov 2021 video)
 - [Tally Wiki](https://wiki.tally.xyz/docs)
 - [A Pocket Guide to DAO Frameworks](https://blog.tally.xyz/a-pocket-guide-to-dao-frameworks-8d7ad5af3a1b) (Oct 2022 post)
-- [Build an NFT DAO from Scratch || Tally Tutorial](https://www.youtube.com/watch?v=cAbHwCWJAG4)
+- [Build an NFT DAO from Scratch - Tally Tutorial](https://www.youtube.com/watch?v=cAbHwCWJAG4)
 - [How to Code an On-Chain DAO](https://betterprogramming.pub/how-to-code-an-on-chain-dao-e525e13a57be) (Feb 2022)
 
 ## Changelog
