@@ -24,7 +24,7 @@ async function main() {
 
   console.log("Etherscan verification in progress...")
   await gov.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "optimism-goerli", address: gov.address, constructorArguments: [store.nft], });
+  await hre.run("verify:verify", { network: "goerli", address: gov.address, constructorArguments: [store.nft], });
   console.log("Etherscan verification done. ✅")
 
   const [issuer] = await ethers.getSigners()

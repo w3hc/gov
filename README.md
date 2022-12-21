@@ -1,23 +1,11 @@
 # DAO Template
 
+## Motivation
+
 Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
 - `Gov.sol` is the **Governor** contract
 - `NFT.sol` is the **NFT** contract (ERC-721)
-
-## Motivation
-
-Provide a DAO set of contracts that everyone can use. We want it to be easy to use, safe, complete, modular and scalable.
-
-## Features
-
-- DAO membership NFTS (ERC-721)
-- On-chain voting system (Governor)
-- Members vote to add or ban a member
-- Easy to config, deploy and run
-- Fully compatible with [Tally](https://www.tally.xyz/)
-- Extreme composability/modularity
-- Upgradeable governance settings
 
 ## Install
 
@@ -42,15 +30,16 @@ npx hardhat deploy
 Alternatively, you can run these three commands:
 
 ```shell
-npx hardhat run scripts/deployNFT.ts --network optimism-goerli
-npx hardhat run scripts/deployGovernor.ts --network optimism-goerli
-npx hardhat run scripts/deployManifesto.ts --network optimism-goerli
+npx hardhat run scripts/deployNFT.ts --network goerli
+npx hardhat run scripts/deployGovernor.ts --network goerli
+npx hardhat run scripts/deployManifesto.ts --network goerli
 ```
 
 ## Supported networks
 
-- Goerli Testnet (`goerli`)
-- Optimism Testnet (`optimism-goerli`)
+- Goerli Testnet (goerli)
+- Optimism Testnet (optimism-goerli)
+- Optimism (optimism)
 
 ## Latest deployment
 
@@ -71,6 +60,26 @@ Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on De
 - [A Pocket Guide to DAO Frameworks](https://blog.tally.xyz/a-pocket-guide-to-dao-frameworks-8d7ad5af3a1b) (Oct 2022 post)
 - [Build an NFT DAO from Scratch || Tally Tutorial](https://www.youtube.com/watch?v=cAbHwCWJAG4)
 - [How to Code an On-Chain DAO](https://betterprogramming.pub/how-to-code-an-on-chain-dao-e525e13a57be) (Feb 2022)
+
+## Changelog
+
+#### [v0.8.0-alpha](https://github.com/web3-hackers-collective/dao-contracts/releases/tag/v0.8.0-alpha)
+
+- added Manifesto contract
+- added tests for handling ERC-20, ERC-721, ERC-1155
+- added Optimism Testnet
+- made the NFT contract upgradeable
+- made the NFT metadata dynamic (updatable)
+
+#### [v0.1](https://github.com/web3-hackers-collective/dao-contracts/releases/tag/v.0.1.0)
+
+- DAO membership NFTS (ERC-721)
+- On-chain voting system (Governor)
+- Members vote to add or ban a member
+- Easy to config, deploy and run
+- Fully compatible with [Tally](https://www.tally.xyz/)
+- Extreme composability/modularity
+- Upgradeable governance settings
 
 ## Versions
 
