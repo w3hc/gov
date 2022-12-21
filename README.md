@@ -1,11 +1,13 @@
-# DAO Template
+# DAO Contracts
+
+A DAO template built using Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
+
+- [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
+- [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
 ## Motivation
 
-Exploring Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
-
-- `Gov.sol` is the **Governor** contract
-- `NFT.sol` is the **NFT** contract (ERC-721)
+See if it can fit the needs of many different communities (activists, local neighborhoods, orgs, ...). We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
 
 ## Install
 
@@ -48,6 +50,12 @@ Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on De
 - NFT: [0xe6BCD785b90dc16d667B022cc871c046587d9Ac5](https://goerli-optimism.etherscan.io/address/0xe6BCD785b90dc16d667B022cc871c046587d9Ac5#code)
 - Gov: [0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd](https://goerli-optimism.etherscan.io/address/0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd#code)
 - Manifesto: [0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C](https://goerli-optimism.etherscan.io/address/0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C#code)
+
+## Roadmap
+
+1. Simplified onboarding ([Onboarding.sol](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/plugins/Onboarding.sol) plugin + UI)
+2. Impact evaluation process & [Hypercerts](https://hypercerts.xyz/) integration
+3. Vault (in addition to the [Gnosis Safe](https://gnosis-safe.io/))
 
 ## Resources
 
