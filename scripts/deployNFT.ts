@@ -85,10 +85,10 @@ async function main() {
     JSON.stringify({nft: nft.address}, undefined, 2)
   );
 
-  console.log("Etherscan verification in progress...")
-  await nft.deployTransaction.wait(6)
-  await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
-  console.log("Etherscan verification done. ✅")
+  // console.log("Etherscan verification in progress...")
+  // await nft.deployTransaction.wait(6)
+  // await hre.run("verify:verify", { network: "goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
+  // console.log("Etherscan verification done. ✅")
 
 }
 
