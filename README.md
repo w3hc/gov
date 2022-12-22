@@ -1,6 +1,6 @@
 # DAO Contracts
 
-A DAO template built using Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
+A DAO template built with Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
@@ -41,7 +41,7 @@ Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
 ## Tools
 
-#### Upload metadata
+### Upload metadata
 
 Edit the metadata in `upload-metadata.ts`, then:
 
@@ -49,7 +49,7 @@ Edit the metadata in `upload-metadata.ts`, then:
 npx hardhat run scripts/upload-metadata.ts
 ```
 
-#### Upload manifesto
+### Upload manifesto
 
 Edit the `manifesto.md` file, then:
 
