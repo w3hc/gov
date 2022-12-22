@@ -47,11 +47,34 @@ async function main() {
   console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/image.png")
 
   const metadata = {
-    "name": "gov Membership",
-    "author": "gov",
-    "description": "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/image.png" 
-  }
+    "name": "DAO Membership",
+    "author": "Gov",
+    "description":
+      "The owner of this NFT has a right to vote on the test DAO proposals.",
+    "image": "ipfs://" + cid + "/image.png",
+    "attributes": [
+      {
+        "trait_type": "Participation rate",
+        "value": "100%",
+      },
+      {
+        "trait_type": "Significant contribs",
+        "value": "0",
+      },
+      {
+        "trait_type": "DAO",
+        "value": "0x34a86cff2acb0A9FDfd12E5429325F9ac2e751B3",
+      },
+      {
+        "trait_type": "Nickname",
+        "value": "Bamboo flute",
+      },
+      {
+        "trait_type": "Role",
+        "value": "Hacker",
+      },
+    ],
+  };
 
   function makeFileObjects() {
     const blob = new Blob([JSON.stringify(metadata)], {
