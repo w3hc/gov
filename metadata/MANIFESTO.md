@@ -1,6 +1,6 @@
 # Manifesto
 
-Oh wow, it looks like we've landed on Optimism!
+[ intro ]
 
 ## Statement of intent
 
