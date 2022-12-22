@@ -32,9 +32,29 @@ npx hardhat deploy
 Alternatively, you can run these three commands:
 
 ```shell
-npx hardhat run scripts/deployNFT.ts --network goerli
-npx hardhat run scripts/deployGovernor.ts --network goerli
-npx hardhat run scripts/deployManifesto.ts --network goerli
+npx hardhat run scripts/deploy-nft.ts --network goerli
+npx hardhat run scripts/deploy-gov.ts --network goerli
+npx hardhat run scripts/deploy-manifesto.ts --network goerli
+```
+
+Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
+
+## Tools
+
+#### Upload metadata
+
+Edit the metadata in `upload-metadata.ts`, then:
+
+```shell
+npx hardhat run scripts/upload-metadata.ts
+```
+
+#### Upload manifesto
+
+Edit the `manifesto.md` file, then:
+
+```shell
+npx hardhat run scripts/upload-manifesto.ts
 ```
 
 ## Supported networks
