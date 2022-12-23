@@ -16,7 +16,7 @@ async function main() {
       return new Web3Storage({ token: getAccessToken()! })
   }
 
-  const dir = "./metadata/"
+  const dir = "./manifesto/"
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
@@ -31,9 +31,11 @@ async function main() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("\ncid:", cid)
+  console.log("\ncid:", msg(cid))
 
-  console.log("\nuri:", msg("ipfs://" + cid + "/manifesto.md"))
+  console.log("\nurl:", "https://gateway.ipfs.io/ipfs/" + cid + "/manifesto.md")
+
+  console.log("\nManifesto storage done. ✅")
 
 }
 

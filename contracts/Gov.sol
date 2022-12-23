@@ -15,6 +15,10 @@ contract Gov is
     GovernorVotes,
     GovernorVotesQuorumFraction
 {
+    string public manifesto;
+
+    event ManifestoUpdated(string cid);
+
     constructor(
         IVotes _token
     )
@@ -60,5 +64,10 @@ contract Gov is
         returns (uint256)
     {
         return super.proposalThreshold();
+    }
+
+    function setManifesto(string memory cid) public onlyGovernance {
+        manifesto = cid;
+        emit ManifestoUpdated(cid);
     }
 }

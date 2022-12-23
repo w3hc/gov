@@ -34,10 +34,6 @@ async function main() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("\ncid:", cid)
-
-  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/image.png")
-
   const metadata = {
     "name": "govDAO Membership",
     "author": "govDAO",
@@ -83,12 +79,15 @@ async function main() {
   async function storeMetadata(files: any) {
     const client = makeStorageClient()
     const cid = await client.put(files, { wrapWithDirectory:false })
-    return "ipfs://" + cid 
+    return cid 
   }
 
-  const uri = (await storeMetadata(makeFileObjects()));
-  console.log("Metadata storage done. ✅", uri)
-
+  const stored = (await storeMetadata(makeFileObjects()));
+  
+  console.log("\ntokenURI:", msg("ipfs://" + stored))
+  console.log("\ncid:", stored)
+  console.log("url:", "https://gateway.ipfs.io/ipfs/" + stored)
+  console.log("\nMetadata storage done. ✅")
 }
 
 main().catch((error) => {

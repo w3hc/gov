@@ -17,16 +17,40 @@ describe("DAO Contracts", function () {
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy(firstMembers, uri);
 
-    const Manifesto = await ethers.getContractFactory("Manifesto");
-    const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
+    // const Manifesto = await ethers.getContractFactory("Manifesto");
+    // const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
 
     const Gov = await ethers.getContractFactory("Gov");
     const gov = await Gov.deploy(nft.address)
 
     await nft.transferOwnership(gov.address);
-    await manifesto.transferOwnership(gov.address)
-
     await nft.connect(alice).delegate(alice.address)
+    await nft.connect(bob).delegate(alice.address)
+
+    const call = await gov.interface.encodeFunctionData('setManifesto', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"])
+    const calldatas = [call.toString()]
+    const PROPOSAL_DESCRIPTION = "v1"
+    const targets = [gov.address]
+    const values = ["0"]
+    const propose = await gov.connect(alice).propose(
+      targets, 
+      values, 
+      calldatas, 
+      PROPOSAL_DESCRIPTION
+    )
+    const proposeReceipt = await propose.wait(1)
+    const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+    await moveBlocks(2)
+    await gov.connect(alice).castVote(proposalId,1)
+    await gov.connect(bob).castVote(proposalId,1)
+    await moveBlocks(300)
+    const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+    await gov.execute(
+      targets, 
+      values, 
+      calldatas,
+      desc
+    )
 
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
     const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'));
@@ -41,7 +65,7 @@ describe("DAO Contracts", function () {
     const erc1155Mock = await ERC1155Mock.deploy();
     await erc1155Mock.safeTransferFrom(deployer.address, gov.address, 1, 1, "0x")
 
-    return { gov, nft, manifesto, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock };
+    return { gov, nft, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock };
   }
 
   describe("Deployment", function () {
@@ -60,6 +84,11 @@ describe("DAO Contracts", function () {
     it("Should transfer the NFT contract ownership", async function () {
       const { gov, nft } = await loadFixture(deployContracts);
       expect(await nft.owner()).to.equal(gov.address);
+    });
+
+    it("Should set the right manifesto cid", async function () {
+      const { gov } = await loadFixture(deployContracts);
+      expect(await gov.manifesto()).to.equal("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya");
     });
 
   });
@@ -213,12 +242,12 @@ describe("DAO Contracts", function () {
 
     it("Should update the manifesto", async function () {
 
-      const { gov, manifesto, alice, bob } = await loadFixture(deployContracts);
+      const { gov, alice, bob } = await loadFixture(deployContracts);
 
-      const call = await manifesto.interface.encodeFunctionData('update', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v2"])
+      const call = await gov.interface.encodeFunctionData('setManifesto', ["bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"])
       const calldatas = [call.toString()]
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Update our manifesto.' } }"
-      const targets = [manifesto.address]
+      const PROPOSAL_DESCRIPTION = "v2"
+      const targets = [gov.address]
       const values = ["0"]
       const propose = await gov.connect(alice).propose(
         targets, 
@@ -239,6 +268,7 @@ describe("DAO Contracts", function () {
         calldatas,
         desc
       )
+      expect(await gov.manifesto()).to.be.equal("bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm")
     });
 
     it("Should transfer ETH to beneficiary", async function () {
@@ -273,7 +303,6 @@ describe("DAO Contracts", function () {
         calldatas,
         desc
       )).to.emit(proposalId, 'ProposalExecuted');
-
     });
 
     it("Should upgrade Gov", async function () {
@@ -307,9 +336,7 @@ describe("DAO Contracts", function () {
         calldatas,
         desc
       )
-
       expect(await gov2.token()).to.equal(nft.address);
-
     });
 
     it("Should upgrade NFT", async function () {

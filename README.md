@@ -7,7 +7,7 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 
 ## Motivation
 
-See if it can fit the needs of many different communities (activists, local neighborhoods, orgs, ...). We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
+See if it can fit the needs of orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other kinds of communities. We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
 
 ## Install
 
@@ -34,20 +34,11 @@ Alternatively, you can run these three commands:
 ```shell
 npx hardhat run scripts/deploy-nft.ts --network goerli
 npx hardhat run scripts/deploy-gov.ts --network goerli
-npx hardhat run scripts/deploy-manifesto.ts --network goerli
 ```
 
-Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
+Then you can interact with your DAO using [Tally](https://www.tally.xyz/). A good first proposal can be to set the manifesto of your DAO which would include the statement of intent of your DAO, the criteria for the future proposals, and some info about the first members.
 
 ## Tools
-
-### Upload metadata
-
-Edit the metadata in `upload-metadata.ts`, then:
-
-```shell
-npx hardhat run scripts/upload-metadata.ts
-```
 
 ### Upload manifesto
 
@@ -55,6 +46,16 @@ Edit the `manifesto.md` file, then:
 
 ```shell
 npx hardhat run scripts/upload-manifesto.ts
+```
+
+Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
+
+### Upload metadata
+
+Edit the metadata in `upload-metadata.ts`, then:
+
+```shell
+npx hardhat run scripts/upload-metadata.ts
 ```
 
 ## Supported networks
