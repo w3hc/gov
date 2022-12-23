@@ -1,4 +1,4 @@
-# DAO Contracts
+# Gov
 
 A DAO template built with Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
@@ -7,7 +7,7 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 
 ## Motivation
 
-See if it can fit the needs of orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other kinds of communities. We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
+See if it can fit the needs of orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other communities. We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
 
 ## Install
 
@@ -29,7 +29,7 @@ Create a `.env` on the model of `.env.example` and add your own keys (the three 
 npx hardhat deploy
 ```
 
-Alternatively, you can run these three commands:
+Alternatively, you can run these two commands:
 
 ```shell
 npx hardhat run scripts/deploy-nft.ts --network goerli
