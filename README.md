@@ -74,7 +74,7 @@ Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on De
 
 ## Roadmap
 
-1. Simplified onboarding ([Onboarding.sol](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/plugins/Onboarding.sol) plugin + UI)
+1. Simplified onboarding (Solidity contract + UI)
 2. Impact evaluation process (+ [Hypercerts](https://hypercerts.xyz/) integration)
 3. Vault (in addition to the [Gnosis Safe](https://gnosis-safe.io/))
 
