@@ -1,11 +1,11 @@
 {
-  "name": "dao-contracts",
+  "name": "gov-contracts",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "npx hardhat run scripts/deploy-nft.ts --network goerli && npx hardhat run scripts/deploy-gov.ts --network goerli && npx hardhat run scripts/deploy-manifesto.ts --network goerli"
+    "deploy": "npx hardhat run scripts/deploy-nft.ts --network goerli && npx hardhat run scripts/deploy-gov.ts --network goerli"
   },
   "keywords": [],
   "author": "",

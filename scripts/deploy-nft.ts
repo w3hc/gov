@@ -58,7 +58,7 @@ async function main() {
         "value": "100%",
       },
       {
-        "trait_type": "Significant contribs",
+        "trait_type": "Contribs",
         "value": "0",
       },
       {
