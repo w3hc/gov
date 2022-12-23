@@ -55,11 +55,11 @@ async function main() {
       },
       {
         "trait_type": "Nickname",
-        "value": "Bertux",
+        "value": "Francis",
       },
       {
         "trait_type": "Role",
-        "value": "Hacker",
+        "value": "Wizard",
       },
     ],
   };
