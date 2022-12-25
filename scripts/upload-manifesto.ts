@@ -16,7 +16,7 @@ async function main() {
       return new Web3Storage({ token: getAccessToken()! })
   }
 
-  const dir = "./manifesto/"
+  const dir = "./storage/manifesto/"
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
