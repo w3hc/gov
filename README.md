@@ -70,7 +70,7 @@ Here are the differences from the standard implementation suggested by Open Zepp
 
 ### Gov.sol
 
-THe following function is `onlyGovernance`, meaning it can only be triggered by a vote.
+The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
 
 - `manifesto` is a variable that holds the CID of the manifesto.
 - `setManifesto()` is a function to update the CID.
