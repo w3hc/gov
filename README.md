@@ -7,7 +7,7 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 
 ## Motivation
 
-See if it can fit the needs of orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other communities. We'll start with the [W3HC](https://w3hc.org/) DAO focused on Web3 integrations, mentoring and education.
+Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other communities.
 
 ## Install
 
@@ -36,9 +36,9 @@ npx hardhat run scripts/deploy-nft.ts --network goerli
 npx hardhat run scripts/deploy-gov.ts --network goerli
 ```
 
-Then you can interact with your DAO using [Tally](https://www.tally.xyz/). A good first proposal can be to set the manifesto of your DAO which would include the statement of intent of your DAO, the criteria for the future proposals, and some info about the first members.
+Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
-## Tools
+## Use
 
 ### Upload manifesto
 
@@ -64,51 +64,25 @@ npx hardhat run scripts/upload-metadata.ts
 - Optimism Testnet
 - Optimism
 
-## Latest deployment
+## Security
 
-Deployed to [Optimism Testnet](https://community.optimism.io/docs/guides/) on Dec 20, 2022 at 7.45pm UTC:
+Here are the differences from the standard implementation suggested by Open Zeppelin:
 
-- NFT: [0xe6BCD785b90dc16d667B022cc871c046587d9Ac5](https://goerli-optimism.etherscan.io/address/0xe6BCD785b90dc16d667B022cc871c046587d9Ac5#code)
-- Gov: [0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd](https://goerli-optimism.etherscan.io/address/0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd#code)
-- Manifesto: [0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C](https://goerli-optimism.etherscan.io/address/0x1198f6aEe71Cb77f1447721A7A986F0cC2b8eA4C#code)
+### Gov.sol
 
-## Roadmap
+THe following function is `onlyGovernance`, meaning it can only be triggered by a vote.
 
-1. Simplified onboarding (Solidity contract + UI)
-2. Impact evaluation process (+ [Hypercerts](https://hypercerts.xyz/) integration)
-3. Vault (in addition to the [Gnosis Safe](https://gnosis-safe.io/))
+- `manifesto` is a variable that holds the CID of the manifesto.
+- `setManifesto()` is a function to update the CID.
+- `ManifestoUpdated` is an event triggered when the CID is updated.
 
-## Resources
+### NFT.sol
 
-- [Introducing OpenZeppelin Governor](https://blog.openzeppelin.com/governor-smart-contract/)
-- [How to set up on-chain governance](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/docs/modules/ROOT/pages/governance.adoc)
-- [Governance section in OpenZeppelin docs](https://docs.openzeppelin.com/contracts/4.x/api/governance)
-- [Build Your DAO with OpenZeppelin Governor ft. ENS](https://www.youtube.com/watch?v=Lltt6j6Hmww) (Dec 2021 video)
-- [Build your governance easily with OpenZeppelin Contracts]() (Nov 2021 video)
-- [Tally Wiki](https://wiki.tally.xyz/docs)
-- [A Pocket Guide to DAO Frameworks](https://blog.tally.xyz/a-pocket-guide-to-dao-frameworks-8d7ad5af3a1b) (Oct 2022 post)
-- [Build an NFT DAO from Scratch - Tally Tutorial](https://www.youtube.com/watch?v=cAbHwCWJAG4)
-- [How to Code an On-Chain DAO](https://betterprogramming.pub/how-to-code-an-on-chain-dao-e525e13a57be) (Feb 2022)
+The following functions are `onlyOwner`, meaning they can only be triggered by a vote.
 
-## Changelog
-
-#### [v0.8.0-alpha](https://github.com/web3-hackers-collective/dao-contracts/releases/tag/v0.8.0-alpha)
-
-- added Manifesto contract
-- added tests for handling ERC-20, ERC-721, ERC-1155
-- added Optimism Testnet
-- made the NFT contract upgradeable
-- made the NFT metadata dynamic (updatable)
-
-#### [v0.1](https://github.com/web3-hackers-collective/dao-contracts/releases/tag/v.0.1.0)
-
-- DAO membership NFTS (ERC-721)
-- On-chain voting system (Governor)
-- Members vote to add or ban a member
-- Easy to config, deploy and run
-- Fully compatible with [Tally](https://www.tally.xyz/)
-- Extreme composability/modularity
-- Upgradeable governance settings
+- `safeMint()` is used to add a new member.
+- `govBurn()` is used to ban a member.
+- `setMetadata()` changes the tokenURI of a given ID.
 
 ## Versions
 
