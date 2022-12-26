@@ -17,9 +17,6 @@ describe("DAO Contracts", function () {
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy(firstMembers, uri);
 
-    // const Manifesto = await ethers.getContractFactory("Manifesto");
-    // const manifesto = await Manifesto.deploy("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya", "v1");
-
     const Gov = await ethers.getContractFactory("Gov");
     const gov = await Gov.deploy(nft.address)
 

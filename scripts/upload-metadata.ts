@@ -19,7 +19,7 @@ async function main() {
       return new Web3Storage({ token: getAccessToken()! })
   }
 
-  const dir = "./metadata/"
+  const dir = "./storage/metadata/"
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
