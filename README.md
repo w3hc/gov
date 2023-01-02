@@ -40,7 +40,7 @@ Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
 ## Use
 
-### Upload manifesto
+#### Upload manifesto
 
 Edit the `manifesto.md` file, then:
 
@@ -50,7 +50,7 @@ npx hardhat run scripts/upload-manifesto.ts
 
 Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
 
-### Upload metadata
+#### Upload metadata
 
 Edit the metadata in `upload-metadata.ts`, then:
 
@@ -68,21 +68,28 @@ npx hardhat run scripts/upload-metadata.ts
 
 Here are the differences from the standard implementation suggested by Open Zeppelin:
 
-### Gov.sol
+#### Gov.sol
 
-THe following function is `onlyGovernance`, meaning it can only be triggered by a vote.
+The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
 
-- `manifesto` is a variable that holds the CID of the manifesto.
 - `setManifesto()` is a function to update the CID.
-- `ManifestoUpdated` is an event triggered when the CID is updated.
 
-### NFT.sol
+#### NFT.sol
 
 The following functions are `onlyOwner`, meaning they can only be triggered by a vote.
 
 - `safeMint()` is used to add a new member.
 - `govBurn()` is used to ban a member.
 - `setMetadata()` changes the tokenURI of a given ID.
+
+## Docs
+
+- [Get started](https://github.com/w3hc/gov/wiki/Get-started)
+- [Submit a proposal](https://github.com/w3hc/gov/wiki/Submit-a-proposal)
+- [Voting rules](https://github.com/w3hc/gov/wiki/Voting-rules)
+- [Resources](https://github.com/w3hc/gov/wiki/Resources)
+- [Latest deployment](https://github.com/w3hc/gov/wiki/Latest-deployment)
+- [Changelog](https://github.com/w3hc/gov/wiki/Changelog)
 
 ## Versions
 
