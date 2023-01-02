@@ -56,6 +56,7 @@ describe("Hypercerts", function () {
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
     const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'));
     await erc20Mock.transfer(alice.address, ethers.utils.parseEther('1'))
+    await erc20Mock.transfer(francis.address, ethers.utils.parseEther('100'))
 
     const Vault = await ethers.getContractFactory("Vault");
     const vault = await Vault.deploy(gov.address, nft.address, erc20Mock.address);
@@ -66,7 +67,7 @@ describe("Hypercerts", function () {
     await hypercerts.transferOwnership(gov.address)
 
     const Shop = await ethers.getContractFactory("Shop");
-    const shop = await Shop.deploy(gov.address, nft.address, erc20Mock.address);
+    const shop = await Shop.deploy(erc20Mock.address, vault.address);
     await shop.transferOwnership(gov.address)
 
     return { gov, nft, deployer, alice, bob, francis, erc20Mock, vault, hypercerts, shop };
@@ -219,6 +220,49 @@ describe("Hypercerts", function () {
         )
         
         expect(await hypercerts.ownerOf(1)).to.be.equal(shop.address)
+      });
+
+      it("Should let Francis buy 1 hypercert", async function () {
+        const { gov, vault, alice, bob, erc20Mock, hypercerts, shop, francis } = await loadFixture(deployContracts);
+  
+        await erc20Mock.connect(alice).approve(vault.address, ethers.utils.parseEther('1'))
+        await vault.connect(alice).give(ethers.utils.parseEther('1'))
+        expect(await erc20Mock.balanceOf(vault.address)).to.equal(ethers.utils.parseEther('1'))
+        expect(await vault.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('1'))
+  
+        const call = await vault.interface.encodeFunctionData('govWithdraw', [ethers.utils.parseEther('0.5')])
+        const call2 = await hypercerts.interface.encodeFunctionData('safeMint', [alice.address])
+        const call3 = await hypercerts.interface.encodeFunctionData('safeMint', [shop.address])
+        const calldatas = [call.toString(), call2.toString(), call3.toString()]
+  
+        const PROPOSAL_DESCRIPTION = ""
+        const targets = [vault.address, hypercerts.address, hypercerts.address]
+        const values = ["0", "0", "0"]
+        const propose = await gov.connect(alice).propose(
+          targets, 
+          values, 
+          calldatas, 
+          PROPOSAL_DESCRIPTION
+        )
+        const proposeReceipt = await propose.wait(1)
+        const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+        await moveBlocks(2)
+        await gov.connect(alice).castVote(proposalId,1)
+        await gov.connect(bob).castVote(proposalId,1)
+        await moveBlocks(300)
+        const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+        await gov.execute(
+          targets, 
+          values, 
+          calldatas,
+          desc
+        )
+        expect(await hypercerts.ownerOf(1)).to.be.equal(shop.address)
+
+        await erc20Mock.connect(francis).approve(shop.address, ethers.utils.parseEther('100'))
+        await shop.connect(francis).buy(hypercerts.address, 1)
+        expect(await hypercerts.ownerOf(1)).to.be.equal(francis.address)
+
       });
 
   });
