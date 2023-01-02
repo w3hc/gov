@@ -96,7 +96,7 @@ describe("Vault", function () {
 
     });
 
-    it("Should withdraw 1 USDg and get 0.5 USDC after govWithdraw", async function () {
+    it("Should burn 1 USDg and get 0.5 USDC after govWithdraw", async function () {
       const { vault, gov, alice, bob, erc20Mock, francis } = await loadFixture(deployContracts);
 
       await erc20Mock.connect(alice).approve(vault.address, ethers.utils.parseEther('1'))
@@ -140,7 +140,7 @@ describe("Vault", function () {
 
     });
 
-    it("Should withdraw 0.1 USDg and get 0.5 USDC after govWithdraw", async function () {
+    it("Should burn 0.1 USDg and get 0.05 USDC after govWithdraw", async function () {
       const { gov, vault, alice, bob, erc20Mock, francis } = await loadFixture(deployContracts);
 
       await erc20Mock.connect(alice).approve(vault.address, ethers.utils.parseEther('1'))
