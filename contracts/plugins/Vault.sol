@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@prb/math/src/UD60x18.sol";
 import "../Gov.sol";
 import "../NFT.sol";
-import "hardhat/console.sol";
 
 contract Vault is Ownable, ERC20 {
     constructor(
@@ -29,24 +28,17 @@ contract Vault is Ownable, ERC20 {
         UD60x18 _amountToTransfer = usdcBal.mul(ratio);
         uint256 amountToTransfer = fromUD60x18(_amountToTransfer);
 
-        console.log("       amount: %s", amount);
-        console.log("totalSupply(): %s", totalSupply());
-        console.log("(usdc)balance: %s", IERC20(usdc).balanceOf(address(this)));
-
-        console.log("amtToTransfer: %s", amountToTransfer);
-
         _burn(msg.sender, amount);
         IERC20(usdc).transfer(msg.sender, amountToTransfer);
-    }
-
-    // test
-    function govWithdraw(uint256 amount) public {
-        IERC20(usdc).transfer(owner(), amount);
     }
 
     function give(uint256 amount) public {
         IERC20(usdc).transferFrom(msg.sender, address(this), amount);
         _mint(msg.sender, amount);
+    }
+
+    function govWithdraw(uint256 amount) public onlyOwner {
+        IERC20(usdc).transfer(owner(), amount);
     }
 
     function setAddr(address _gov, address _nft) public onlyOwner {
