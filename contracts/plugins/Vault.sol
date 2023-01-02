@@ -33,7 +33,7 @@ contract Vault is Ownable, ERC20, ReentrancyGuard {
         IERC20(usdc).transfer(msg.sender, amountToTransfer);
     }
 
-    function give(uint256 amount) public {
+    function give(uint256 amount) public nonReentrant {
         IERC20(usdc).transferFrom(msg.sender, address(this), amount);
         _mint(msg.sender, amount);
     }
