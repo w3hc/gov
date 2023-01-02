@@ -6,8 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@prb/math/src/UD60x18.sol";
-import "../Gov.sol";
-import "../NFT.sol";
 
 contract Vault is Ownable, ERC20, ReentrancyGuard {
     constructor(
