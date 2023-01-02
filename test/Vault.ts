@@ -118,7 +118,7 @@ describe("Vault", function () {
 
     });
 
-    xit("Should withdraw 0.1 USDg and get 0.5 USDC after govWithdraw", async function () {
+    it("Should withdraw 0.1 USDg and get 0.5 USDC after govWithdraw", async function () {
       const { vault, alice, erc20Mock, francis } = await loadFixture(deployContracts);
 
       await erc20Mock.connect(alice).approve(vault.address, ethers.utils.parseEther('1'))
@@ -132,13 +132,12 @@ describe("Vault", function () {
       expect(await vault.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('1'))
       expect(await erc20Mock.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('0'))
 
-      await vault.connect(alice).withdraw(ethers.utils.parseEther('0.5'))
+      await vault.connect(alice).withdraw(ethers.utils.parseEther('0.1')) // 
 
-      expect(await vault.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('0.75'))
-      expect(await erc20Mock.balanceOf(vault.address)).to.equal(ethers.utils.parseEther('0.25'))
-      // expect(await erc20Mock.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('0.125'))
-
-      console.log((250000000000000000 / 1000000000000000000) * 500000000000000000 )
+      expect(await erc20Mock.balanceOf(vault.address)).to.equal(ethers.utils.parseEther('0.45'))
+      expect(await erc20Mock.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('0.05'))
+      expect(await vault.balanceOf(alice.address)).to.equal(ethers.utils.parseEther('0.9'))
+      expect(await vault.totalSupply()).to.equal(ethers.utils.parseEther('0.9'))
 
     });
 

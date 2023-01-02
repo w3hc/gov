@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-// import "../math/UD60x18.sol";
+import "@prb/math/src/UD60x18.sol";
 import "../Gov.sol";
 import "../NFT.sol";
 import "hardhat/console.sol";
@@ -24,19 +24,16 @@ contract Vault is Ownable, ERC20 {
     address public usdc;
 
     function withdraw(uint256 amount) public {
-        // console.log(
-        //     "IERC20(usdc).balanceOf(address(this): %s",
-        //     IERC20(usdc).balanceOf(address(this))
-        // );
-
-        uint256 amountToTransfer = (amount / totalSupply()) *
-            IERC20(usdc).balanceOf(address(this));
+        UD60x18 ratio = toUD60x18(amount).div(toUD60x18(totalSupply()));
+        UD60x18 usdcBal = toUD60x18(IERC20(usdc).balanceOf(address(this)));
+        UD60x18 _amountToTransfer = usdcBal.mul(ratio);
+        uint256 amountToTransfer = fromUD60x18(_amountToTransfer);
 
         console.log("       amount: %s", amount);
         console.log("totalSupply(): %s", totalSupply());
         console.log("(usdc)balance: %s", IERC20(usdc).balanceOf(address(this)));
 
-        console.log("amountToTransfer: %s", amountToTransfer);
+        console.log("amtToTransfer: %s", amountToTransfer);
 
         _burn(msg.sender, amount);
         IERC20(usdc).transfer(msg.sender, amountToTransfer);
