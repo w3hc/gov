@@ -23,6 +23,7 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@openzeppelin/contracts": "^4.8",
     "@openzeppelin/contracts-upgradeable": "^4.8.0",
+    "@prb/math": "^3.1.0",
     "cli-color": "^2.0.3",
     "dotenv": "^16.0.1",
     "web3.storage": "^4.4.0"
