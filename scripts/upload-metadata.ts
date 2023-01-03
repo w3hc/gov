@@ -35,8 +35,8 @@ async function main() {
   const cid = await storeFiles(await getFiles(dir))
 
   const metadata = {
-    "name": "govDAO Membership",
-    "author": "govDAO",
+    "name": "DAO Membership",
+    "author": "Gov",
     "description":
       "The owner of this NFT has a right to vote on the test DAO proposals.",
     "image": "ipfs://" + cid + "/image.png",
@@ -46,20 +46,20 @@ async function main() {
         "value": "100%",
       },
       {
-        "trait_type": "Significant contribs",
-        "value": "1",
+        "trait_type": "Contribs",
+        "value": "0",
       },
       {
         "trait_type": "DAO",
-        "value": "0x2117bC9657Cb24C2868Bd660557812fEB535F3Bd",
+        "value": "unset",
       },
       {
         "trait_type": "Nickname",
-        "value": "Francis",
+        "value": "unset",
       },
       {
         "trait_type": "Role",
-        "value": "Wizard",
+        "value": "Hacker",
       },
     ],
   };
