@@ -5,9 +5,11 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
+The docs is available [here](https://github.com/w3hc/gov/wiki).
+
 ## Motivation
 
-Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other communities.
+Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, collectives, and other communities.
 
 ## Install
 
@@ -68,19 +70,19 @@ npx hardhat run scripts/upload-metadata.ts
 
 Here are the differences from the standard implementation suggested by Open Zeppelin:
 
-#### Gov.sol
+### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
 
 The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
 
-- `setManifesto()` is a function to update the CID.
+- `setManifesto()` updates the CID.
 
-#### NFT.sol
+### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
 
 The following functions are `onlyOwner`, meaning they can only be triggered by a vote.
 
-- `safeMint()` is used to add a new member.
-- `govBurn()` is used to ban a member.
-- `setMetadata()` changes the tokenURI of a given ID.
+- `safeMint()` adds a new member.
+- `govBurn()` adds to ban a member.
+- `setMetadata()` changes the tokenURI of a given NFT ID.
 
 ## Docs
 
@@ -99,4 +101,4 @@ The following functions are `onlyOwner`, meaning they can only be triggered by a
 
 ## Support
 
-You can contact me via [Element](https://matrix.to/#/@julienbrg:matrix.org), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discord.gg/xw9dCeQ94Y), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
+You can contact me via [Element](https://matrix.to/#/@julienbrg:matrix.org), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discord.gg/bHKJV3NWUQ), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
