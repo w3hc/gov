@@ -13,13 +13,13 @@ Provide an adapted coordination tool for orgs, federations of orgs, activists, c
 
 ## Install
 
-```shell
+```sh
 npm i
 ```
 
 ## Test
 
-```shell
+```sh
 npx hardhat test
 ```
 
@@ -27,13 +27,13 @@ npx hardhat test
 
 Create a `.env` on the model of `.env.example` and add your own keys (the three first are required), then deploy to Goerli:
 
-```shell
-npx hardhat deploy
+```sh
+npm run deploy
 ```
 
 Alternatively, you can run these two commands:
 
-```shell
+```sh
 npx hardhat run scripts/deploy-nft.ts --network goerli
 npx hardhat run scripts/deploy-gov.ts --network goerli
 ```
@@ -42,23 +42,23 @@ Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
 ## Use
 
-#### Upload manifesto
-
-Edit the `manifesto.md` file, then:
-
-```shell
-npx hardhat run scripts/upload-manifesto.ts
-```
-
-Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
-
 #### Upload metadata
 
 Edit the metadata in `upload-metadata.ts`, then:
 
-```shell
+```sh
 npx hardhat run scripts/upload-metadata.ts
 ```
+
+#### Upload manifesto
+
+Edit the `manifesto.md` file, then:
+
+```sh
+npx hardhat run scripts/upload-manifesto.ts
+```
+
+Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
 
 ## Supported networks
 
