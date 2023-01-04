@@ -7,7 +7,7 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 
 ## Motivation
 
-Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, and other communities.
+Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, collectives, and other communities.
 
 ## Install
 
