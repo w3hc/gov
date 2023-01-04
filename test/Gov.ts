@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
 
-describe("DAO Contracts", function () {
+describe("Gov", function () {
 
   async function deployContracts() {
     
