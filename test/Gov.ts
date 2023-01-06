@@ -24,7 +24,7 @@ describe("Gov", function () {
     await nft.connect(alice).delegate(alice.address)
     await nft.connect(bob).delegate(alice.address)
 
-    const call = await gov.interface.encodeFunctionData('setManifesto', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"])
+    const call = gov.interface.encodeFunctionData('setManifesto', ["bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"])
     const calldatas = [call.toString()]
     const PROPOSAL_DESCRIPTION = "v1"
     const targets = [gov.address]
@@ -100,7 +100,7 @@ describe("Gov", function () {
     it('Should submit a proposal', async function () {
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
 
-      const addMemberCall = await nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
+      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
       const targets = [nft.address]
       const values = ["0"]
@@ -126,7 +126,7 @@ describe("Gov", function () {
     it('Should cast a vote', async function () {
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
 
-      const addMemberCall = await nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
+      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
 
       const targets = [nft.address]
@@ -211,7 +211,7 @@ describe("Gov", function () {
     it('Should burn the NFT', async function () {
       const { nft, gov, alice } = await loadFixture(deployContracts);
 
-      const banMemberCall = await nft.interface.encodeFunctionData('govBurn', [1])
+      const banMemberCall = nft.interface.encodeFunctionData('govBurn', [1])
       const calldatas = [banMemberCall.toString()]
       const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Bye bye!' } }"
       const targets = [nft.address]
@@ -241,7 +241,7 @@ describe("Gov", function () {
 
       const { gov, alice, bob } = await loadFixture(deployContracts);
 
-      const call = await gov.interface.encodeFunctionData('setManifesto', ["bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"])
+      const call = gov.interface.encodeFunctionData('setManifesto', ["bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"])
       const calldatas = [call.toString()]
       const PROPOSAL_DESCRIPTION = "v2"
       const targets = [gov.address]
@@ -308,7 +308,7 @@ describe("Gov", function () {
       const Gov = await ethers.getContractFactory("Gov");
       const gov2 = await Gov.deploy(await gov.token())
 
-      const call = await nft.interface.encodeFunctionData('transferOwnership', [gov2.address])
+      const call = nft.interface.encodeFunctionData('transferOwnership', [gov2.address])
       const calldatas = [call.toString()]
 
       const PROPOSAL_DESCRIPTION = ""
@@ -421,7 +421,7 @@ describe("Gov", function () {
     it("Should transfer ERC-721 to beneficiary", async function () {
       const { gov, alice, francis, bob, erc721Mock } = await loadFixture(deployContracts);
 
-      const erc721Transfer = await erc721Mock.interface.encodeFunctionData('transferFrom', [gov.address, francis.address, 1])
+      const erc721Transfer = erc721Mock.interface.encodeFunctionData('transferFrom', [gov.address, francis.address, 1])
       const calldatas = [erc721Transfer.toString()]
 
       const PROPOSAL_DESCRIPTION = ""
