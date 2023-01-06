@@ -70,7 +70,7 @@ Note that you can put a whole website in the manifesto directory, the result wil
 
 ## Security
 
-Here are the differences from the Governor and ERC-721 standard implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
+Here are the differences from the Governor and ERC-721 implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
 
 ### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
 
