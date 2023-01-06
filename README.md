@@ -86,15 +86,6 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 - `govBurn()` adds to ban a member.
 - `setMetadata()` changes the tokenURI of a given NFT ID.
 
-## Docs
-
-- [Get started](https://github.com/w3hc/gov/wiki/Get-started)
-- [Submit a proposal](https://github.com/w3hc/gov/wiki/Submit-a-proposal)
-- [Voting rules](https://github.com/w3hc/gov/wiki/Voting-rules)
-- [Resources](https://github.com/w3hc/gov/wiki/Resources)
-- [Latest deployment](https://github.com/w3hc/gov/wiki/Latest-deployment)
-- [Changelog](https://github.com/w3hc/gov/wiki/Changelog)
-
 ## Versions
 
 - Node [v18.12.1](https://nodejs.org/uk/blog/release/v18.12.1/)
