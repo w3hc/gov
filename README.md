@@ -5,21 +5,23 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
-The docs is available [here](https://github.com/w3hc/gov/wiki).
+The [documentation](https://w3hc.github.io/gov-docs/) is under edit, but there's a [Wiki](https://github.com/w3hc/gov/wiki) where you can find more info about the project.
+
+View the [frontend repo](https://github.com/w3hc/gov-ui).
 
 ## Motivation
 
-Provide an adapted coordination tool for orgs, federations of orgs, activists, commons stewardship, local neighborhoods, collectives, and other communities.
+Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities should be able to take advantage of it. We want DAOs to be secure, scalable and easy to use.
 
 ## Install
 
-```shell
+```sh
 npm i
 ```
 
 ## Test
 
-```shell
+```sh
 npx hardhat test
 ```
 
@@ -27,13 +29,13 @@ npx hardhat test
 
 Create a `.env` on the model of `.env.example` and add your own keys (the three first are required), then deploy to Goerli:
 
-```shell
-npx hardhat deploy
+```sh
+npm run deploy
 ```
 
 Alternatively, you can run these two commands:
 
-```shell
+```sh
 npx hardhat run scripts/deploy-nft.ts --network goerli
 npx hardhat run scripts/deploy-gov.ts --network goerli
 ```
@@ -42,23 +44,23 @@ Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
 ## Use
 
-#### Upload manifesto
-
-Edit the `manifesto.md` file, then:
-
-```shell
-npx hardhat run scripts/upload-manifesto.ts
-```
-
-Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
-
 #### Upload metadata
 
 Edit the metadata in `upload-metadata.ts`, then:
 
-```shell
+```sh
 npx hardhat run scripts/upload-metadata.ts
 ```
+
+#### Upload manifesto
+
+Edit the `manifesto.md` file, then:
+
+```sh
+npx hardhat run scripts/upload-manifesto.ts
+```
+
+Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
 
 ## Supported networks
 
@@ -68,7 +70,7 @@ npx hardhat run scripts/upload-metadata.ts
 
 ## Security
 
-Here are the differences from the standard implementation suggested by Open Zeppelin:
+Here are the differences from the Governor and ERC-721 standard implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
 
 ### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
 
@@ -78,7 +80,7 @@ The following function is `onlyGovernance`, meaning it can only be triggered by 
 
 ### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
 
-The following functions are `onlyOwner`, meaning they can only be triggered by a vote.
+The following functions are `onlyOwner`, and since the NFT contract ownership is transfered to the Gov contract, they can only be triggered by a vote.
 
 - `safeMint()` adds a new member.
 - `govBurn()` adds to ban a member.
