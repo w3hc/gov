@@ -5,13 +5,13 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
-The [documentation](https://w3hc.github.io/gov-docs/) is under edit, but there's a [Wiki](https://github.com/w3hc/gov/wiki) where you can find more info about the project.
-
-View the [frontend repo](https://github.com/w3hc/gov-ui).
-
 ## Motivation
 
 Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities should be able to take advantage of it. We want DAOs to be secure, scalable and easy to use.
+
+- [Documentation](https://w3hc.github.io/gov-docs/)
+- [UI](https://github.com/w3hc/gov-ui)
+- [Test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
 
 ## Install
 
