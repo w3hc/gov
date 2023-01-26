@@ -23,7 +23,7 @@ contract Gov is
         IVotes _token
     )
         Governor("Gov")
-        GovernorSettings(1, 150, 1)
+        GovernorSettings(1, 100, 0)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20)
     {}
