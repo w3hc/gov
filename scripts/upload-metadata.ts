@@ -42,8 +42,8 @@ async function main() {
     "image": "ipfs://" + cid + "/image.png",
     "attributes": [
       {
-        "trait_type": "Participation rate",
-        "value": "100%",
+        "trait_type": "Participation rate (%)",
+        "value": "100",
       },
       {
         "trait_type": "Contribs",

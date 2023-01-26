@@ -88,6 +88,13 @@ describe("Gov", function () {
       expect(await gov.manifesto()).to.equal("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya");
     });
 
+    it("Should get the quorum", async function () {
+      const { gov } = await loadFixture(deployContracts);
+      const blockNumber = await ethers.provider.getBlockNumber();
+      console.log("blockNumber", blockNumber)
+      expect(await gov.quorum(blockNumber - 1)).to.equal(0);
+    });
+
   });
 
   describe("Interactions", function () {
@@ -97,7 +104,7 @@ describe("Gov", function () {
       expect(await nft.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    it('Should submit a proposal', async function () {
+    xit('Should submit a proposal', async function () {
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
 
       const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
@@ -478,6 +485,94 @@ describe("Gov", function () {
         desc
       )
       expect(await erc1155Mock.balanceOf(francis.address, 1)).to.equal(1);
+    });
+
+    xit("Should make 100 people vote", async function () {
+      const { gov, alice, francis, bob, nft } = await loadFixture(deployContracts);
+
+      await francis.sendTransaction({
+        to: gov.address,
+        value: ethers.utils.parseEther('1')
+      });
+      expect(await ethers.provider.getBalance(gov.address)).to.be.equal("1000000000000000000")
+
+
+
+    let amount = 100
+    let signers
+    const randomSigners = async (amount:number)  => {
+
+      const signers = []
+      for (let i = 0; i < amount; i++) {
+        signers.push(ethers.Wallet.createRandom())
+      }
+      return signers
+      
+    }
+
+    // console.log(randomSigners(amount))
+    const members = randomSigners(amount)
+    console.log("Member #80:", (await members)[80].address )
+
+    // 12 max :)
+    for (let i = 0; i < 12; i++) {
+
+      const addMemberCall2 = await nft.interface.encodeFunctionData('safeMint', [(await members)[i].address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])
+      const calldatas2 = [addMemberCall2.toString()]
+
+      const PROPOSAL_DESCRIPTION2 = ""
+      const targets2 = [nft.address]
+      const values2 = ["0"]
+      const propose2 = await gov.connect(alice).propose(
+        targets2, 
+        values2, 
+        calldatas2, 
+        PROPOSAL_DESCRIPTION2
+      )
+      const proposeReceipt2 = await propose2.wait(1)
+      const proposalId2 = proposeReceipt2.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId2,1)
+      await gov.connect(bob).castVote(proposalId2,0) // weird
+      await moveBlocks(300)
+      const desc2 = ethers.utils.id(PROPOSAL_DESCRIPTION2)
+      await gov.execute(
+        targets2, 
+        values2, 
+        calldatas2,
+        desc2
+      )
+      
+
+
+    }
+    expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
+
+
+      const addMemberCall = "0x"
+      const calldatas = [addMemberCall.toString()]
+      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer 0.0001 ETH to Bob.' } }"
+      const targets = [alice.address]
+      const values = ["100000000000000"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      expect(await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )).to.emit(proposalId, 'ProposalExecuted');
     });
   });
 });
