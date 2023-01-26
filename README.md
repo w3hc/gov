@@ -7,10 +7,12 @@ A DAO template built with Open Zeppelin's [Governor contract](https://docs.openz
 
 ## Motivation
 
-Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities should be able to take advantage of it. We want DAOs to be secure, scalable and easy to use.
+Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities should be able to take advantage of it. 
+
+We need DAOs to be secure, scalable and easy to use.
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [UI](https://github.com/w3hc/gov-ui)
+- [Gov UI](https://github.com/w3hc/gov-ui)
 - [Test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
 
 ## Install
@@ -65,8 +67,8 @@ Note that you can put a whole website in the manifesto directory, the result wil
 ## Supported networks
 
 - Goerli Testnet
-- Optimism Testnet
-- Optimism
+- Optimism Goerli Testnet
+- Arbitrum Goerli Testnet
 
 ## Security
 
