@@ -117,7 +117,7 @@ describe("Gov", function () {
       expect(await nft.delegates(alice.address)).to.equal(alice.address);
     }); 
 
-    xit('Should submit a proposal', async function () {
+    it('Should submit a proposal', async function () {
       const { nft, gov, alice, francis } = await loadFixture(deployContracts);
 
       const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
