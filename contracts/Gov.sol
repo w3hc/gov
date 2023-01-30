@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
 /// @title DAO contract
-/// @author w3hc.eth
+/// @author Web3 Hackers Collective
 /// @custom:security-contact julien@strat.cc
 contract Gov is
     Governor,

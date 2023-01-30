@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title DAO Membership NFT contract
-/// @author w3hc.eth
+/// @author Web3 Hackers Collective
 /// @custom:security-contact julien@strat.cc
 contract NFT is
     ERC721,
