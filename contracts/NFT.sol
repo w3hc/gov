@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+/// @title DAO Membership NFT contract
+/// @author w3hc.eth
 /// @custom:security-contact julien@strat.cc
 contract NFT is
     ERC721,
@@ -33,6 +35,10 @@ contract NFT is
         }
     }
 
+    /// @notice Adds a member
+    /// @dev Marked `onlyOwner`: only the Gov contract can access this function
+    /// @param to The address of the recipient
+    /// @param uri The CID of the new member's NFT (metadata)
     function safeMint(address to, string memory uri) public onlyOwner {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
@@ -64,6 +70,9 @@ contract NFT is
         super._burn(tokenId);
     }
 
+    /// @notice Bans a member
+    /// @dev Marked `onlyOwner`: only the Gov contract can access this function
+    /// @param tokenId The id of the NFT
     function govBurn(uint256 tokenId) public onlyOwner {
         _burn(tokenId);
     }
@@ -74,6 +83,10 @@ contract NFT is
         return super.tokenURI(tokenId);
     }
 
+    /// @notice Replaces the tokenId of a given NFT
+    /// @dev Marked `onlyOwner`: only the Gov contract can access this function
+    /// @param tokenId The id of the NFT
+    /// @param uri The new CID for this ID
     function setMetadata(uint256 tokenId, string memory uri) public onlyOwner {
         _setTokenURI(tokenId, uri);
     }
