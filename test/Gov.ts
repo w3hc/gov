@@ -17,8 +17,22 @@ describe("Gov", function () {
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy(firstMembers, uri);
 
+    const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+    const name = "Gov"
+    const votingDelay = "1"
+    const votingPeriod = "300"
+    const votingThreshold = "1"
+    const quorum = "20"
     const Gov = await ethers.getContractFactory("Gov");
-    const gov = await Gov.deploy(nft.address)
+    const gov = await Gov.deploy(
+      nft.address, 
+      manifesto, 
+      name, 
+      votingDelay, 
+      votingPeriod, 
+      votingThreshold, 
+      quorum
+    )
 
     await nft.transferOwnership(gov.address);
     await nft.connect(alice).delegate(alice.address)
@@ -91,7 +105,6 @@ describe("Gov", function () {
     it("Should get the quorum", async function () {
       const { gov } = await loadFixture(deployContracts);
       const blockNumber = await ethers.provider.getBlockNumber();
-      console.log("blockNumber", blockNumber)
       expect(await gov.quorum(blockNumber - 1)).to.equal(0);
     });
 
@@ -312,8 +325,22 @@ describe("Gov", function () {
     it("Should upgrade Gov", async function () {
       const { nft, gov, alice, bob } = await loadFixture(deployContracts);
 
-      const Gov = await ethers.getContractFactory("Gov");
-      const gov2 = await Gov.deploy(await gov.token())
+      const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+      const name = "Gov"
+      const votingDelay = "1"
+      const votingPeriod = "300"
+      const votingThreshold = "1"
+      const quorum = "20"
+      const Gov2 = await ethers.getContractFactory("Gov");
+      const gov2 = await Gov2.deploy(
+        await gov.token(), 
+        manifesto, 
+        name, 
+        votingDelay, 
+        votingPeriod, 
+        votingThreshold, 
+        quorum
+      )
 
       const call = nft.interface.encodeFunctionData('transferOwnership', [gov2.address])
       const calldatas = [call.toString()]
@@ -359,8 +386,22 @@ describe("Gov", function () {
       const nft2 = await NFT.deploy(firstMembers, uri);
       await nft2.deployed()
 
-      const Gov = await ethers.getContractFactory("Gov");
-      const gov2 = await Gov.deploy(nft2.address)
+      const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+      const name = "Gov"
+      const votingDelay = "1"
+      const votingPeriod = "300"
+      const votingThreshold = "1"
+      const quorum = "20"
+      const Gov2 = await ethers.getContractFactory("Gov");
+      const gov2 = await Gov2.deploy(
+        nft2.address, 
+        manifesto, 
+        name, 
+        votingDelay, 
+        votingPeriod, 
+        votingThreshold, 
+        quorum
+      )
       await gov2.deployed()
 
       await nft2.transferOwnership(gov2.address);
@@ -512,7 +553,7 @@ describe("Gov", function () {
 
     // console.log(randomSigners(amount))
     const members = randomSigners(amount)
-    console.log("Member #80:", (await members)[80].address )
+    // console.log("Member #80:", (await members)[80].address )
 
     // 12 max :)
     for (let i = 0; i < 12; i++) {

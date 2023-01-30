@@ -16,9 +16,24 @@ describe("Vault", function () {
     ];
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy(firstMembers, uri);
-
+  
     const Gov = await ethers.getContractFactory("Gov");
-    const gov = await Gov.deploy(nft.address)
+    const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+    const name = "Gov"
+    const votingDelay = "1"
+    const votingPeriod = "300"
+    const votingThreshold = "1"
+    const quorum = "20"
+    const gov = await Gov.deploy(
+      nft.address, 
+      manifesto, 
+      name, 
+      votingDelay, 
+      votingPeriod, 
+      votingThreshold, 
+      quorum
+    ) 
+  
     await deployer.sendTransaction({
       to: gov.address,
       value: ethers.utils.parseEther('1')
