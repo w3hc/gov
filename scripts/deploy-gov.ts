@@ -9,8 +9,23 @@ async function main() {
 
   console.log("\nGov deployment in progress...") 
   
+  // Initial vote settings
   const Gov = await ethers.getContractFactory("Gov")
-  const gov = await Gov.deploy(store.nft)
+  const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+  const name = "Gov"
+  const votingDelay = "1"
+  const votingPeriod = "300"
+  const votingThreshold = "0"
+  const quorum = "4"
+  const gov = await Gov.deploy(
+    store.nft, 
+    manifesto, 
+    name, 
+    votingDelay, 
+    votingPeriod, 
+    votingThreshold, 
+    quorum
+  )
   await gov.deployed();
   console.log("\nGov deployed at", msg(gov.address), "✅")  
 
