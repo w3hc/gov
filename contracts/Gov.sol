@@ -22,13 +22,21 @@ contract Gov is
     event ManifestoUpdated(string cid);
 
     constructor(
-        IVotes _token
+        IVotes _token,
+        string memory _manifesto,
+        string memory _name,
+        uint256 _votingDelay,
+        uint256 _votingPeriod,
+        uint256 _votingThreshold,
+        uint256 _quorum
     )
-        Governor("Gov")
-        GovernorSettings(1, 100, 0)
+        Governor(_name)
+        GovernorSettings(_votingDelay, _votingPeriod, _votingThreshold)
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(20)
-    {}
+        GovernorVotesQuorumFraction(_quorum)
+    {
+        manifesto = _manifesto;
+    }
 
     function votingDelay()
         public
