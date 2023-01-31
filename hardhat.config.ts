@@ -9,10 +9,10 @@ const {
   GOERLI_TESTNET_RPC_URL, 
   DEPLOYER_DAO_TESTER_PRIVATE_KEY, 
   ETHERSCAN_API_KEY, 
-  // OPTIMISM_TESTNET_RPC_URL,
-  // ETHERSCAN_OPTIMISM_API_KEY,
-  // ARBITRUM_TESTNET_RPC_URL, 
-  // ETHERSCAN_ARBITRUM_API_KEY 
+  OPTIMISM_TESTNET_RPC_URL,
+  ETHERSCAN_OPTIMISM_API_KEY,
+  ARBITRUM_TESTNET_RPC_URL, 
+  ETHERSCAN_ARBITRUM_API_KEY 
 } = process.env;
 
 const config: HardhatUserConfig = {
@@ -34,10 +34,6 @@ const config: HardhatUserConfig = {
       url: GOERLI_TESTNET_RPC_URL || "",
       accounts: DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
     },
-    // 'arbitrum-goerli': {
-    //   url: ARBITRUM_TESTNET_RPC_URL,
-    //   accounts: DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
-    // },
     // 'optimism-goerli': {
     //   url: OPTIMISM_TESTNET_RPC_URL,
     //   accounts: DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
@@ -46,11 +42,15 @@ const config: HardhatUserConfig = {
     //   url: "https://mainnet.optimism.io",
     //   accounts: DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
     // },
+    'arbitrum-goerli': {
+      url: ARBITRUM_TESTNET_RPC_URL,
+      accounts: DEPLOYER_DAO_TESTER_PRIVATE_KEY !== undefined ? [DEPLOYER_DAO_TESTER_PRIVATE_KEY] : [],
+    },
   }, 
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY,
+    // apiKey: ETHERSCAN_API_KEY,
     // apiKey: ETHERSCAN_OPTIMISM_API_KEY,
-    // apiKey: ETHERSCAN_ARBITRUM_API_KEY,
+    apiKey: ETHERSCAN_ARBITRUM_API_KEY,
   },
 };
 
