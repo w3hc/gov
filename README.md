@@ -12,7 +12,6 @@ Provide a coordination tool that fits the needs of everyday people. Orgs, federa
 We need DAOs to be secure, scalable and easy to use.
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [Gov UI](https://github.com/w3hc/gov-ui)
 - [Test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
 
 ## Install
