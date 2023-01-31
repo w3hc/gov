@@ -1,6 +1,6 @@
 # Gov
 
-A DAO template built with Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
+A DAO framework built with Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
 
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
@@ -12,7 +12,7 @@ Provide a coordination tool that fits the needs of everyday people. Orgs, federa
 We need DAOs to be secure, scalable and easy to use.
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [Test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
+- [A test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
 
 ## Install
 
@@ -65,6 +65,7 @@ Note that you can put a whole website in the manifesto directory, the result wil
 
 ## Supported networks
 
+- Optimism Mainnet
 - Goerli Testnet
 - Optimism Goerli Testnet
 - Arbitrum Goerli Testnet
