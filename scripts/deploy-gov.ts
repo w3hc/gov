@@ -40,7 +40,15 @@ async function main() {
   try {
     console.log("\nEtherscan verification in progress...")
     await gov.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: "goerli", address: gov.address, constructorArguments: [store.nft], });
+    await hre.run("verify:verify", { network: "arbitrum-goerli", address: gov.address, constructorArguments: [
+      store.nft, 
+      manifesto, 
+      name, 
+      votingDelay, 
+      votingPeriod, 
+      votingThreshold, 
+      quorum], 
+    });
     console.log("Etherscan verification done. ✅")
   } catch (error) {
     console.error(error);
