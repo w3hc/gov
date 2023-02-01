@@ -12,7 +12,8 @@ Provide a coordination tool that fits the needs of everyday people. Orgs, federa
 We need DAOs to be secure, scalable and easy to use.
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [A test DAO on Tally](https://www.tally.xyz/gov/girlygov-64)
+- [A test DAO on Tally](https://www.tally.xyz/gov/girlygov-64) | [W3HC DAO on Tally](https://www.tally.xyz/gov/w3hc)
+- [gov-proposal-editor](https://github.com/w3hc/gov-proposal-editor) | [gov-ui](https://github.com/w3hc/gov-ui)
 
 ## Install
 
@@ -28,7 +29,7 @@ npx hardhat test
 
 ## Deploy
 
-Create a `.env` on the model of `.env.example` and add your own keys (the three first are required), then deploy to Goerli:
+Create a `.env` on the model of `.env.example` and add your own keys, then deploy to Goerli:
 
 ```sh
 npm run deploy

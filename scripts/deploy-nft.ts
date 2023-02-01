@@ -1,4 +1,6 @@
-import { ethers } from "hardhat";
+// npx hardhat run scripts/deploy-nft.ts --network goerli
+
+import { ethers, network } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 const fs = require("fs");
@@ -111,7 +113,7 @@ async function main() {
   try {
     console.log("\nEtherscan verification in progress...")
     await nft.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: "arbitrum-goerli", address: nft.address, constructorArguments: [firstMembers, uri], });
+    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], });
     console.log("Etherscan verification done. ✅")
   } catch (error) {
     console.error(error);

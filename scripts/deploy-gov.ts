@@ -1,4 +1,5 @@
-import { ethers } from "hardhat";
+// npx hardhat run scripts/deploy-gov.ts --network goerli
+import { ethers, network } from "hardhat";
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 import * as store from '../store.json'
@@ -40,7 +41,7 @@ async function main() {
   try {
     console.log("\nEtherscan verification in progress...")
     await gov.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: "arbitrum-goerli", address: gov.address, constructorArguments: [
+    await hre.run("verify:verify", { network: network.name, address: gov.address, constructorArguments: [
       store.nft, 
       manifesto, 
       name, 
