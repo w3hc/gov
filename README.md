@@ -29,7 +29,15 @@ npx hardhat test
 
 ## Deploy
 
-Create a `.env` on the model of `.env.example` and add your own keys, then deploy to Goerli:
+Create a `.env` on the model of `.env.example`:
+
+```sh
+cp .env.example .env
+```
+
+Add your own keys in your `.env` file. 
+
+Then deploy to Goerli:
 
 ```sh
 npm run deploy

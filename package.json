@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "npx hardhat run scripts/deploy-nft.ts --network goerli && npx hardhat run scripts/deploy-gov.ts --network goerli"
+    "deploy": "npx hardhat run scripts/clear.ts && npx hardhat run scripts/deploy-nft.ts --network goerli && npx hardhat run scripts/deploy-gov.ts --network goerli",
+    "clear": "npx hardhat run scripts/clear.ts"
   },
   "keywords": [],
   "author": "",

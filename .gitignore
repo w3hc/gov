@@ -8,6 +8,8 @@ NOTES.md
 store.json
 manifesto.json
 package-lock.json
+nftAbi.json
+govAbi.json
 
 #Hardhat files
 cache

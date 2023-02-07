@@ -1,23 +1,23 @@
 // npx hardhat run scripts/deploy-gov.ts --network goerli
-import { ethers, network } from "hardhat";
-const color = require("cli-color")
-var msg = color.xterm(39).bgXterm(128);
+import hre, { ethers, network, artifacts } from 'hardhat'
 import * as store from '../store.json'
-const hre = require("hardhat");
-const fs = require('fs');
+import fs from 'fs'
+const color = require("cli-color")
+
+var msg = color.xterm(39).bgXterm(128)
 
 async function main() {
 
   console.log("\nGov deployment in progress...") 
   
-  // Initial vote settings
+  // See https://w3hc.github.io/gov-docs/vote-settings.html 
   const Gov = await ethers.getContractFactory("Gov")
   const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
   const name = "Gov"
-  const votingDelay = "1"
-  const votingPeriod = "300"
-  const votingThreshold = "0"
-  const quorum = "4"
+  const votingDelay = 1
+  const votingPeriod = 300
+  const votingThreshold = 0
+  const quorum = 4
   const gov = await Gov.deploy(
     store.nft, 
     manifesto, 
@@ -27,16 +27,26 @@ async function main() {
     votingThreshold, 
     quorum
   )
-  await gov.deployed();
+  await gov.deployed()
   console.log("\nGov deployed at", msg(gov.address), "✅")  
 
   fs.writeFileSync(
-    "store.json",
+    'store.json',
     JSON.stringify({
       nft: store.nft, 
       gov: gov.address
     }, undefined, 2),
-  ); 
+  )
+
+  fs.writeFileSync(
+    'govAbi.json', 
+    JSON.stringify(
+      artifacts.readArtifactSync('Gov').abi, 
+      null, 
+      2
+    )
+  )
+  console.log("\nGov ABI available in govAbi.json ✅")  
 
   try {
     console.log("\nEtherscan verification in progress...")

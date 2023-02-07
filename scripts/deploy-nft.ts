@@ -1,13 +1,13 @@
 // npx hardhat run scripts/deploy-nft.ts --network goerli
-
-import { ethers, network } from "hardhat";
+import hre, { ethers, network, artifacts } from 'hardhat'
+import fs from 'fs'
 const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
-const fs = require("fs");
-const hre = require("hardhat");
 import { Web3Storage, Blob, File , getFilesFromPath } from "web3.storage"
-import * as dotenv from "dotenv";
+import * as dotenv from "dotenv"
+
 dotenv.config();
+var msg = color.xterm(39).bgXterm(128)
 
 async function main() {
   
@@ -96,7 +96,7 @@ async function main() {
     return "ipfs://" + cid 
   }
 
-  const uri = (await storeMetadata(makeFileObjects()));
+  const uri = (await storeMetadata(makeFileObjects()))
   console.log("Metadata storage done. ✅", uri)
 
   console.log("\nNFT deployment in progress...") 
@@ -110,17 +110,27 @@ async function main() {
     JSON.stringify({nft: nft.address}, undefined, 2)
   );
 
+  fs.writeFileSync(
+    'nftAbi.json', 
+    JSON.stringify(
+      artifacts.readArtifactSync('NFT').abi, 
+      null, 
+      2
+    )
+  )
+  console.log("\nNFT ABI available in nftAbi.json ✅")  
+
   try {
     console.log("\nEtherscan verification in progress...")
     await nft.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], });
+    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], })
     console.log("Etherscan verification done. ✅")
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error(error)
+  process.exitCode = 1
 });
