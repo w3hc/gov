@@ -7,9 +7,9 @@ describe("Gov", function () {
 
   async function deployContracts() {
     
-    const [deployer, alice, bob, francis] = await ethers.getSigners();
+    const [deployer, alice, bob, francis] = await ethers.getSigners()
 
-    const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe";
+    const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
     const firstMembers = [
       alice.address, 
       bob.address
@@ -19,11 +19,11 @@ describe("Gov", function () {
 
     const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
     const name = "Gov"
-    const votingDelay = "1"
-    const votingPeriod = "300"
-    const votingThreshold = "1"
-    const quorum = "20"
-    const Gov = await ethers.getContractFactory("Gov");
+    const votingDelay = 1
+    const votingPeriod = 300
+    const votingThreshold = 1
+    const quorum = 4
+    const Gov = await ethers.getContractFactory("Gov")
     const gov = await Gov.deploy(
       nft.address, 
       manifesto, 
@@ -34,7 +34,7 @@ describe("Gov", function () {
       quorum
     )
 
-    await nft.transferOwnership(gov.address);
+    await nft.transferOwnership(gov.address)
     await nft.connect(alice).delegate(alice.address)
     await nft.connect(bob).delegate(alice.address)
 
@@ -64,7 +64,7 @@ describe("Gov", function () {
     )
 
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
-    const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'));
+    const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'))
     await erc20Mock.transfer(gov.address, ethers.utils.parseEther('1'))
 
     const ERC721Mock = await ethers.getContractFactory("ERC721Mock");
@@ -72,106 +72,157 @@ describe("Gov", function () {
     await erc721Mock.approve(gov.address, 1)
     await erc721Mock.transferFrom(deployer.address, gov.address, 1)
 
-    const ERC1155Mock = await ethers.getContractFactory("ERC1155Mock");
+    const ERC1155Mock = await ethers.getContractFactory("ERC1155Mock")
     const erc1155Mock = await ERC1155Mock.deploy();
     await erc1155Mock.safeTransferFrom(deployer.address, gov.address, 1, 1, "0x")
 
-    return { gov, nft, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock };
+    return { gov, nft, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock }
   }
 
   describe("Deployment", function () {
 
-    it("Should own the right token IDs", async function () {
-      const { nft, alice, bob } = await loadFixture(deployContracts);
-      expect(await nft.ownerOf(0)).to.equal(alice.address);
-      expect(await nft.ownerOf(1)).to.equal(bob.address);
-    });
+    it("Should make 100 people vote", async function () {
+      const { gov, alice, francis, bob, nft } = await loadFixture(deployContracts);
 
-    it("Should set the right token address", async function () {
-      const { gov, nft } = await loadFixture(deployContracts);
-      expect(await gov.token()).to.equal(nft.address);
-    });
+      await francis.sendTransaction({
+        to: gov.address,
+        value: ethers.utils.parseEther('1')
+      });
+      expect(await ethers.provider.getBalance(gov.address)).to.be.equal(ethers.utils.parseEther('1'))
 
-    it("Should transfer the NFT contract ownership", async function () {
-      const { gov, nft } = await loadFixture(deployContracts);
-      expect(await nft.owner()).to.equal(gov.address);
-    });
+      let amount:number = 200
+      let signers:any = []
+      const randomSigners = async (amount:number) => {
+        for (let i = 0; i < amount; i++) {
+          const x = ethers.Wallet.createRandom()
+          const y = new ethers.Wallet(x, ethers.provider)
+          signers.push(y)
+        }
+        return signers
+      }
+      console.log("add 100 members")
 
-    it("Should set the right manifesto cid", async function () {
-      const { gov } = await loadFixture(deployContracts);
-      expect(await gov.manifesto()).to.equal("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya");
-    });
+      // console.log(randomSigners(amount))
+      const members = randomSigners(amount)
+      console.log("Member #198:", (await members)[198].address )
 
-    it("Should get the quorum", async function () {
-      const { gov } = await loadFixture(deployContracts);
-      const blockNumber = await ethers.provider.getBlockNumber();
-      expect(await gov.quorum(blockNumber - 1)).to.equal(0);
-    });
+      let max:number = 70
+      for (let i = 0; i <= max ; i++) {
+        const calldatas = [(nft.interface.encodeFunctionData('safeMint', [(await members)[i].address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])).toString()]
+        const PROPOSAL_DESCRIPTION = ""
+        const targets = [nft.address]
+        const values = ["0"]
+        const propose = await gov.connect(alice).propose(
+          targets, 
+          values, 
+          calldatas, 
+          PROPOSAL_DESCRIPTION
+        )
+        const proposeReceipt = await propose.wait(1)
+        const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+        await moveBlocks(1)
+        await gov.connect(alice).castVote(proposalId,1)
+        await gov.connect(bob).castVote(proposalId,1)
+        await moveBlocks(298)
+        const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+        await gov.execute(
+          targets, 
+          values, 
+          calldatas,
+          desc
+        )
+        expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
 
-  });
+      }
+      expect(await nft.balanceOf((await members)[70].address)).to.be.equal("1")
+      expect(await nft.ownerOf(72)).to.be.equal((await members)[70].address)
+      console.log("[1st loop] nft supply:", (await nft.totalSupply()).toString())
+      await francis.sendTransaction({
+        to: (await members)[0].address,
+        value: ethers.utils.parseEther('0.1')
+      });
+      await francis.sendTransaction({
+        to: (await members)[1].address,
+        value: ethers.utils.parseEther('0.1')
+      });
+      await francis.sendTransaction({
+        to: (await members)[2].address,
+        value: ethers.utils.parseEther('0.1')
+      });
+      await francis.sendTransaction({
+        to: (await members)[3].address,
+        value: ethers.utils.parseEther('0.1')
+      });
+      await francis.sendTransaction({
+        to: (await members)[4].address,
+        value: ethers.utils.parseEther('0.1')
+      });
+      let max2:number = 100
+      for (let i = max + 1 ; i <= max + max2 ; i++) {
+        const calldatas = [(nft.interface.encodeFunctionData('safeMint', [(await members)[i].address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])).toString()]
+        const PROPOSAL_DESCRIPTION = " "
+        const targets = [nft.address]
+        const values = ["0"]
+        const propose = await gov.connect(alice).propose(
+          targets, 
+          values, 
+          calldatas, 
+          PROPOSAL_DESCRIPTION
+        )
 
-  describe("Interactions", function () {
+        const proposeReceipt = await propose.wait(1)
+        const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+        await moveBlocks(1)
+        await gov.connect(alice).castVote(proposalId,1)
+        await gov.connect(bob).castVote(proposalId,1)
+        await gov.connect(francis).castVote(proposalId,1)
+        // console.log("Member #0 address:", (await members)[0].address )
+        // console.log("Member #0 signer:", (await members)[0] )
+        // console.log("Francis signer:", francis)
 
-    it("Should delegate to self", async function () {
-      const { nft, alice } = await loadFixture(deployContracts);
-      expect(await nft.delegates(alice.address)).to.equal(alice.address);
-    }); 
+        // console.log(await nft.balanceOf((await members)[0].address))
+        // console.log("members0 bal:", await ethers.provider.getBalance((await members)[0]))
 
-    it('Should submit a proposal', async function () {
-      const { nft, gov, alice, francis } = await loadFixture(deployContracts);
+        await nft.connect((await members)[0]).delegate((await members)[0].address)
+        await gov.connect((await members)[0]).castVote(proposalId,1)
 
-      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
-      const calldatas = [addMemberCall.toString()]
-      const targets = [nft.address]
-      const values = ["0"]
-      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
-      const propose = await gov.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )
-      const proposeReceipt = await propose.wait(1)
-      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
-      expect(await gov.state(proposalId)).to.be.equal(1)
-      await expect(gov.connect(francis).propose(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )).to.be.revertedWith("Governor: proposer votes below proposal threshold")
-    });
+        await nft.connect((await members)[1]).delegate((await members)[1].address)
+        await gov.connect((await members)[1]).castVote(proposalId,1)
 
-    it('Should cast a vote', async function () {
-      const { nft, gov, alice, francis } = await loadFixture(deployContracts);
+        await nft.connect((await members)[2]).delegate((await members)[1].address)
+        await gov.connect((await members)[2]).castVote(proposalId,1)
 
-      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
-      const calldatas = [addMemberCall.toString()]
+        await nft.connect((await members)[3]).delegate((await members)[1].address)
+        await gov.connect((await members)[3]).castVote(proposalId,1)
 
-      const targets = [nft.address]
-      const values = ["0"]
-      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
-      const propose = await gov.connect(alice).propose(
-        targets, 
-        values, 
-        calldatas, 
-        descriptionHash
-      )
-      const proposeReceipt = await propose.wait(1)
-      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
-      await gov.connect(alice).castVote(proposalId,1)
-      expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(true)
-    });
+        await nft.connect((await members)[4]).delegate((await members)[1].address)
+        await gov.connect((await members)[4]).castVote(proposalId,1)
 
-    it('Should execute the proposal', async function () {
-      const { nft, gov, alice, francis, bob } = await loadFixture(deployContracts);
+        await moveBlocks(298)
+        const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+        await gov.execute(
+          targets, 
+          values, 
+          calldatas,
+          desc
+        )
 
-      const addMemberCall = await nft.interface.encodeFunctionData('safeMint', [francis.address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])
-      const calldatas = [addMemberCall.toString()]
+      }
+      console.log("[2nd loop] nft supply:", (await nft.totalSupply()).toString())
+      expect(await nft.balanceOf((await members)[170].address)).to.be.equal("1")
+      expect(await nft.ownerOf(172)).to.be.equal((await members)[170].address)
 
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"
+    })
+
+    it('Should execute the proposal', async function () {      
+      const {nft, gov, alice, francis, bob } = await loadFixture(deployContracts)
+      const calldatas = [
+        (nft.interface.encodeFunctionData('safeMint', [
+          francis.address, 
+          "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
+        ]
+        )).toString()]
+      const PROPOSAL_DESCRIPTION = ""
       const targets = [nft.address]
       const values = ["0"]
       const propose = await gov.connect(alice).propose(
@@ -182,10 +233,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await moveBlocks(1)
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await moveBlocks(298)
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -193,8 +244,8 @@ describe("Gov", function () {
         calldatas,
         desc
       )
-      expect(await nft.ownerOf(2)).to.equal(francis.address);
-    });
+      expect(await nft.ownerOf(2)).to.equal(francis.address)
+    })
 
     it('Should set the nft metadata', async function () {
       const { nft, gov, alice, bob } = await loadFixture(deployContracts);
@@ -528,92 +579,91 @@ describe("Gov", function () {
       expect(await erc1155Mock.balanceOf(francis.address, 1)).to.equal(1);
     });
 
-    xit("Should make 100 people vote", async function () {
-      const { gov, alice, francis, bob, nft } = await loadFixture(deployContracts);
+    
 
-      await francis.sendTransaction({
-        to: gov.address,
-        value: ethers.utils.parseEther('1')
-      });
-      expect(await ethers.provider.getBalance(gov.address)).to.be.equal("1000000000000000000")
+    it("Should own the right token IDs", async function () {
+      const { nft, alice, bob } = await loadFixture(deployContracts);
+      expect(await nft.ownerOf(0)).to.equal(alice.address);
+      expect(await nft.ownerOf(1)).to.equal(bob.address);
+    })
 
+    it("Should set the right token address", async function () {
+      const { gov, nft } = await loadFixture(deployContracts);
+      expect(await gov.token()).to.equal(nft.address);
+    })
 
+    it("Should transfer the NFT contract ownership", async function () {
+      const { gov, nft } = await loadFixture(deployContracts);
+      expect(await nft.owner()).to.equal(gov.address);
+    })
 
-    let amount = 100
-    let signers
-    const randomSigners = async (amount:number)  => {
+    it("Should set the right manifesto cid", async function () {
+      const { gov } = await loadFixture(deployContracts);
+      expect(await gov.manifesto()).to.equal("bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya");
+    })
 
-      const signers = []
-      for (let i = 0; i < amount; i++) {
-        signers.push(ethers.Wallet.createRandom())
-      }
-      return signers
-      
-    }
+    it("Should get the quorum", async function () {
+      const { gov } = await loadFixture(deployContracts);
+      const blockNumber = await ethers.provider.getBlockNumber();
+      expect(await gov.quorum(blockNumber - 1)).to.equal(0);
+    })
+  });
 
-    // console.log(randomSigners(amount))
-    const members = randomSigners(amount)
-    // console.log("Member #80:", (await members)[80].address )
+  describe("Interactions", function () {
 
-    // 12 max :)
-    for (let i = 0; i < 12; i++) {
+    it("Should delegate to self", async function () {
+      const { nft, alice } = await loadFixture(deployContracts);
+      expect(await nft.delegates(alice.address)).to.equal(alice.address);
+    })
 
-      const addMemberCall2 = await nft.interface.encodeFunctionData('safeMint', [(await members)[i].address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])
-      const calldatas2 = [addMemberCall2.toString()]
+    it('Should submit a proposal', async function () {
+      const { nft, gov, alice, francis } = await loadFixture(deployContracts);
 
-      const PROPOSAL_DESCRIPTION2 = ""
-      const targets2 = [nft.address]
-      const values2 = ["0"]
-      const propose2 = await gov.connect(alice).propose(
-        targets2, 
-        values2, 
-        calldatas2, 
-        PROPOSAL_DESCRIPTION2
-      )
-      const proposeReceipt2 = await propose2.wait(1)
-      const proposalId2 = proposeReceipt2.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
-      await gov.connect(alice).castVote(proposalId2,1)
-      await gov.connect(bob).castVote(proposalId2,0) // weird
-      await moveBlocks(300)
-      const desc2 = ethers.utils.id(PROPOSAL_DESCRIPTION2)
-      await gov.execute(
-        targets2, 
-        values2, 
-        calldatas2,
-        desc2
-      )
-      
-
-
-    }
-    expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
-
-
-      const addMemberCall = "0x"
+      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
       const calldatas = [addMemberCall.toString()]
-      const PROPOSAL_DESCRIPTION = "{ result: { kind: 'valid', asString: 'Transfer 0.0001 ETH to Bob.' } }"
-      const targets = [alice.address]
-      const values = ["100000000000000"]
+      const targets = [nft.address]
+      const values = ["0"]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
       const propose = await gov.connect(alice).propose(
         targets, 
         values, 
         calldatas, 
-        PROPOSAL_DESCRIPTION
+        descriptionHash
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      expect(await gov.state(proposalId)).to.be.equal(1)
+      await expect(gov.connect(francis).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
+      )).to.be.revertedWith("Governor: proposer votes below proposal threshold")
+    })
+
+    it('Should cast a vote', async function () {
+      const { nft, gov, alice, francis } = await loadFixture(deployContracts);
+
+      const addMemberCall = nft.interface.encodeFunctionData('safeMint', [francis.address, "10000000000000"])
+      const calldatas = [addMemberCall.toString()]
+
+      const targets = [nft.address]
+      const values = ["0"]
+      const descriptionHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("{ result: { kind: 'valid', asString: '# Simple proposal\n**It\'s simple.**' } }"))
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        descriptionHash
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
       await moveBlocks(2)
       await gov.connect(alice).castVote(proposalId,1)
-      await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
-      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-      expect(await gov.execute(
-        targets, 
-        values, 
-        calldatas,
-        desc
-      )).to.emit(proposalId, 'ProposalExecuted');
-    });
-  });
-});
+      expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(true)
+    })
+
+    
+  })
+})
