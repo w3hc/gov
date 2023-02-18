@@ -207,6 +207,41 @@ describe("Gov", function () {
       expect(await nft.ownerOf(2)).to.equal(francis.address)
     })
 
+    it('Should switch delegate before castVote', async function () {      
+      const {nft, gov, alice, francis, bob } = await loadFixture(deployContracts)
+
+      const calldatas = [
+        (nft.interface.encodeFunctionData('safeMint', [
+          francis.address, 
+          "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
+        ]
+        )).toString()]
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [nft.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(1)      
+      await nft.connect(bob).delegate(alice.address) // call to delegate after propose and before castVote
+      await gov.connect(alice).castVote(proposalId,1)
+      // await gov.connect(bob).castVote(proposalId,1) // bob donesn't need to go vote
+      await moveBlocks(298)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      expect(await nft.ownerOf(2)).to.equal(francis.address)
+    })
+
     it('Should set the nft metadata', async function () {
       const { nft, gov, alice, bob } = await loadFixture(deployContracts);
 
@@ -381,7 +416,7 @@ describe("Gov", function () {
       expect(await gov2.token()).to.equal(nft.address);
     });
 
-    xit("Should upgrade NFT", async function () {
+    it("Should upgrade NFT", async function () {
       const { nft, alice, bob, francis } = await loadFixture(deployContracts);
 
       const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe";
@@ -417,6 +452,7 @@ describe("Gov", function () {
 
       await nft2.transferOwnership(gov2.address);
       await nft2.connect(alice).delegate(alice.address)
+      await nft2.connect(bob).delegate(bob.address)
 
       const call = nft2.interface.encodeFunctionData('safeMint', [francis.address, "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"])
       const calldatas = [call.toString()]
@@ -434,7 +470,6 @@ describe("Gov", function () {
       await moveBlocks(2)
       await gov2.connect(alice).castVote(proposalId,1)
       await gov2.connect(bob).castVote(proposalId,1)
-      console.log("state #1", await gov2.state(proposalId))
       await moveBlocks(300)
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov2.execute(
@@ -443,8 +478,6 @@ describe("Gov", function () {
         calldatas,
         desc
       )
-      console.log("state #2", await gov2.state(proposalId))
-
       expect(await nft2.ownerOf(2)).to.equal(francis.address);
       expect(await gov2.token()).to.equal(nft2.address);
     });
@@ -542,7 +575,7 @@ describe("Gov", function () {
       expect(await erc1155Mock.balanceOf(francis.address, 1)).to.equal(1);
     });
 
-    xit("Should make 100 people vote", async function () {
+    xit("Should make 100+ people vote", async function () {
       const { gov, alice, francis, bob, nft } = await loadFixture(deployContracts);
 
       await francis.sendTransaction({
@@ -591,7 +624,7 @@ describe("Gov", function () {
           calldatas,
           desc
         )
-        expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
+        // expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
 
       }
       expect(await nft.balanceOf((await members)[70].address)).to.be.equal("1")
