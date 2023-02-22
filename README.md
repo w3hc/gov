@@ -12,8 +12,8 @@ Provide a coordination tool that fits the needs of everyday people. Orgs, federa
 We need DAOs to be secure, scalable and easy to use.
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [A test DAO on Tally](https://www.tally.xyz/gov/girlygov-64) | [W3HC DAO on Tally](https://www.tally.xyz/gov/w3hc)
-- [gov-proposal-editor](https://github.com/w3hc/gov-proposal-editor) | [gov-ui](https://github.com/w3hc/gov-ui)
+- [W3HC DAO on Tally](https://www.tally.xyz/gov/w3hc)
+- [Gov UI](https://github.com/w3hc/gov-ui) (WIP)
 
 ## Install
 
@@ -68,6 +68,16 @@ Edit the `manifesto.md` file, then:
 
 ```sh
 npx hardhat run scripts/upload-manifesto.ts
+```
+
+Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
+
+#### Submit a proposal
+
+Edit the `submit-proposal.ts` file, then:
+
+```sh
+npx hardhat run scripts/submit-proposal.ts --network goerli
 ```
 
 Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
