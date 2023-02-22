@@ -17,13 +17,13 @@ We need DAOs to be secure, scalable and easy to use.
 
 ## Install
 
-```sh
+```js
 npm i
 ```
 
 ## Test
 
-```sh
+```js
 npx hardhat test
 ```
 
@@ -31,7 +31,7 @@ npx hardhat test
 
 Create a `.env` on the model of `.env.example`:
 
-```sh
+```js
 cp .env.example .env
 ```
 
@@ -39,48 +39,15 @@ Add your own keys in your `.env` file.
 
 Then deploy to Goerli:
 
-```sh
+```js
 npm run deploy
-```
-
-Alternatively, you can run these two commands:
-
-```sh
-npx hardhat run scripts/deploy-nft.ts --network goerli
-npx hardhat run scripts/deploy-gov.ts --network goerli
 ```
 
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
-## Use
+To deploy to other networks, please read the [deployment section in the docs](https://w3hc.github.io/gov-docs/deployment.html).
 
-#### Upload metadata
-
-Edit the metadata in `upload-metadata.ts`, then:
-
-```sh
-npx hardhat run scripts/upload-metadata.ts
-```
-
-#### Upload manifesto
-
-Edit the `manifesto.md` file, then:
-
-```sh
-npx hardhat run scripts/upload-manifesto.ts
-```
-
-Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
-
-#### Submit a proposal
-
-Edit the `submit-proposal.ts` file, then:
-
-```sh
-npx hardhat run scripts/submit-proposal.ts --network goerli
-```
-
-Note that you can put a whole website in the manifesto directory, the result will be the same: you'll get the CID of your manifesto.
+To upload the membership NFT metadata, upload the manifesto, or submit a proposal using the CLI, please check [this section of the docs](https://w3hc.github.io/gov-docs/deployment.html#use).
 
 ## Supported networks
 
