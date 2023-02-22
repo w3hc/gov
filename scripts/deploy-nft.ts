@@ -46,7 +46,7 @@ async function main() {
 
   console.log("\ncid:", cid)
 
-  console.log("url:", "https://" + cid + "ipfs.w3s.link/image.png")
+  console.log("url:", "https://" + cid + ".ipfs.w3s.link/image.png")
 
   // Edit the following variable
   const metadata = {
