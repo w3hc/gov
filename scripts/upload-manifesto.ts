@@ -4,7 +4,7 @@ import { Web3Storage, getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv";
 dotenv.config();
 
-async function main() {
+export async function upload() {
   
   console.log("\nStorage in progress...") 
 
@@ -37,9 +37,10 @@ async function main() {
 
   console.log("\nManifesto storage done. ✅")
 
+  return cid
 }
 
-main().catch((error) => {
+upload().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

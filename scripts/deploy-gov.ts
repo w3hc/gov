@@ -3,6 +3,7 @@ import hre, { ethers, network, artifacts } from 'hardhat'
 import * as store from '../store.json'
 import fs from 'fs'
 const color = require("cli-color")
+import { upload } from '../scripts/upload-manifesto'
 
 var msg = color.xterm(39).bgXterm(128)
 
@@ -12,8 +13,9 @@ async function main() {
   
   // See https://w3hc.github.io/gov-docs/vote-settings.html 
   const Gov = await ethers.getContractFactory("Gov")
-  const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
-  const name = "Gov"
+  const manifesto = await upload()
+  
+  const name = "Test DAO"
   const votingDelay = 1
   const votingPeriod = 300
   const votingThreshold = 0
