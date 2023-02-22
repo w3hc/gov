@@ -11,15 +11,16 @@ async function main() {
 
   console.log("\nGov deployment in progress...") 
   
-  // See https://w3hc.github.io/gov-docs/vote-settings.html 
   const Gov = await ethers.getContractFactory("Gov")
   const manifesto = await upload()
-  
-  const name = "Test DAO"
+
+  // Edit the following 5 variables
+  const name = "Our DAO"
   const votingDelay = 1
   const votingPeriod = 300
   const votingThreshold = 0
   const quorum = 4
+
   const gov = await Gov.deploy(
     store.nft, 
     manifesto, 
