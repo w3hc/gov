@@ -31,7 +31,9 @@ async function main() {
     quorum
   )
   await gov.deployed()
-  console.log("\nGov deployed at", msg(gov.address), "✅")  
+  console.log("\nGov deployed at", msg(gov.address), "✅")
+  const receipt = await ethers.provider.getTransactionReceipt(gov.deployTransaction.hash)
+  console.log("\nBlock number:", msg(receipt.blockNumber))
 
   fs.writeFileSync(
     'store.json',

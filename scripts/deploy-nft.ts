@@ -46,8 +46,9 @@ async function main() {
 
   console.log("\ncid:", cid)
 
-  console.log("url:", "https://" + cid + ".ipfs.w3s.linkdata/image.png")
+  console.log("url:", "https://" + cid + "ipfs.w3s.link/image.png")
 
+  // Edit the following variable
   const metadata = {
     "name": "DAO Membership",
     "author": "Gov",
@@ -102,8 +103,10 @@ async function main() {
   console.log("\nNFT deployment in progress...") 
   const NFT = await ethers.getContractFactory("NFT")
   const nft = await NFT.deploy(firstMembers, uri)
-  await nft.deployed();
+  await nft.deployed()
   console.log("\nNFT deployed at", msg(nft.address), "✅")
+  const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)
+  console.log("\nBlock number:", msg(receipt.blockNumber))
 
   fs.writeFileSync(
     "store.json",
