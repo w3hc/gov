@@ -13,9 +13,9 @@ async function main() {
   
   console.log("\nStorage in progress...") 
   
-  const o = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
-  const b = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
-  const j = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
+  const o = "0x7fd5d090a30460385dd165fc1608e1f66fa2448e"
+  const b = "0x476e2651bf97de8a26e4a05a9c8e00a6efa1390c"
+  const j = "0xa30189949cd8f662582b10eb6e353374419edf67"
 
   const firstMembers = [
     o, 
