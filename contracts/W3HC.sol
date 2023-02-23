@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title DAO Membership NFT contract
 /// @author Web3 Hackers Collective
-contract NFT is
+contract W3HC is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,
@@ -28,7 +28,10 @@ contract NFT is
     constructor(
         address[] memory _firstMembers,
         string memory _uri
-    ) ERC721("Membership NFT", "MEMBER") EIP712("Membership NFT", "1") {
+    )
+        ERC721("Web3 Hackers Collective Membership NFT", "W3HC")
+        EIP712("Web3 Hackers Collective Membership NFT", "1")
+    {
         for (uint i; i < _firstMembers.length; i++) {
             safeMint(_firstMembers[i], _uri);
         }
@@ -85,7 +88,7 @@ contract NFT is
     /// @notice Replaces the tokenId of a given NFT
     /// @dev Marked `onlyOwner`: only the Gov contract can access this function
     /// @param tokenId The id of the NFT
-    /// @param uri The new `tokenURI` for this ID (should be "ipfs://<CID>")
+    /// @param uri The new `tokenURI` for this ID (should be "ipfs://<CID>/<FILE_NAME>")
     function setMetadata(uint256 tokenId, string memory uri) public onlyOwner {
         _setTokenURI(tokenId, uri);
     }
