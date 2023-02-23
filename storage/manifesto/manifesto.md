@@ -11,7 +11,7 @@ A new proposal MUST meet one of the following criteria:
 - Organize local hackathons, workshops and meetups
 - Request retroactive funding for a successful integration
 - Develop and maintain Gov: a DAO framework built with Governor and NFTs
-- Help people to setup a DAO using Gov
+- Help people to setup their own DAO
 
 ## First Members
 

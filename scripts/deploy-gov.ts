@@ -15,11 +15,12 @@ async function main() {
   const manifesto = await upload()
 
   // Edit the following 5 variables
-  const name = "Our DAO"
+  const name = "Web3 Hackers Collective"
   const votingDelay = 1
-  const votingPeriod = 300
-  const votingThreshold = 0
-  const quorum = 4
+  // 300 is around 1 hour // previous test DAO https://www.tally.xyz/gov/more-optimistic-than-ever
+  const votingPeriod = 300 * 24 * 14
+  const votingThreshold = 1
+  const quorum = 20
 
   const gov = await Gov.deploy(
     store.nft, 

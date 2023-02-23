@@ -13,12 +13,14 @@ async function main() {
   
   console.log("\nStorage in progress...") 
   
-  const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
-  const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
+  const o = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
+  const b = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
+  const j = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
 
   const firstMembers = [
-    alice, 
-    bob
+    o, 
+    b,
+    j
   ];
 
   function getAccessToken() {
@@ -50,10 +52,10 @@ async function main() {
 
   // Edit the following variable
   const metadata = {
-    "name": "DAO Membership",
-    "author": "Gov",
+    "name": "Web3 Hackers Collective Membership",
+    "author": "W3HC",
     "description":
-      "The owner of this NFT has a right to vote on the test DAO proposals.",
+      "The owner of this NFT has a right to vote on proposals submitted to the W3HC DAO. \n\nThe mission statement of the Web3 Hackers Collective is \"We want to build integrations through mentoring and learning.\" \n\nhttps://w3hc.org/",
     "image": "ipfs://" + cid + "/image.png",
     "attributes": [
       {
@@ -62,7 +64,7 @@ async function main() {
       },
       {
         "trait_type": "Contribs",
-        "value": "0",
+        "value": "1",
       },
       {
         "trait_type": "DAO",
