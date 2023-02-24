@@ -30,9 +30,12 @@ async function main() {
   }
 
   const dir = "./storage/metadata/"
+  let name:string = ""
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
+      name = File[File.length -1].name.substring(10)
+      console.log("name:", name)
       return File
   }
 
@@ -43,10 +46,9 @@ async function main() {
   }
 
   const cid = await storeFiles(await getFiles(dir))
+  console.log("url:", "https://" + cid + ".ipfs.w3s.link/"+ name)
 
   console.log("\ncid:", cid)
-
-  console.log("url:", "https://" + cid + ".ipfs.w3s.link/image.png")
 
   // Edit the following variable
   const metadata = {
@@ -54,7 +56,7 @@ async function main() {
     "author": "Gov",
     "description":
       "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/image.png",
+    "image": "ipfs://" + cid + "/" + name,
     "attributes": [
       {
         "trait_type": "Participation rate (%)",
@@ -96,41 +98,41 @@ async function main() {
     const cid = await client.put(files, { wrapWithDirectory:false })
     return "ipfs://" + cid 
   }
-
+  
   const uri = (await storeMetadata(makeFileObjects()))
   console.log("Metadata storage done. ✅", uri)
 
-  console.log("\nNFT deployment in progress...") 
-  const NFT = await ethers.getContractFactory("NFT")
-  const nft = await NFT.deploy(firstMembers, uri)
-  await nft.deployed()
-  console.log("\nNFT deployed at", msg(nft.address), "✅")
-  const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)
-  console.log("\nBlock number:", msg(receipt.blockNumber))
+  // console.log("\nNFT deployment in progress...") 
+  // const NFT = await ethers.getContractFactory("NFT")
+  // const nft = await NFT.deploy(firstMembers, uri)
+  // await nft.deployed()
+  // console.log("\nNFT deployed at", msg(nft.address), "✅")
+  // const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)
+  // console.log("\nBlock number:", msg(receipt.blockNumber))
 
-  fs.writeFileSync(
-    "store.json",
-    JSON.stringify({nft: nft.address}, undefined, 2)
-  );
+  // fs.writeFileSync(
+  //   "store.json",
+  //   JSON.stringify({nft: nft.address}, undefined, 2)
+  // );
 
-  fs.writeFileSync(
-    'nftAbi.json', 
-    JSON.stringify(
-      artifacts.readArtifactSync('NFT').abi, 
-      null, 
-      2
-    )
-  )
-  console.log("\nNFT ABI available in nftAbi.json ✅")  
+  // fs.writeFileSync(
+  //   'nftAbi.json', 
+  //   JSON.stringify(
+  //     artifacts.readArtifactSync('NFT').abi, 
+  //     null, 
+  //     2
+  //   )
+  // )
+  // console.log("\nNFT ABI available in nftAbi.json ✅")  
 
-  try {
-    console.log("\nEtherscan verification in progress...")
-    await nft.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], })
-    console.log("Etherscan verification done. ✅")
-  } catch (error) {
-    console.error(error)
-  }
+  // try {
+  //   console.log("\nEtherscan verification in progress...")
+  //   await nft.deployTransaction.wait(6)
+  //   await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], })
+  //   console.log("Etherscan verification done. ✅")
+  // } catch (error) {
+  //   console.error(error)
+  // }
 }
 
 main().catch((error) => {
