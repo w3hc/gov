@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title DAO Membership NFT contract
 /// @author Web3 Hackers Collective
-contract W3HC is
+contract W3HCMembership is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,

@@ -11,14 +11,25 @@ async function main() {
 
   console.log("\nGov deployment in progress...") 
   
-  const Gov = await ethers.getContractFactory("Gov")
+  const Gov = await ethers.getContractFactory("Web3HackersCollective")
   const manifesto = await upload()
+
+  /*
+  On Optimism Mainnet 
+
+  1 day : 569288-566176=3112
+  2 days : 569288-563523=5765
+
+  SO that's 120 blocks / 1 hour according to Etherscan
+
+  On OP testnet (previous calculation): 300 is around 1 hour according to https://www.tally.xyz/gov/more-optimistic-than-ever
+  */
 
   // Edit the following 5 variables
   const name = "Web3 Hackers Collective"
   const votingDelay = 1
-  // 300 is around 1 hour // previous test DAO https://www.tally.xyz/gov/more-optimistic-than-ever
-  const votingPeriod = 300 * 24 * 14
+  const numberOfDays = 14
+  const votingPeriod = 120 * 24 * numberOfDays // For OP Mainnet
   const votingThreshold = 1
   const quorum = 20
 
@@ -47,7 +58,7 @@ async function main() {
   fs.writeFileSync(
     'govAbi.json', 
     JSON.stringify(
-      artifacts.readArtifactSync('Gov').abi, 
+      artifacts.readArtifactSync('Web3HackersCollective').abi, 
       null, 
       2
     )
@@ -73,7 +84,7 @@ async function main() {
 
   const [issuer] = await ethers.getSigners()
   const abiDir = __dirname + '/../artifacts/contracts';
-  const nftAbiContract = abiDir + "/" + "NFT.sol" + "/" + "NFT" + ".json"  
+  const nftAbiContract = abiDir + "/" + "W3HCMembership.sol" + "/" + "W3HCMembership" + ".json"  
   let nftAbi;
   try {
     nftAbi = JSON.parse(fs.readFileSync(nftAbiContract,{encoding:'utf8', flag:'r'}));

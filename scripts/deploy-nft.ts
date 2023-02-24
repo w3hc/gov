@@ -103,8 +103,8 @@ async function main() {
   console.log("Metadata storage done. ✅", uri)
 
   console.log("\nNFT deployment in progress...") 
-  const NFT = await ethers.getContractFactory("NFT")
-  const nft = await NFT.deploy(firstMembers, uri)
+  const W3HCMembership = await ethers.getContractFactory("W3HCMembership")
+  const nft = await W3HCMembership.deploy(firstMembers, uri)
   await nft.deployed()
   console.log("\nNFT deployed at", msg(nft.address), "✅")
   const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)
@@ -118,7 +118,7 @@ async function main() {
   fs.writeFileSync(
     'nftAbi.json', 
     JSON.stringify(
-      artifacts.readArtifactSync('NFT').abi, 
+      artifacts.readArtifactSync('W3HCMembership').abi, 
       null, 
       2
     )

@@ -63,7 +63,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       goerli: GOERLI_ETHERSCAN_API_KEY || "",
       optimisticGoerli: OPTIMISM_ETHERSCAN_API_KEY || "",
-      optimism: OPTIMISM_ETHERSCAN_API_KEY || "",
+      optimisticEthereum: OPTIMISM_ETHERSCAN_API_KEY || "",
       arbitrumGoerli: ARBITRUM_ETHERSCAN_API_KEY || "",
     }
   },
