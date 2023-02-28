@@ -18,8 +18,8 @@ async function main() {
   const name = "Our DAO"
   const votingDelay = 1
   const votingPeriod = 300
-  const votingThreshold = 0
-  const quorum = 4
+  const votingThreshold = 1
+  const quorum = 20
 
   const gov = await Gov.deploy(
     store.nft, 
