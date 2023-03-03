@@ -1,5 +1,7 @@
 # Manifesto
 
+The Web3 Hackers Collective DAO contract ([0x83E2403A8b94AF988B4F4Ae9869577783b8CD216](https://optimistic.etherscan.io/address/0x83e2403a8b94af988b4f4ae9869577783b8cd216#code)) was deployed to Optimism Mainnet on Feb 24, 2023 at 10:10am UTC.
+
 ## Mission Statement
 
 **We want to build integrations through mentoring and learning.**
