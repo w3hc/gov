@@ -33,11 +33,10 @@ async function main() {
   const cid = await storeFiles(await getFiles(dir))
 
   const metadata = {
-    "name": "DAO Membership",
-    "author": "Gov",
+    "name": "Web3 Hackers Collective Membership NFT",
     "description":
-      "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/image.png",
+      "The owner of this NFT has a right to vote on proposals submitted to the W3HC DAO. \n\nThe mission statement of the Web3 Hackers Collective is \"We want to build integrations through mentoring and learning.\" \n\nView the DAO on Tally: https://www.tally.xyz/gov/web3-hackers-collective \n\nhttps://w3hc.org",
+    "image": "ipfs://bafybeif54pvansk6tlywsxajimb3qwtp5mm7efsp6loiaoioocpgebirwu/pa30.png",
     "attributes": [
       {
         "trait_type": "Participation rate (%)",
@@ -45,22 +44,26 @@ async function main() {
       },
       {
         "trait_type": "Contribs",
-        "value": "0",
+        "value": "1",
       },
       {
-        "trait_type": "DAO",
-        "value": "unset",
+        "trait_type": "DAO contract address",
+        "value": "0x83E2403A8b94AF988B4F4Ae9869577783b8CD216",
+      },
+      {
+        "trait_type": "Tally URL",
+        "value": "https://www.tally.xyz/gov/web3-hackers-collective",
       },
       {
         "trait_type": "Nickname",
-        "value": "unset",
+        "value": "BertUX",
       },
       {
         "trait_type": "Role",
         "value": "Hacker",
       },
     ],
-  };
+  }
 
   function makeFileObjects() {
     const blob = new Blob([JSON.stringify(metadata)], {

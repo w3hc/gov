@@ -17,9 +17,9 @@ A new proposal MUST meet one of the following criteria:
 
 ## First Members
 
-- Julien
-- Bertrand
 - Olivier
+- BertUX
+- Julien
 
 ## Legal
 
