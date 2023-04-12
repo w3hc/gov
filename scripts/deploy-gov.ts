@@ -13,6 +13,7 @@ async function main() {
   
   const Gov = await ethers.getContractFactory("Gov")
   const manifesto = await upload()
+  console.log("\nManifesto CID:", manifesto, "✅")
 
   // Edit the following 5 variables
   const name = "Our DAO"

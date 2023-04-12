@@ -5,13 +5,15 @@ A DAO framework built with Open Zeppelin's [Governor contract](https://docs.open
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
+Gov is maintained by the [Web3 Hackers Collective](https://www.tally.xyz/gov/web3-hackers-collective).
+
 ## Motivation
 
-Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to deploy their own DAO. 
+Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://gov-ui.on.fleek.co/). 
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [W3HC DAO on Tally](https://www.tally.xyz/gov/w3hc)
-- [Gov UI](https://github.com/w3hc/gov-ui) (WIP)
+- [Deploy your DAO](https://gov-ui.on.fleek.co/) (UI)
+- [Example DAO on Tally](https://www.tally.xyz/gov/web3-hackers-collective)
 
 ## Install
 
@@ -74,8 +76,8 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ## Versions
 
-- Node [v18.12.1](https://nodejs.org/uk/blog/release/v18.12.1/)
-- NPM [v8.19.2](https://github.com/npm/cli/releases/tag/v8.19.2)
+- Node [v18.15.0](https://nodejs.org/uk/blog/release/v18.15.0/)
+- NPM [v9.5.0](https://github.com/npm/cli/releases/tag/v9.5.0)
 - OpenZeppelin Contracts [v4.8.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.8.0)
 
 ## Support
