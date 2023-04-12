@@ -58,7 +58,7 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 
 ## Security
 
-Here are the differences from the Governor and ERC-721 reference implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
+Here are the differences between the Governor and ERC-721 reference implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
 
 ### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
 
@@ -68,7 +68,7 @@ The following function is `onlyGovernance`, meaning it can only be triggered by 
 
 ### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
 
-The following functions are `onlyOwner`, and since the NFT contract ownership is transfered to the Gov contract, they can only be triggered by a vote.
+The following functions are `onlyOwner`, and since the NFT contract ownership is transferred to the Gov contract, they can only be triggered by a vote.
 
 - `safeMint()` adds a new member.
 - `govBurn()` bans a member.
