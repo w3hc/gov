@@ -21,7 +21,6 @@ const removeDir = function(path:any) {
   } else {
     console.log("Directory path not found.")
   }
-  console.log("✅", path, "removed.")
 }
 
 const pathToArtifacts = path.join(__dirname, "../artifacts")
@@ -31,3 +30,5 @@ const typechainTypes = path.join(__dirname, "../typechain-types")
 removeDir(pathToArtifacts)
 removeDir(pathToCache)
 removeDir(typechainTypes)
+
+console.log("\n/artifacts, /cache and /typechain-types were removed. ✅")

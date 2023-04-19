@@ -31,11 +31,11 @@ export async function upload() {
 
   const cid = await storeFiles(await getFiles(dir))
 
-  console.log("\ncid:", msg(cid))
+  // console.log("\ncid:", msg(cid))
 
-  console.log("\nurl:", "https://gateway.ipfs.io/ipfs/" + cid + "/manifesto.md")
+  // console.log("\nurl:", "https://gateway.ipfs.io/ipfs/" + cid + "/manifesto.md")
 
-  console.log("\nManifesto storage done. ✅")
+  // console.log("\nManifesto storage done. ✅")
 
   return cid
 }

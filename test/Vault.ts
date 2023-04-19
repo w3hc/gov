@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { moveBlocks } from "./utils/move-blocks"
 
-describe("Vault", function () {
+describe("Vault V1 [DEPRECATED]", function () {
 
   async function deployContracts() {
     
