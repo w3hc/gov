@@ -16,10 +16,6 @@ contract Vault2 is ERC4626, Ownable, ERC20Snapshot {
         ERC20(asset()).transfer(msg.sender, amount);
     }
 
-    // function snapshot(address account) public returns (uint256) {
-    //     return balanceOfAt(account, _snapshot());
-    // }
-
     function snapshot() public {
         latestSnapshot = _snapshot();
     }

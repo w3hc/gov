@@ -89,11 +89,6 @@ describe("Vault V2", function () {
     const hypercerts = await HypercertsMock.deploy();
     await hypercerts.transferOwnership(gov.address)
 
-    // const ERC721Mock = await ethers.getContractFactory("ERC721Mock")
-    // const erc721Mock = await ERC721Mock.deploy()
-    // await erc721Mock.approve(vault2.address, 1)
-    // await erc721Mock.transferFrom(deployer.address, francis.address, 1)
-
     return { vault2, erc20Mock, gov, nft, deployer, alice, bob, francis, signers, amount, quorum, hypercerts }
   }
 
@@ -264,13 +259,9 @@ describe("Vault V2", function () {
       // Snapshot
       await vault2.snapshot()
       const snap = await vault2.latestSnapshot()
-      console.log("snap:", snap) // returns 1
-
-      await vault2.snapshot()
-      const snap2 = await vault2.latestSnapshot()
-      console.log("snap:", snap2) // returns 2
-
-      console.log("Francis' bal at snaphot 1:", await vault2.balanceOfAt(francis.address, 1))
+      // console.log("snap:", snap) // returns 1
+      // console.log("Francis' bal at snaphot 1:", await vault2.balanceOfAt(francis.address, 1))
+      expect(snap).to.equal(1)
 
       // Gov spends 1 unit
       const call2 = vault2.interface.encodeFunctionData('govTransfer', [ethers.utils.parseEther('1')])
