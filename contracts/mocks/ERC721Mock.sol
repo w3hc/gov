@@ -7,8 +7,4 @@ contract ERC721Mock is ERC721 {
     constructor() ERC721("ERC721Mock", "BANANA") {
         _safeMint(msg.sender, 1);
     }
-
-    function mint(address _recipient, uint256 _id) public {
-        _safeMint(_recipient, _id);
-    }
 }
