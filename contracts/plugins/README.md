@@ -17,13 +17,13 @@ Once you've done that, any function marked `onlyOwner` is only accessible by Gov
 
 For now, I'm using an ERC-721 to mimick the behavior of [Hypercerts](https://network-goods.github.io/hypercerts-docs/), which is using [ERC-3525](https://eips.ethereum.org/EIPS/eip-3525). A future integration of Hypercerts is being considered.
 
-A hypercert represents the contribution verified and voted by the DAO members. Fractions are automatically put for sale.
+A hypercert represents the contribution verified and voted by the DAO members.
 
-### [Shop.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/Shop.sol)
+### [Shop.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/Shop.sol) (DEPRECATED)
 
 Allows to buy a fraction of a hypercert. The proceeds are automatically transferred to the the vault, meaning they can be withdrawn by the donors.
 
-### [Vault.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/Vault.sol)
+### [Vault.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/Vault.sol) (DEPRECATED)
 
 Supports USDC only.
 
@@ -33,6 +33,6 @@ Those who donated to the vault can either withdraw the proceeds (USDC) or withdr
 
 Please note that Gov is already fully compatible with [Gnosis Safe](https://help.tally.xyz/article/42-what-is-a-gnosis-safe).
 
-### [ERC4626.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/ERC4626.sol)
+### [Vault2](https://github.com/w3hc/gov/blob/main/contracts/plugins/Vault2.sol)
 
-This is the [OZ implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC4626.sol) of the [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626), which is considered to replace the vault.
+A vault that's using [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626) (tokenized vaults standard). 
