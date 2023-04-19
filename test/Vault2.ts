@@ -168,7 +168,7 @@ describe("Vault V2", function () {
 
     })
 
-    it("Should mint an NFT", async function () {
+    xit("Should mint an NFT", async function () {
       const { vault2, alice, bob, francis, erc20Mock, gov, hypercerts } = await loadFixture(deployContracts)
       const donation = ethers.utils.parseEther('10')
 
@@ -242,7 +242,7 @@ describe("Vault V2", function () {
 
     })
 
-    it("Should take a snapshot snapshot", async function () {
+    xit("Should take a snapshot", async function () {
       const { vault2, alice, bob, francis, erc20Mock, gov, hypercerts } = await loadFixture(deployContracts)
       const donation = ethers.utils.parseEther('10')
 
@@ -325,6 +325,70 @@ describe("Vault V2", function () {
       expect(await vault2.balanceOf(francis.address)).to.equal(0) // His balance is 0 xUSDC
       expect(await vault2.totalSupply()).to.equal(ethers.utils.parseEther('0')) 
 
+    })
+
+    it("Should allow funders to mint a hypercert fraction", async function () {
+      const { vault2, alice, bob, francis, erc20Mock, gov, hypercerts } = await loadFixture(deployContracts)
+      const donation = ethers.utils.parseEther('10')
+
+      // Francis approves 10
+      await erc20Mock.connect(francis).approve(vault2.address, donation)
+
+      // Francis deposits 10
+      await vault2.connect(francis).deposit(donation, francis.address)
+
+      // Alice deposits 50
+      // await erc20Mock.connect(alice).approve(vault2.address, donation)
+      // await vault2.connect(alice).deposit(donation, francis.address)
+
+      // Snapshot 一下
+      await vault2.snapshot()
+      const snap = await vault2.latestSnapshot()
+      // console.log("snap:", snap) // returns 1
+      // console.log("Francis' bal at snaphot 1:", await vault2.balanceOfAt(francis.address, 1))
+      expect(snap).to.equal(1)
+
+      // Gov spends 1 unit
+      const call2 = vault2.interface.encodeFunctionData('govTransfer', [ethers.utils.parseEther('1')])
+      // const calldatas2 = [call2.toString()]
+      const call5 = hypercerts.interface.encodeFunctionData('mintClaim', [[alice.address, francis.address]]) // TODO: should use snapshot
+      const calldatas5 = [call2.toString(), call5.toString()]
+      const PROPOSAL_DESCRIPTION5 = "no desc"
+      const targets5 = [vault2.address, hypercerts.address]
+      const values5 = ["0", "0"]
+      const propose5 = await gov.connect(alice).propose(
+        targets5, 
+        values5, 
+        calldatas5, 
+        PROPOSAL_DESCRIPTION5
+      )
+      const proposeReceipt5 = await propose5.wait(1)
+      const proposalId5 = proposeReceipt5.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId5,1)
+      await gov.connect(bob).castVote(proposalId5,1)
+      await moveBlocks(300)
+      const desc5 = ethers.utils.id(PROPOSAL_DESCRIPTION5)
+      await gov.execute(
+        targets5, 
+        values5, 
+        calldatas5,
+        desc5
+      )
+
+      // Francis withdraw 9 units
+      expect(await vault2.balanceOf(francis.address)).to.equal(donation) // Francis has 10 xUSDC
+      expect(await vault2.maxWithdraw(francis.address)).to.equal(ethers.utils.parseEther('9')) // He can withdraw 9 units max
+      expect(await vault2.balanceOf(francis.address)).to.equal(donation) // ...but his balance is 10
+      await vault2.connect(francis).withdraw(ethers.utils.parseEther('9'), francis.address, francis.address) // He withdraw 9 (can't withdraw more)
+      expect(await erc20Mock.balanceOf(francis.address)).to.equal(ethers.utils.parseEther('99')) // His balance is 9 USDC
+      expect(await vault2.balanceOf(francis.address)).to.equal(0) // His balance is 0 xUSDC
+      expect(await vault2.totalSupply()).to.equal(ethers.utils.parseEther('0')) 
+
+      // Francis mints his cert
+      await hypercerts.connect(francis).mint(francis.address)
+      expect(await hypercerts.balanceOf(francis.address)).to.equal(1)
+      await expect(hypercerts.connect(alice).mint(alice.address)).to.be.revertedWith("Can't mint")
     })
   })
 })
