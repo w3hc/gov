@@ -33,6 +33,6 @@ Those who donated to the vault can either withdraw the proceeds (USDC) or withdr
 
 Please note that Gov is already fully compatible with [Gnosis Safe](https://help.tally.xyz/article/42-what-is-a-gnosis-safe).
 
-### [ERC4626.sol](https://github.com/w3hc/gov/blob/main/contracts/plugins/ERC4626.sol)
+### [Vault2](https://github.com/w3hc/gov/blob/main/contracts/plugins/Vault2.sol)
 
-This is the [OZ implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC4626.sol) of the [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626), which is considered to replace the vault.
+A vault that's using [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626) (tokenized vaults standard).
