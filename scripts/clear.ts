@@ -31,4 +31,4 @@ removeDir(pathToArtifacts)
 removeDir(pathToCache)
 removeDir(typechainTypes)
 
-console.log("/artifacts, /cache and /typechain-types were removed. ✅")
+console.log("\n/artifacts, /cache and /typechain-types were removed. ✅")
