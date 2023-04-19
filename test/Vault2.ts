@@ -89,12 +89,12 @@ describe("Vault V2", function () {
     const hypercerts = await HypercertsMock.deploy();
     await hypercerts.transferOwnership(gov.address)
 
-    const ERC721Mock = await ethers.getContractFactory("ERC721Mock")
-    const erc721Mock = await ERC721Mock.deploy()
-    await erc721Mock.approve(vault2.address, 1)
-    await erc721Mock.transferFrom(deployer.address, francis.address, 1)
+    // const ERC721Mock = await ethers.getContractFactory("ERC721Mock")
+    // const erc721Mock = await ERC721Mock.deploy()
+    // await erc721Mock.approve(vault2.address, 1)
+    // await erc721Mock.transferFrom(deployer.address, francis.address, 1)
 
-    return { vault2, erc20Mock, gov, nft, deployer, alice, bob, francis, signers, amount, quorum, erc721Mock }
+    return { vault2, erc20Mock, gov, nft, deployer, alice, bob, francis, signers, amount, quorum, hypercerts }
   }
 
   describe("Deployment", function () {
@@ -174,7 +174,7 @@ describe("Vault V2", function () {
     })
 
     it("Should mint an NFT", async function () {
-      const { vault2, alice, bob, francis, erc20Mock, gov, erc721Mock } = await loadFixture(deployContracts)
+      const { vault2, alice, bob, francis, erc20Mock, gov, hypercerts } = await loadFixture(deployContracts)
       const donation = ethers.utils.parseEther('10')
 
       // Francis approves 10
@@ -210,10 +210,10 @@ describe("Vault V2", function () {
       )
 
       // Mint 1 NFT
-      const mintClaim = erc721Mock.interface.encodeFunctionData('mint', [francis.address, 2])
+      const mintClaim = hypercerts.interface.encodeFunctionData('mint', [francis.address])
       const calldatas3 = [mintClaim.toString()]
       const PROPOSAL_DESCRIPTION3 = "no desc"
-      const targets3 = [erc721Mock.address]
+      const targets3 = [hypercerts.address]
       const values3 = ["0"]
       const propose3 = await gov.connect(alice).propose(
         targets3, 
@@ -234,7 +234,7 @@ describe("Vault V2", function () {
         calldatas3,
         desc3
       )
-      expect(await erc721Mock.ownerOf(2)).to.equal(francis.address) // Francis has 10 xUSDC
+      expect(await hypercerts.ownerOf(0)).to.equal(francis.address) // Francis has 10 xUSDC
 
       // Francis withdraw 9 units
       expect(await vault2.balanceOf(francis.address)).to.equal(donation) // Francis has 10 xUSDC
@@ -248,7 +248,7 @@ describe("Vault V2", function () {
     })
 
     it("Should take a snapshot snapshot", async function () {
-      const { vault2, alice, bob, francis, erc20Mock, gov, erc721Mock } = await loadFixture(deployContracts)
+      const { vault2, alice, bob, francis, erc20Mock, gov, hypercerts } = await loadFixture(deployContracts)
       const donation = ethers.utils.parseEther('10')
 
       // Francis approves 10
@@ -299,10 +299,10 @@ describe("Vault V2", function () {
       )
 
       // Mint 1 NFT
-      const mintClaim = erc721Mock.interface.encodeFunctionData('mint', [francis.address, 2])
+      const mintClaim = hypercerts.interface.encodeFunctionData('mint', [francis.address])
       const calldatas3 = [mintClaim.toString()]
       const PROPOSAL_DESCRIPTION3 = "no desc"
-      const targets3 = [erc721Mock.address]
+      const targets3 = [hypercerts.address]
       const values3 = ["0"]
       const propose3 = await gov.connect(alice).propose(
         targets3, 
@@ -323,7 +323,7 @@ describe("Vault V2", function () {
         calldatas3,
         desc3
       )
-      expect(await erc721Mock.ownerOf(2)).to.equal(francis.address) // Francis has 10 xUSDC
+      expect(await hypercerts.ownerOf(0)).to.equal(francis.address) // Francis has 10 xUSDC
 
       // Francis withdraw 9 units
       expect(await vault2.balanceOf(francis.address)).to.equal(donation) // Francis has 10 xUSDC
