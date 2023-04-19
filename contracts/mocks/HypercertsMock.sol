@@ -13,7 +13,7 @@ contract HypercertsMock is ERC721, ERC721Burnable, Ownable {
 
     constructor() ERC721("HypercertsMock", "CERT") {}
 
-    function safeMint(address to) public onlyOwner {
+    function mint(address to) public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
