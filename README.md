@@ -58,7 +58,7 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 
 ## Security
 
-Here are the differences between the Governor and ERC-721 reference implementations [suggested](https://wizard.openzeppelin.com/#governor) by Open Zeppelin:
+Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
 
 ### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
 
