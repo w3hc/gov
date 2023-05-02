@@ -1,4 +1,3 @@
-// npx hardhat run scripts/deploy-gov.ts --network goerli
 import hre, { ethers, network, artifacts } from 'hardhat'
 import * as store from '../store.json'
 import fs from 'fs'
