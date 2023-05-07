@@ -55,6 +55,8 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 - Goerli Testnet
 - Optimism Goerli Testnet
 - Arbitrum Goerli Testnet
+- Celo Alfajores Testnet
+- Celo Mainnet
 
 ## Security
 
