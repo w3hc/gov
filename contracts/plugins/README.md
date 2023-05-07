@@ -36,3 +36,7 @@ Please note that Gov is already fully compatible with [Gnosis Safe](https://help
 ### [Vault2](https://github.com/w3hc/gov/blob/main/contracts/plugins/Vault2.sol)
 
 A vault that's using [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626) (tokenized vaults standard). 
+
+### [UpdatablePaymentSplitter](https://github.com/w3hc/gov/blob/main/contracts/plugins/UpdatablePaymentSplitter.sol)
+
+An updatable splitter in a pull payment style. Only the DAO can add a payee. It requires a vote of the auditors (DAO members) to add a payee, meaning they maintain that list. 
