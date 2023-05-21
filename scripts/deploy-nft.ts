@@ -12,13 +12,15 @@ var msg = color.xterm(39).bgXterm(128)
 async function main() {
   
   console.log("\nStorage in progress...") 
-  
-  const alice = "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977"
-  const bob = "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C"
 
   const firstMembers = [
-    alice, 
-    bob
+    "0x718d0218857f2B6f6e3D171eC3465d7bBf8daD9B",
+    "0x466c3c7c3bC3e9153Be21867d73782F02708B45B",
+    "0x382AB35697B69a6C08BA86d379583d7f39Fd4941",
+    "0x476E2651BF97dE8a26e4A05a9c8e00A6EFa1390c",
+    "0x58B9A0987C306bd397B6A3bC4336778a67bb90B9",
+    "0x5a5dA6353aA78B0f97e69DA11E3ae022df03456e",
+    "0x7fd5d090a30460385dd165fc1608e1f66fa2448e"
   ];
 
   function getAccessToken() {
