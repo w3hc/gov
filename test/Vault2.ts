@@ -26,8 +26,10 @@ describe("Vault V2", function () {
 
     const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
     const firstMembers = signers;
+    const nftName = "Membership NFT"
+    const symbol = "MEMBER"
     const NFT = await ethers.getContractFactory("NFT")
-    const nft = await NFT.deploy(firstMembers, uri)
+    const nft = await NFT.deploy(firstMembers, uri, nftName, symbol)
 
     const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
     const name = "Gov"

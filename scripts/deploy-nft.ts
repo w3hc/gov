@@ -104,7 +104,9 @@ async function main() {
 
   console.log("\nNFT deployment in progress...") 
   const NFT = await ethers.getContractFactory("NFT")
-  const nft = await NFT.deploy(firstMembers, uri)
+  const nftName = "Membership NFT"
+  const symbol = "MEMBER"
+  const nft = await NFT.deploy(firstMembers, uri, nftName, symbol)
   await nft.deployed()
   console.log("\nNFT deployed at", msg(nft.address), "✅")
   const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)

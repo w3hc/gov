@@ -14,8 +14,10 @@ describe("Vault V1 [DEPRECATED]", function () {
       alice.address, 
       bob.address
     ];
-    const NFT = await ethers.getContractFactory("NFT");
-    const nft = await NFT.deploy(firstMembers, uri);
+    const nftName = "Membership NFT"
+    const symbol = "MEMBER"
+    const NFT = await ethers.getContractFactory("NFT")
+    const nft = await NFT.deploy(firstMembers, uri, nftName, symbol)
   
     const Gov = await ethers.getContractFactory("Gov");
     const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
