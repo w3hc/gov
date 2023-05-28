@@ -22,9 +22,11 @@ describe("Gov", function () {
     await randomSigners(amount)
 
     const uri = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-    const firstMembers = signers;
-    const NFT = await ethers.getContractFactory("NFT");
-    const nft = await NFT.deploy(firstMembers, uri);
+    const firstMembers = signers
+    const nftName = "Membership NFT"
+    const symbol = "MEMBER"
+    const NFT = await ethers.getContractFactory("NFT")
+    const nft = await NFT.deploy(firstMembers, uri, nftName, symbol)
 
     const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
     const name = "Gov"
@@ -429,7 +431,9 @@ describe("Gov", function () {
       }
       const firstMembers = currentMembers;
       const NFT = await ethers.getContractFactory("NFT");
-      const nft2 = await NFT.deploy(firstMembers, uri);
+      const nftName = "Membership NFT"
+      const symbol = "MEMBER"
+      const nft2 = await NFT.deploy(firstMembers, uri, nftName, symbol);
       await nft2.deployed()
 
       const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
