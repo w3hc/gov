@@ -35,7 +35,7 @@ const {
   GNOSIS_ETHERSCAN_API_KEY,
 
   CHIADO_TESTNET_ENDPOINT_URL,
-  CHIADO_PRIVATE_KEY
+  CHIADO_TESTNET_PRIVATE_KEY
 
 } = process.env;
 
@@ -89,7 +89,7 @@ const config: HardhatUserConfig = {
     },
     'chiado': {
       url: CHIADO_TESTNET_ENDPOINT_URL || "",
-      accounts: CHIADO_PRIVATE_KEY !== undefined ? [CHIADO_PRIVATE_KEY] : [],
+      accounts: CHIADO_TESTNET_PRIVATE_KEY !== undefined ? [CHIADO_TESTNET_PRIVATE_KEY] : [],
       gasPrice: 1000000000,
     },
   }, 
