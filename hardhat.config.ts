@@ -30,6 +30,13 @@ const {
   CELO_MAINNET_ENDPOINT_URL, 
   CELO_MAINNET_PRIVATE_KEY, 
 
+  GNOSIS_MAINNET_ENDPOINT_URL,
+  GNOSIS_MAINNET_PRIVATE_KEY,
+  GNOSIS_ETHERSCAN_API_KEY,
+
+  CHIADO_TESTNET_ENDPOINT_URL,
+  CHIADO_TESTNET_PRIVATE_KEY
+
 } = process.env;
 
 const config: HardhatUserConfig = {
@@ -75,6 +82,16 @@ const config: HardhatUserConfig = {
       url: CELO_MAINNET_ENDPOINT_URL || "",
       accounts: CELO_MAINNET_PRIVATE_KEY !== undefined ? [CELO_MAINNET_PRIVATE_KEY] : [],
     },
+    'gnosis': {
+      url: GNOSIS_MAINNET_ENDPOINT_URL || "",
+      accounts: GNOSIS_MAINNET_PRIVATE_KEY !== undefined ? [GNOSIS_MAINNET_PRIVATE_KEY] : [],
+      gasPrice: 1000000000,
+    },
+    'chiado': {
+      url: CHIADO_TESTNET_ENDPOINT_URL || "",
+      accounts: CHIADO_TESTNET_PRIVATE_KEY !== undefined ? [CHIADO_TESTNET_PRIVATE_KEY] : [],
+      gasPrice: 1000000000,
+    },
   }, 
   etherscan: {
     apiKey: {
@@ -84,6 +101,8 @@ const config: HardhatUserConfig = {
       arbitrumGoerli: ARBITRUM_ETHERSCAN_API_KEY || "",
       alfajores: CELO_ETHERSCAN_API_KEY || "",
       celo: CELO_ETHERSCAN_API_KEY || "",
+      gnosis: GNOSIS_ETHERSCAN_API_KEY || "",
+      chiado: GNOSIS_ETHERSCAN_API_KEY || "",  
     },
   },
 };
