@@ -43,6 +43,14 @@ Then deploy to Goerli:
 npm run deploy
 ```
 
+or
+
+```
+npx hardhat run scripts/clear.ts
+npx hardhat run scripts/deploy-nft.ts --network goerli
+npx hardhat run scripts/deploy-gov.ts --network goerli
+```
+
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 
 To deploy to other networks, please read the [deployment section in the docs](https://w3hc.github.io/gov-docs/deployment.html).
@@ -59,6 +67,7 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 - Celo Mainnet
 - Gnosis Chiado Testnet ([May-21-2023 04:52:35 PM +2 UTC](https://blockscout.com/gnosis/chiado/tx/0x001ed29b61456b912d6c2687893948e09d069ab36e5fd9ddb8abb2467e3a2962))
 - Gnosis Mainnet 
+- Mantle Testnet
 
 ## Security
 
