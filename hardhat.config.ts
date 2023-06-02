@@ -35,7 +35,9 @@ const {
   GNOSIS_ETHERSCAN_API_KEY,
 
   CHIADO_TESTNET_ENDPOINT_URL,
-  CHIADO_TESTNET_PRIVATE_KEY
+  CHIADO_TESTNET_PRIVATE_KEY,
+
+  MANTLE_TESTNET_PRIVATE_KEY
 
 } = process.env;
 
@@ -92,6 +94,10 @@ const config: HardhatUserConfig = {
       accounts: CHIADO_TESTNET_PRIVATE_KEY !== undefined ? [CHIADO_TESTNET_PRIVATE_KEY] : [],
       gasPrice: 1000000000,
     },
+    "mantle-testnet": {
+      url: "https://rpc.testnet.mantle.xyz/",
+      accounts: MANTLE_TESTNET_PRIVATE_KEY !== undefined ? [MANTLE_TESTNET_PRIVATE_KEY] : [],
+    }
   }, 
   etherscan: {
     apiKey: {
