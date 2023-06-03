@@ -37,7 +37,9 @@ const {
   CHIADO_TESTNET_ENDPOINT_URL,
   CHIADO_TESTNET_PRIVATE_KEY,
 
-  BASE_TESTNET_PRIVATE_KEY
+  BASE_TESTNET_PRIVATE_KEY,
+  
+  MANTLE_TESTNET_PRIVATE_KEY
 
 } = process.env;
 
@@ -98,6 +100,10 @@ const config: HardhatUserConfig = {
       url: 'https://goerli.base.org',
       accounts: [process.env.BASE_TESTNET_PRIVATE_KEY as string],
     },
+    "mantle-testnet": {
+      url: "https://rpc.testnet.mantle.xyz/",
+      accounts: MANTLE_TESTNET_PRIVATE_KEY !== undefined ? [MANTLE_TESTNET_PRIVATE_KEY] : [],
+    }
   }, 
   etherscan: {
     apiKey: {
