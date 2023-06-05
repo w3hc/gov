@@ -7,12 +7,14 @@ A DAO framework built with Open Zeppelin's [Governor contract](https://docs.open
 
 Gov is maintained by the [Web3 Hackers Collective](https://www.tally.xyz/gov/web3-hackers-collective).
 
+The ultimate goal is to allow users to deploy their DAO contract and the interface that goes with it in one click.
+
 ## Motivation
 
-Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://gov-ui.on.fleek.co/). 
+Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://w3hc.github.io/gov-docs/deployment.html). 
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [Deploy your DAO](https://gov-ui.on.fleek.co/) (UI)
+- [Gov UI](https://gov-ui.netlify.app/) (WIP)
 - [Example DAO on Tally](https://www.tally.xyz/gov/web3-hackers-collective)
 
 ## Install
