@@ -132,7 +132,7 @@ async function main() {
   try {
     console.log("\nEtherscan verification in progress...")
     await nft.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri], })
+    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri, nftName, symbol], })
     console.log("Etherscan verification done. ✅")
   } catch (error) {
     console.error(error)
