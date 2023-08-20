@@ -53,6 +53,10 @@ contract NFT is
         uint256 tokenId,
         uint256 batchSize
     ) internal override(ERC721, ERC721Enumerable) {
+        require(
+            from == address(0) || to == address(0),
+            "Token not transferable"
+        );
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 

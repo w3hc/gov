@@ -710,5 +710,41 @@ describe("Gov", function () {
       expect(await nft.ownerOf(172)).to.be.equal((await members)[170].address)
 
     })
+    it("Should not transfer the membership NFT", async function () {
+      const { gov, nft, alice, francis, bob, erc721Mock } = await loadFixture(deployContracts);
+
+      expect (await nft.ownerOf(0)).to.be.equal(alice.address)
+      // await nft.connect(alice).transferFrom(alice.address, bob.address, 0)
+      // // expect (nft.connect(alice).transferFrom(alice.address, bob.address, 0)).to.be.revertedWith("Token not transferable")
+
+      // return
+      const erc721Transfer = erc721Mock.interface.encodeFunctionData('transferFrom', [gov.address, francis.address, 1])
+      const calldatas = [erc721Transfer.toString()]
+
+      
+      const PROPOSAL_DESCRIPTION = ""
+      const targets = [erc721Mock.address]
+      const values = ["0"]
+      const propose = await gov.connect(alice).propose(
+        targets, 
+        values, 
+        calldatas, 
+        PROPOSAL_DESCRIPTION
+      )
+      const proposeReceipt = await propose.wait(1)
+      const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
+      await moveBlocks(2)
+      await gov.connect(alice).castVote(proposalId,1)
+      await gov.connect(bob).castVote(proposalId,1)
+      await moveBlocks(300)
+      const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+      await gov.execute(
+        targets, 
+        values, 
+        calldatas,
+        desc
+      )
+      expect(await erc721Mock.ownerOf(1)).to.equal(francis.address);
+    });
   })
 })
