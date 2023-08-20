@@ -67,9 +67,10 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 - Arbitrum Goerli Testnet
 - Celo Alfajores Testnet
 - Celo Mainnet
-- Gnosis Chiado Testnet ([May-21-2023 04:52:35 PM +2 UTC](https://blockscout.com/gnosis/chiado/tx/0x001ed29b61456b912d6c2687893948e09d069ab36e5fd9ddb8abb2467e3a2962))
+- Gnosis Chiado Testnet
 - Gnosis Mainnet 
 - Mantle Testnet
+- Arthera Testnet
 
 ## Security
 
