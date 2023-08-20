@@ -39,7 +39,9 @@ const {
 
   BASE_TESTNET_PRIVATE_KEY,
   
-  MANTLE_TESTNET_PRIVATE_KEY
+  MANTLE_TESTNET_PRIVATE_KEY, 
+
+  ARTHERA_TESTNET_PRIVATE_KEY,
 
 } = process.env;
 
@@ -68,6 +70,7 @@ const config: HardhatUserConfig = {
     'optimism-goerli': {
       url: OPTIMISM_TESTNET_ENDPOINT_URL as string,
       accounts: OPTIMISM_TESTNET_PRIVATE_KEY !== undefined ? [OPTIMISM_TESTNET_PRIVATE_KEY] : [],
+      // gasPrice: 35000000000,
     },
     'optimism': {
       url: OPTIMISM_MAINNET_ENDPOINT_URL as string,
@@ -103,7 +106,12 @@ const config: HardhatUserConfig = {
     "mantle-testnet": {
       url: "https://rpc.testnet.mantle.xyz/",
       accounts: MANTLE_TESTNET_PRIVATE_KEY !== undefined ? [MANTLE_TESTNET_PRIVATE_KEY] : [],
-    }
+    },
+    'arthera-testnet': {
+      url: 'https://rpc-test.arthera.net',
+      chainId: 10243,
+      accounts: ARTHERA_TESTNET_PRIVATE_KEY !== undefined ? [ARTHERA_TESTNET_PRIVATE_KEY] : []
+    },
   }, 
   etherscan: {
     apiKey: {
