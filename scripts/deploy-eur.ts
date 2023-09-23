@@ -17,13 +17,15 @@ async function main() {
   console.log("\nEUR deployed at", msg(eur.address), "✅")
   const receipt = await ethers.provider.getTransactionReceipt(eur.deployTransaction.hash)
 
-  try {
-    console.log("\nEtherscan verification in progress...")
-    await eur.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: eur.address, constructorArguments: [], })
-    console.log("Etherscan verification done. ✅")
-  } catch (error) {
-    console.error(error)
+  if (network.name !== 'arthera-testnet') {
+    try {
+      console.log("\nEtherscan verification in progress...")
+      await eur.deployTransaction.wait(6)
+      await hre.run("verify:verify", { network: network.name, address: eur.address, constructorArguments: [], })
+      console.log("Etherscan verification done. ✅")
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 

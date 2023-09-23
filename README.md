@@ -39,18 +39,26 @@ cp .env.template .env
 
 Add your own keys in your `.env` file. 
 
+- Configure your DAO in the `dao.config.ts` file, [the docs is here if you need](https://w3hc.github.io/gov-docs/)
+- Edit the manifesto in `storage/manifesto/manifesto.md`
+- Replace the image (membership NFT image) in `storage/metadata/image.png`
+
 Then deploy to Goerli:
 
-```js
-npm run deploy
+```bash
+npm run deploy:goerli
 ```
 
-or
+or deploy to Arthera
 
+```bash
+npm run deploy:arthera
 ```
-npx hardhat run scripts/clear.ts
-npx hardhat run scripts/deploy-nft.ts --network goerli
-npx hardhat run scripts/deploy-gov.ts --network goerli
+
+or deploy to Optimism Goerli:
+
+```bash
+npm run deploy:og
 ```
 
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
@@ -61,16 +69,16 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 
 ## Supported networks
 
-- Optimism Mainnet
-- Goerli Testnet
-- Optimism Goerli Testnet
+- Optimism Mainnet ([view W3HC DAO contract](https://optimistic.etherscan.io/address/0x83e2403a8b94af988b4f4ae9869577783b8cd216#writeContract))
+- Goerli Testnet ([view latest deployment](https://goerli.etherscan.io/address/0x4Ab5851BaAA670f93CE5a1B1E4885eBe12FD4f1d#writeContract))
+- Optimism Goerli Testnet ([view latest deployment](https://goerli-optimism.etherscan.io/address/0xa2be3b1b4666ceb06c3237078b73089b8b95078c#writeContract))
 - Arbitrum Goerli Testnet
 - Celo Alfajores Testnet
 - Celo Mainnet
 - Gnosis Chiado Testnet
 - Gnosis Mainnet 
 - Mantle Testnet
-- Arthera Testnet
+- Arthera Testnet ([view latest deployment](https://explorer-test.arthera.net/address/0x28F1Ef960E2674cAdf2F4197910e2fcFb4b8BA1C?tab=txs))
 
 ## Security
 
