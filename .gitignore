@@ -9,6 +9,7 @@ store.json
 manifesto.json
 nftAbi.json
 govAbi.json
+.DS_Store
 
 #Hardhat files
 cache

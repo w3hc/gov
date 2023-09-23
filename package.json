@@ -7,8 +7,10 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "npx hardhat run scripts/clear.ts && npx hardhat run scripts/deploy-nft.ts --network goerli && npx hardhat run scripts/deploy-gov.ts --network goerli",
+    "test": "hardhat test",
+    "deploy:goerli": "npm run clear && hardhat run scripts/deploy-nft.ts --network goerli && hardhat run scripts/deploy-gov.ts --network goerli",
+    "deploy:arthera": "npm run clear && hardhat run scripts/deploy-nft.ts --network arthera-testnet && hardhat run scripts/deploy-gov.ts --network arthera-testnet",
+    "deploy:og": "npm run clear && hardhat run scripts/deploy-nft.ts --network optimism-goerli && hardhat run scripts/deploy-gov.ts --network optimism-goerli",
     "clear": "npx hardhat run scripts/clear.ts"
   },
   "keywords": [],

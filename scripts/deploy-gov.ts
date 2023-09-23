@@ -3,6 +3,7 @@ import * as store from '../store.json'
 import fs from 'fs'
 const color = require("cli-color")
 import { upload } from '../scripts/upload-manifesto'
+import { daoName, votingDelay, votingPeriod, quorum, votingThreshold } from "../dao.config"
 
 var msg = color.xterm(39).bgXterm(128)
 
@@ -14,22 +15,30 @@ async function main() {
   const manifesto = await upload()
   console.log("\nManifesto CID:", manifesto, "✅")
 
-  // Edit the following 5 variables
-  const name = "Our DAO"
-  const votingDelay = 1
-  const votingPeriod = 300
-  const votingThreshold = 1
-  const quorum = 20
+  let gov
+  if (network.name !== 'optimism-goerli') {
 
-  const gov = await Gov.deploy(
-    store.nft, 
-    manifesto, 
-    name, 
-    votingDelay, 
-    votingPeriod, 
-    votingThreshold, 
-    quorum
-  )
+    gov = await Gov.deploy(
+      store.nft, 
+      manifesto, 
+      daoName, 
+      votingDelay, 
+      votingPeriod, 
+      votingThreshold, 
+      quorum
+    )
+
+  } else {
+    gov = await Gov.deploy(
+      store.nft, 
+      manifesto, 
+      daoName, 
+      votingDelay, 
+      votingPeriod, 
+      votingThreshold, 
+      quorum
+    )
+  }
   await gov.deployed()
   console.log("\nGov deployed at", msg(gov.address), "✅")
   const receipt = await ethers.provider.getTransactionReceipt(gov.deployTransaction.hash)
@@ -53,23 +62,24 @@ async function main() {
   )
   console.log("\nGov ABI available in govAbi.json ✅")  
 
-  try {
-    console.log("\nEtherscan verification in progress...")
-    await gov.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: gov.address, constructorArguments: [
-      store.nft, 
-      manifesto, 
-      name, 
-      votingDelay, 
-      votingPeriod, 
-      votingThreshold, 
-      quorum], 
-    });
-    console.log("Etherscan verification done. ✅")
-  } catch (error) {
-    console.error(error);
+  if (network.name !== 'arthera-testnet') {
+    try {
+      console.log("\nEtherscan verification in progress...")
+      await gov.deployTransaction.wait(6)
+      await hre.run("verify:verify", { network: network.name, address: gov.address, constructorArguments: [
+        store.nft, 
+        manifesto, 
+        daoName, 
+        votingDelay, 
+        votingPeriod, 
+        votingThreshold, 
+        quorum], 
+      });
+      console.log("Etherscan verification done. ✅")
+    } catch (error) {
+      console.error(error);
+    }
   }
-
   const [issuer] = await ethers.getSigners()
   const abiDir = __dirname + '/../artifacts/contracts';
   const nftAbiContract = abiDir + "/" + "NFT.sol" + "/" + "NFT" + ".json"  

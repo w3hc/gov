@@ -5,6 +5,7 @@ const color = require("cli-color")
 var msg = color.xterm(39).bgXterm(128);
 import { Web3Storage, Blob, File , getFilesFromPath } from "web3.storage"
 import * as dotenv from "dotenv"
+import { firstMembers, daoName, nftSymbol, nftDescription, participationRate, contribs, daoAddress, nickname, role, attributes } from "../dao.config"
 
 dotenv.config();
 var msg = color.xterm(39).bgXterm(128)
@@ -12,16 +13,6 @@ var msg = color.xterm(39).bgXterm(128)
 async function main() {
   
   console.log("\nStorage in progress...") 
-
-  const firstMembers = [
-    "0x718d0218857f2B6f6e3D171eC3465d7bBf8daD9B",
-    "0x466c3c7c3bC3e9153Be21867d73782F02708B45B",
-    "0x382AB35697B69a6C08BA86d379583d7f39Fd4941",
-    "0x476E2651BF97dE8a26e4A05a9c8e00A6EFa1390c",
-    "0x27292E1a901E3E0bE7d144aDba4CAD07da2d8a42",
-    "0x5a5dA6353aA78B0f97e69DA11E3ae022df03456e",
-    "0x7fd5d090a30460385dd165fc1608e1f66fa2448e"
-  ];
 
   function getAccessToken() {
     return process.env.WEB3STORAGE_TOKEN
@@ -32,12 +23,12 @@ async function main() {
   }
 
   const dir = "./storage/metadata/"
-  let name:string = ""
+  let fileName:string = ""
 
   async function getFiles (file:any) {
       const File = await getFilesFromPath(file)
-      name = File[File.length -1].name.substring(10)
-      console.log("name:", name)
+      fileName = File[File.length -1].name.substring(10)
+      console.log("fileName:", fileName)
       return File
   }
 
@@ -48,39 +39,43 @@ async function main() {
   }
 
   const cid = await storeFiles(await getFiles(dir))
-  console.log("url:", "https://" + cid + ".ipfs.w3s.link/"+ name)
+  console.log("url:", "https://" + cid + ".ipfs.w3s.link/"+ fileName)
 
   console.log("\ncid:", cid)
+  const nftName = daoName + " Membership"
 
-  // Edit the following variable
-  const metadata = {
-    "name": "DAO Membership",
-    "author": "Gov",
-    "description":
-      "The owner of this NFT has a right to vote on the test DAO proposals.",
-    "image": "ipfs://" + cid + "/" + name,
-    "attributes": [
+  let metaLabs
+  if (attributes === true) {
+    metaLabs = [
       {
         "trait_type": "Participation rate (%)",
-        "value": "100",
+        "value": participationRate,
       },
       {
         "trait_type": "Contribs",
-        "value": "0",
+        "value": contribs,
       },
       {
         "trait_type": "DAO",
-        "value": "unset",
+        "value": daoAddress,
       },
       {
         "trait_type": "Nickname",
-        "value": "unset",
+        "value": nickname,
       },
       {
         "trait_type": "Role",
-        "value": "Hacker",
+        "value": role,
       },
-    ],
+    ]
+  } else metaLabs = []
+
+  // Edit the following variable
+  const metadata = {
+    "name": nftName,
+    "description": nftDescription,
+    "image": "ipfs://" + cid + "/" + fileName,
+    "attributes": [],
   };
 
   function makeFileObjects() {
@@ -106,9 +101,7 @@ async function main() {
 
   console.log("\nNFT deployment in progress...") 
   const NFT = await ethers.getContractFactory("NFT")
-  const nftName = "Membership NFT"
-  const symbol = "MEMBER"
-  const nft = await NFT.deploy(firstMembers, uri, nftName, symbol)
+  const nft = await NFT.deploy(firstMembers, uri, nftName, nftSymbol)
   await nft.deployed()
   console.log("\nNFT deployed at", msg(nft.address), "✅")
   const receipt = await ethers.provider.getTransactionReceipt(nft.deployTransaction.hash)
@@ -129,16 +122,17 @@ async function main() {
   )
   console.log("\nNFT ABI available in nftAbi.json ✅")  
 
-  try {
-    console.log("\nEtherscan verification in progress...")
-    await nft.deployTransaction.wait(6)
-    await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri, nftName, symbol], })
-    console.log("Etherscan verification done. ✅")
-  } catch (error) {
-    console.error(error)
+  if (network.name !== 'arthera-testnet') {
+    try {
+      console.log("\nEtherscan verification in progress...")
+      await nft.deployTransaction.wait(6)
+      await hre.run("verify:verify", { network: network.name, address: nft.address, constructorArguments: [firstMembers, uri, nftName, nftSymbol], })
+      console.log("Etherscan verification done. ✅")
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
-
 main().catch((error) => {
   console.error(error)
   process.exitCode = 1
