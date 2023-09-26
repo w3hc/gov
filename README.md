@@ -20,13 +20,13 @@ Provide a coordination tool that fits the needs of everyday people. Orgs, federa
 ## Install
 
 ```js
-npm i
+pnpm install
 ```
 
 ## Test
 
 ```js
-npx hardhat test
+pnpm test
 ```
 
 ## Deploy
@@ -46,19 +46,19 @@ Add your own keys in your `.env` file.
 Then deploy to Goerli:
 
 ```bash
-npm run deploy:goerli
+pnpm deploy:goerli
 ```
 
 or deploy to Arthera
 
 ```bash
-npm run deploy:arthera
+pnpm deploy:arthera
 ```
 
 or deploy to Optimism Goerli:
 
 ```bash
-npm run deploy:og
+pnpm deploy:og
 ```
 
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
@@ -100,9 +100,9 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ## Versions
 
-- Node [v18.15.0](https://nodejs.org/uk/blog/release/v18.15.0/)
-- NPM [v9.5.0](https://github.com/npm/cli/releases/tag/v9.5.0)
-- OpenZeppelin Contracts [v4.8.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.8.0)
+- Node [v18.17.1](https://nodejs.org/uk/blog/release/v18.17.1/)
+- pnpm [v6.28.0](https://pnpm.io/)
+- OpenZeppelin Contracts [v4.9.3](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.9.3)
 
 ## Support
 
