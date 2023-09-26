@@ -51,7 +51,7 @@ contract Fundraiser is ERC4626, Ownable, ERC20Snapshot {
 
     function pay(address target) internal {
         uint amount = 1;
-        address people_who_donated;
+        // address people_who_donated;
         IERC20(usdc).transfer(target, amount);
     }
 
