@@ -80,6 +80,25 @@ To upload the membership NFT metadata, upload the manifesto, or submit a proposa
 - Mantle Testnet
 - Arthera Testnet ([view latest deployment](https://explorer-test.arthera.net/address/0x28F1Ef960E2674cAdf2F4197910e2fcFb4b8BA1C?tab=txs))
 
+## Variants
+
+There are three protected branches, each one of them corresponding to a certain variant. 
+
+### `main`
+
+- Supports SBTs (non-transferable NFTs)
+- Block-number-based
+
+### `no-sbt`
+
+- Doesn't support SBTs (membership NFTs are transferable)
+- Block-number-based
+
+### `timestamp-based`
+
+- Timestamp-based (ideal for Optimism, Avalanche, Arthera)
+- Not supported by Tally
+
 ## Security
 
 Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
