@@ -1,7 +1,6 @@
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { moveBlocks } from "./utils/move-blocks"
 
 describe("Gov", function () {
 
@@ -30,10 +29,10 @@ describe("Gov", function () {
 
     const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
     const name = "Gov"
-    const votingDelay = 1
-    const votingPeriod = 60 * 60 * 24 * 1
-    const votingThreshold = 1
-    const quorum = 20
+    const votingDelay = 1 // 1 second
+    const votingPeriod = 60 * 60 * 24 * 15 // 15 days
+    const votingThreshold = 1 
+    const quorum = 20 // 20ù
     const Gov = await ethers.getContractFactory("Gov")
     const gov = await Gov.deploy(
       nft.address, 
@@ -62,17 +61,16 @@ describe("Gov", function () {
     )
     const proposeReceipt = await propose.wait(1)
     const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-    await moveBlocks(2)
+    await time.increase(10);
     await gov.connect(alice).castVote(proposalId,1)
-    // await gov.connect(bob).castVote(proposalId,1)
-    // await moveBlocks(300)
-    // const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-    // await gov.execute(
-    //   targets, 
-    //   values, 
-    //   calldatas,
-    //   desc
-    // )
+    await time.increase(votingPeriod);
+    const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
+    await gov.execute(
+      targets, 
+      values, 
+      calldatas,
+      desc
+    )
 
     const ERC20Mock = await ethers.getContractFactory("ERC20Mock");
     const erc20Mock = await ERC20Mock.deploy(ethers.utils.parseEther('10000'))
@@ -87,7 +85,7 @@ describe("Gov", function () {
     const erc1155Mock = await ERC1155Mock.deploy();
     await erc1155Mock.safeTransferFrom(deployer.address, gov.address, 1, 1, "0x")
 
-    return { gov, nft, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock, signers, amount, quorum, firstMembers }
+    return { gov, nft, deployer, alice, bob, francis, erc20Mock, erc721Mock, erc1155Mock, signers, amount, quorum, firstMembers, votingPeriod }
   }
 
   describe("Deployment", function () {
@@ -113,14 +111,8 @@ describe("Gov", function () {
     })
 
     it("Should get the quorum", async function () {
-      const { gov, nft, quorum } = await loadFixture(deployContracts);
-      const blockNumber = await ethers.provider.getBlockNumber();
-      // const supply =  await nft.totalSupply();
-      // const result = supply.toNumber() * quorum / 100
-      // console.log("result:", result)
-      const today =  Math.floor(new Date().getTime() / 1000);
-
-      console.log('today', today)
+      const { gov } = await loadFixture(deployContracts);
+      const today = Math.floor(new Date().getTime() / 1000);
       expect(await gov.quorum(today)).to.equal(2);
     })
   });
@@ -147,7 +139,7 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       expect(await gov.state(proposalId)).to.be.equal(1)
       await expect(gov.connect(francis).propose(
         targets, 
@@ -174,13 +166,13 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(true)
     })
 
     it('Should execute the proposal', async function () {      
-      const {nft, gov, alice, francis, bob } = await loadFixture(deployContracts)
+      const {nft, gov, alice, francis, bob, votingPeriod } = await loadFixture(deployContracts)
       const calldatas = [
         (nft.interface.encodeFunctionData('safeMint', [
           francis.address, 
@@ -198,10 +190,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(1)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(298)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -213,7 +205,7 @@ describe("Gov", function () {
     })
 
     it('Should switch delegate before castVote', async function () {      
-      const {nft, gov, alice, francis, bob } = await loadFixture(deployContracts)
+      const {nft, gov, alice, francis, bob, votingPeriod } = await loadFixture(deployContracts)
 
       const calldatas = [
         (nft.interface.encodeFunctionData('safeMint', [
@@ -232,11 +224,11 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(1)      
+      await time.increase(2);
       await nft.connect(bob).delegate(alice.address) // call to delegate after propose and before castVote
       await gov.connect(alice).castVote(proposalId,1)
       // await gov.connect(bob).castVote(proposalId,1) // bob donesn't need to go vote
-      await moveBlocks(298)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -248,7 +240,7 @@ describe("Gov", function () {
     })
 
     it('Should set the nft metadata', async function () {
-      const { nft, gov, alice, bob } = await loadFixture(deployContracts);
+      const { nft, gov, alice, bob, votingPeriod } = await loadFixture(deployContracts);
 
       const newMetadata = "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
       const setMetadata = await nft.interface.encodeFunctionData('setMetadata', [1, newMetadata])
@@ -265,10 +257,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -280,7 +272,7 @@ describe("Gov", function () {
     });
 
     it('Should burn the NFT', async function () {
-      const { nft, gov, alice } = await loadFixture(deployContracts);
+      const { nft, gov, alice, votingPeriod } = await loadFixture(deployContracts);
 
       const banMemberCall = nft.interface.encodeFunctionData('govBurn', [1])
       const calldatas = [banMemberCall.toString()]
@@ -295,9 +287,9 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -310,7 +302,7 @@ describe("Gov", function () {
 
     it("Should update the manifesto", async function () {
 
-      const { gov, alice, bob } = await loadFixture(deployContracts);
+      const { gov, alice, bob, votingPeriod } = await loadFixture(deployContracts);
 
       const call = gov.interface.encodeFunctionData('setManifesto', ["bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"])
       const calldatas = [call.toString()]
@@ -325,10 +317,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -340,7 +332,7 @@ describe("Gov", function () {
     });
 
     it("Should transfer ETH to beneficiary", async function () {
-      const { gov, alice, francis, bob } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, votingPeriod } = await loadFixture(deployContracts);
 
       await francis.sendTransaction({
         to: gov.address,
@@ -360,10 +352,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       expect(await gov.execute(
         targets, 
@@ -374,14 +366,13 @@ describe("Gov", function () {
     });
 
     it("Should upgrade Gov", async function () {
-      const { nft, gov, alice, bob } = await loadFixture(deployContracts);
+      const { nft, gov, alice, bob, votingPeriod } = await loadFixture(deployContracts);
 
       const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
       const name = "Gov"
-      const votingDelay = "1"
-      const votingPeriod = "300"
-      const votingThreshold = "1"
-      const quorum = "20"
+      const votingDelay = 1
+      const votingThreshold = 1
+      const quorum = 20
       const Gov2 = await ethers.getContractFactory("Gov");
       const gov2 = await Gov2.deploy(
         await gov.token(), 
@@ -407,10 +398,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -442,7 +433,7 @@ describe("Gov", function () {
       const manifesto = "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
       const name = "Gov"
       const votingDelay = 1
-      const votingPeriod = 300
+      const votingPeriod = 60 * 60 * 24 * 15 // 15 days
       const votingThreshold = 1
       const quorum = 20
       const Gov2 = await ethers.getContractFactory("Gov");
@@ -474,10 +465,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov2.connect(alice).castVote(proposalId,1)
       await gov2.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov2.execute(
         targets, 
@@ -490,7 +481,7 @@ describe("Gov", function () {
     });
 
     it("Should transfer ERC-20 to beneficiary", async function () {
-      const { gov, alice, francis, bob, erc20Mock } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, erc20Mock, votingPeriod } = await loadFixture(deployContracts);
 
       const erc20MockTransfer = await erc20Mock.interface.encodeFunctionData('transfer', [francis.address, ethers.utils.parseEther('1')])
       const calldatas = [erc20MockTransfer.toString()]
@@ -506,10 +497,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -521,7 +512,7 @@ describe("Gov", function () {
     });
 
     it("Should transfer ERC-721 to beneficiary", async function () {
-      const { gov, alice, francis, bob, erc721Mock } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, erc721Mock, votingPeriod } = await loadFixture(deployContracts);
 
       const erc721Transfer = erc721Mock.interface.encodeFunctionData('transferFrom', [gov.address, francis.address, 1])
       const calldatas = [erc721Transfer.toString()]
@@ -537,10 +528,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -552,7 +543,7 @@ describe("Gov", function () {
     });
 
     it("Should transfer ERC-1155 to beneficiary", async function () {
-      const { gov, alice, francis, bob, erc1155Mock } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, erc1155Mock, votingPeriod } = await loadFixture(deployContracts);
 
       const erc1155MockTransfer = await erc1155Mock.interface.encodeFunctionData('safeTransferFrom', [gov.address, francis.address, 1, 1, "0x"])
       const calldatas = [erc1155MockTransfer.toString()]
@@ -568,10 +559,10 @@ describe("Gov", function () {
       )
       const proposeReceipt = await propose.wait(1)
       const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-      await moveBlocks(2)
+      await time.increase(2);
       await gov.connect(alice).castVote(proposalId,1)
       await gov.connect(bob).castVote(proposalId,1)
-      await moveBlocks(300)
+      await time.increase(votingPeriod);
       const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
       await gov.execute(
         targets, 
@@ -583,7 +574,7 @@ describe("Gov", function () {
     });
 
     xit("Should make 100+ people vote", async function () {
-      const { gov, alice, francis, bob, nft } = await loadFixture(deployContracts);
+      const { gov, alice, francis, bob, nft, votingPeriod } = await loadFixture(deployContracts);
 
       await francis.sendTransaction({
         to: gov.address,
@@ -620,10 +611,10 @@ describe("Gov", function () {
         )
         const proposeReceipt = await propose.wait(1)
         const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-        await moveBlocks(1)
+        await time.increase(2);
         await gov.connect(alice).castVote(proposalId,1)
         await gov.connect(bob).castVote(proposalId,1)
-        await moveBlocks(298)
+        await time.increase(votingPeriod);
         const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
         await gov.execute(
           targets, 
@@ -672,7 +663,7 @@ describe("Gov", function () {
 
         const proposeReceipt = await propose.wait(1)
         const proposalId = proposeReceipt.events![0].args!.proposalId.toString()
-        await moveBlocks(1)
+        await time.increase(2);
         await gov.connect(alice).castVote(proposalId,1)
         await gov.connect(bob).castVote(proposalId,1)
         await gov.connect(francis).castVote(proposalId,1)
@@ -698,7 +689,7 @@ describe("Gov", function () {
         await nft.connect((await members)[4]).delegate((await members)[1].address)
         await gov.connect((await members)[4]).castVote(proposalId,1)
 
-        await moveBlocks(298)
+        await time.increase(votingPeriod);
         const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
         await gov.execute(
           targets, 
