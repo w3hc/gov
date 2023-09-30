@@ -710,9 +710,10 @@ describe("Gov", function () {
       expect(await nft.ownerOf(172)).to.be.equal((await members)[170].address)
 
     })
-    it("Should not transfer the membership NFT", async function () {
-      const { nft, alice, bob } = await loadFixture(deployContracts);
-      await expect(nft.transferFrom(bob.address, alice.address, 1)).to.be.revertedWith("ERC721: caller is not token owner or approved")
+    it("Should transfer the membership NFT", async function () {
+      const { nft, alice, bob } = await loadFixture(deployContracts)
+      await nft.connect(bob).transferFrom(bob.address, alice.address, 1)
+      expect(await nft.ownerOf(1)).to.be.equal(alice.address)
     });
   })
 })
