@@ -6,15 +6,18 @@ import "hardhat-celo";
 
 dotenv.config();
 
-const { 
+const {
+  GOERLI_TESTNET_ENDPOINT_URL,
+  GOERLI_TESTNET_PRIVATE_KEY,
+  GOERLI_ETHERSCAN_API_KEY,
 
-  GOERLI_TESTNET_ENDPOINT_URL, 
-  GOERLI_TESTNET_PRIVATE_KEY, 
-  GOERLI_ETHERSCAN_API_KEY, 
+  SEPOLIA_RPC_ENDPOINT_URL,
+  SEPOLIA_PRIVATE_KEY,
+  SEPOLIA_ETHERSCAN_API_KEY,
 
   OPTIMISM_TESTNET_ENDPOINT_URL,
   OPTIMISM_TESTNET_PRIVATE_KEY,
-  OPTIMISM_ETHERSCAN_API_KEY, 
+  OPTIMISM_ETHERSCAN_API_KEY,
 
   OPTIMISM_MAINNET_ENDPOINT_URL,
   OPTIMISM_MAINNET_PRIVATE_KEY,
@@ -23,12 +26,12 @@ const {
   ARBITRUM_TESTNET_PRIVATE_KEY,
   ARBITRUM_ETHERSCAN_API_KEY,
 
-  CELO_TESTNET_ENDPOINT_URL, 
-  CELO_TESTNET_PRIVATE_KEY, 
-  CELO_ETHERSCAN_API_KEY, 
+  CELO_TESTNET_ENDPOINT_URL,
+  CELO_TESTNET_PRIVATE_KEY,
+  CELO_ETHERSCAN_API_KEY,
 
-  CELO_MAINNET_ENDPOINT_URL, 
-  CELO_MAINNET_PRIVATE_KEY, 
+  CELO_MAINNET_ENDPOINT_URL,
+  CELO_MAINNET_PRIVATE_KEY,
 
   GNOSIS_MAINNET_ENDPOINT_URL,
   GNOSIS_MAINNET_PRIVATE_KEY,
@@ -38,11 +41,10 @@ const {
   CHIADO_TESTNET_PRIVATE_KEY,
 
   BASE_TESTNET_PRIVATE_KEY,
-  
-  MANTLE_TESTNET_PRIVATE_KEY, 
+
+  MANTLE_TESTNET_PRIVATE_KEY,
 
   ARTHERA_TESTNET_PRIVATE_KEY,
-
 } = process.env;
 
 const config: HardhatUserConfig = {
@@ -51,71 +53,107 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   mocha: {
-    timeout: 100000
+    timeout: 100000,
   },
   networks: {
-    'hardhat': {
+    hardhat: {
       chainId: 1337,
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
     },
-    'goerli': {
+
+    goerli: {
       url: GOERLI_TESTNET_ENDPOINT_URL as string,
-      accounts: GOERLI_TESTNET_PRIVATE_KEY !== undefined ? [GOERLI_TESTNET_PRIVATE_KEY] : [],
+      accounts: SEPOLIA_PRIVATE_KEY !== undefined ? [SEPOLIA_PRIVATE_KEY] : [],
     },
-    'optimism-goerli': {
+    sepolia: {
+      url: SEPOLIA_RPC_ENDPOINT_URL as string,
+      accounts:
+        GOERLI_TESTNET_PRIVATE_KEY !== undefined
+          ? [GOERLI_TESTNET_PRIVATE_KEY]
+          : [],
+    },
+    "optimism-goerli": {
       url: OPTIMISM_TESTNET_ENDPOINT_URL as string,
-      accounts: OPTIMISM_TESTNET_PRIVATE_KEY !== undefined ? [OPTIMISM_TESTNET_PRIVATE_KEY] : [],
+      accounts:
+        OPTIMISM_TESTNET_PRIVATE_KEY !== undefined
+          ? [OPTIMISM_TESTNET_PRIVATE_KEY]
+          : [],
       // gasPrice: 35000000000,
     },
-    'optimism': {
+    optimism: {
       url: OPTIMISM_MAINNET_ENDPOINT_URL as string,
-      accounts: OPTIMISM_MAINNET_PRIVATE_KEY !== undefined ? [OPTIMISM_MAINNET_PRIVATE_KEY] : [],
+      accounts:
+        OPTIMISM_MAINNET_PRIVATE_KEY !== undefined
+          ? [OPTIMISM_MAINNET_PRIVATE_KEY]
+          : [],
     },
-    'arbitrum-goerli': {
+    "arbitrum-goerli": {
       url: ARBITRUM_TESTNET_ENDPOINT_URL as string,
-      accounts: ARBITRUM_TESTNET_PRIVATE_KEY !== undefined ? [ARBITRUM_TESTNET_PRIVATE_KEY] : [],
+      accounts:
+        ARBITRUM_TESTNET_PRIVATE_KEY !== undefined
+          ? [ARBITRUM_TESTNET_PRIVATE_KEY]
+          : [],
     },
-    'alfajores': {
+    alfajores: {
       url: CELO_TESTNET_ENDPOINT_URL as string,
-      accounts: CELO_TESTNET_PRIVATE_KEY !== undefined ? [CELO_TESTNET_PRIVATE_KEY] : [],
-      chainId: 44787
+      accounts:
+        CELO_TESTNET_PRIVATE_KEY !== undefined
+          ? [CELO_TESTNET_PRIVATE_KEY]
+          : [],
+      chainId: 44787,
     },
-    'celo': {
+    celo: {
       url: CELO_MAINNET_ENDPOINT_URL as string,
-      accounts: CELO_MAINNET_PRIVATE_KEY !== undefined ? [CELO_MAINNET_PRIVATE_KEY] : [],
+      accounts:
+        CELO_MAINNET_PRIVATE_KEY !== undefined
+          ? [CELO_MAINNET_PRIVATE_KEY]
+          : [],
     },
-    'gnosis': {
+    gnosis: {
       url: GNOSIS_MAINNET_ENDPOINT_URL as string,
-      accounts: GNOSIS_MAINNET_PRIVATE_KEY !== undefined ? [GNOSIS_MAINNET_PRIVATE_KEY] : [],
+      accounts:
+        GNOSIS_MAINNET_PRIVATE_KEY !== undefined
+          ? [GNOSIS_MAINNET_PRIVATE_KEY]
+          : [],
       // gasPrice: 1000000000,
     },
-    'chiado': {
+    chiado: {
       url: CHIADO_TESTNET_ENDPOINT_URL as string,
-      accounts: CHIADO_TESTNET_PRIVATE_KEY !== undefined ? [CHIADO_TESTNET_PRIVATE_KEY] : [],
+      accounts:
+        CHIADO_TESTNET_PRIVATE_KEY !== undefined
+          ? [CHIADO_TESTNET_PRIVATE_KEY]
+          : [],
       gasPrice: 1000000000,
     },
-    'base-goerli': {
-      url: 'https://goerli.base.org',
+    "base-goerli": {
+      url: "https://goerli.base.org",
       accounts: [process.env.BASE_TESTNET_PRIVATE_KEY as string],
     },
     "mantle-testnet": {
       url: "https://rpc.testnet.mantle.xyz/",
-      accounts: MANTLE_TESTNET_PRIVATE_KEY !== undefined ? [MANTLE_TESTNET_PRIVATE_KEY] : [],
+      accounts:
+        MANTLE_TESTNET_PRIVATE_KEY !== undefined
+          ? [MANTLE_TESTNET_PRIVATE_KEY]
+          : [],
     },
-    'arthera-testnet': {
-      url: 'https://rpc-test.arthera.net',
+    "arthera-testnet": {
+      url: "https://rpc-test.arthera.net",
       chainId: 10243,
-      accounts: ARTHERA_TESTNET_PRIVATE_KEY !== undefined ? [ARTHERA_TESTNET_PRIVATE_KEY] : []
+      accounts:
+        ARTHERA_TESTNET_PRIVATE_KEY !== undefined
+          ? [ARTHERA_TESTNET_PRIVATE_KEY]
+          : [],
     },
-  }, 
+  },
   etherscan: {
     apiKey: {
       goerli: GOERLI_ETHERSCAN_API_KEY || "",
+      sepolia: SEPOLIA_ETHERSCAN_API_KEY || "",
       optimisticGoerli: OPTIMISM_ETHERSCAN_API_KEY || "",
       optimisticEthereum: OPTIMISM_ETHERSCAN_API_KEY || "",
       arbitrumGoerli: ARBITRUM_ETHERSCAN_API_KEY || "",
@@ -130,11 +168,11 @@ const config: HardhatUserConfig = {
         network: "base-goerli",
         chainId: 84531,
         urls: {
-         apiURL: "https://api-goerli.basescan.org/api",
-         browserURL: "https://goerli.basescan.org"
-        }
-      }
-    ]
+          apiURL: "https://api-goerli.basescan.org/api",
+          browserURL: "https://goerli.basescan.org",
+        },
+      },
+    ],
   },
 };
 

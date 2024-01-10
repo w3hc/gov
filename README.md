@@ -49,6 +49,12 @@ Then deploy to Goerli:
 pnpm deploy:goerli
 ```
 
+or deploy to Sepolia
+
+```bash
+pnpm deploy:sepolia
+```
+
 or deploy to Arthera
 
 ```bash
