@@ -37,34 +37,12 @@ Create a `.env` on the model of `.env.template`:
 cp .env.template .env
 ```
 
-Add your own keys in your `.env` file. 
+Add your own keys in your `.env` file.
 
-- Configure your DAO in the `dao.config.ts` file, [the docs is here if you need](https://w3hc.github.io/gov-docs/)
-- Edit the manifesto in `storage/manifesto/manifesto.md`
-- Replace the image (membership NFT image) in `storage/metadata/image.png`
-
-Then deploy to Goerli:
-
-```bash
-pnpm deploy:goerli
-```
-
-or deploy to Sepolia
+Then deploy to Sepolia:
 
 ```bash
 pnpm deploy:sepolia
-```
-
-or deploy to Arthera
-
-```bash
-pnpm deploy:arthera
-```
-
-or deploy to Optimism Goerli:
-
-```bash
-pnpm deploy:og
 ```
 
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
@@ -72,38 +50,6 @@ Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
 To deploy to other networks, please read the [deployment section in the docs](https://w3hc.github.io/gov-docs/deployment.html).
 
 To upload the membership NFT metadata, upload the manifesto, or submit a proposal using the CLI, please check [this section of the docs](https://w3hc.github.io/gov-docs/deployment.html#use).
-
-## Supported networks
-
-- Optimism Mainnet ([view W3HC DAO contract](https://optimistic.etherscan.io/address/0x83e2403a8b94af988b4f4ae9869577783b8cd216#writeContract))
-- Goerli Testnet ([view latest deployment](https://goerli.etherscan.io/address/0x4Ab5851BaAA670f93CE5a1B1E4885eBe12FD4f1d#writeContract))
-- Optimism Goerli Testnet ([view latest deployment](https://goerli-optimism.etherscan.io/address/0xa2be3b1b4666ceb06c3237078b73089b8b95078c#writeContract))
-- Arbitrum Goerli Testnet
-- Celo Alfajores Testnet
-- Celo Mainnet
-- Gnosis Chiado Testnet
-- Gnosis Mainnet 
-- Mantle Testnet
-- Arthera Testnet ([view latest deployment](https://explorer-test.arthera.net/address/0x28F1Ef960E2674cAdf2F4197910e2fcFb4b8BA1C?tab=txs))
-
-## Variants
-
-There are three protected branches, each one of them corresponding to a certain variant. 
-
-### `main`
-
-- Supports SBTs (non-transferable NFTs)
-- Block-number-based
-
-### `no-sbt`
-
-- Doesn't support SBTs (membership NFTs are transferable)
-- Block-number-based
-
-### `timestamp-based`
-
-- Timestamp-based (ideal for Optimism, Avalanche, Arthera)
-- Not supported by Tally
 
 ## Security
 
@@ -125,9 +71,9 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ## Versions
 
-- Node [v18.17.1](https://nodejs.org/uk/blog/release/v18.17.1/)
-- pnpm [v6.28.0](https://pnpm.io/)
-- OpenZeppelin Contracts [v4.9.3](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v4.9.3)
+- Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)
+- pnpm [v8.7.5](https://pnpm.io/)
+- OpenZeppelin Contracts [v5.0.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.1)
 
 ## Support
 
