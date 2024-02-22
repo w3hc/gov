@@ -1,20 +1,12 @@
 node_modules
-.env
 coverage
 coverage.json
 typechain
 typechain-types
-NOTES.md
-store.json
-manifesto.json
-nftAbi.json
-govAbi.json
 .DS_Store
 
-#Hardhat files
 cache
 artifacts
-.openzeppelin
 
-#Remix
-/.deps
+.env*
+!.env.template
