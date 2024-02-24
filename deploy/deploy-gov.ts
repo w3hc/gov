@@ -3,6 +3,18 @@ import color from "cli-color"
 var msg = color.xterm(39).bgXterm(128)
 import hre, { ethers, network } from "hardhat"
 import { abi } from "../artifacts/contracts/NFT.sol/NFT.json"
+import {
+    firstMembers,
+    uri,
+    name,
+    symbol,
+    manifesto,
+    daoName,
+    votingDelay,
+    votingPeriod,
+    votingThreshold,
+    quorum
+} from "../dao.config"
 
 export default async ({ getNamedAccounts, deployments }: any) => {
     const { deploy } = deployments
@@ -15,28 +27,12 @@ export default async ({ getNamedAccounts, deployments }: any) => {
     const signer = await ethers.getSigner(deployer)
     console.log("deployer:", deployer)
 
-    const firstMembers = [
-        "0xD8a394e7d7894bDF2C57139fF17e5CBAa29Dd977", // Alice
-        "0xe61A1a5278290B6520f0CEf3F2c71Ba70CF5cf4C" // Bob
-    ]
-
-    const uri = ""
-    const name = ""
-    const symbol = ""
-
     const nft = await deploy("NFT", {
         from: deployer,
         args: [deployer, firstMembers, uri, name, symbol],
         log: true,
         overwrite: true
     })
-
-    const manifesto = ""
-    const daoName = ""
-    const votingDelay = 1
-    const votingPeriod = 300
-    const votingThreshold = 1
-    const quorum = 20
 
     const gov = await deploy("Gov", {
         from: deployer,
