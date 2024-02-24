@@ -5,16 +5,14 @@ A DAO framework built with Open Zeppelin's [Governor contract](https://docs.open
 - [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
 - [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
 
-Gov is maintained by the [Web3 Hackers Collective](https://www.tally.xyz/gov/web3-hackers-collective).
-
-The ultimate goal is to allow users to deploy their DAO contract and the interface that goes with it in one click.
+Since `v0.10.0`, Gov is using non-tranferable membership NFTs ("SBTs"), it is also timestamp-based by default.
 
 ## Motivation
 
 Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://w3hc.github.io/gov-docs/deployment.html). 
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
-- [Gov UI](https://gov-ui.netlify.app/) (WIP)
+- [Gov UI](https://gov-ui.netlify.app/)
 - [Example DAO on Tally](https://www.tally.xyz/gov/web3-hackers-collective)
 
 ## Install
@@ -37,19 +35,15 @@ Create a `.env` on the model of `.env.template`:
 cp .env.template .env
 ```
 
-Add your own keys in your `.env` file.
-
-Then deploy to Sepolia:
+- Add your own keys in your `.env` file
+- Edit the `dao.config.ts` file (optional)
+- Then deploy to Sepolia:
 
 ```bash
 pnpm deploy:sepolia
 ```
 
 Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
-
-To deploy to other networks, please read the [deployment section in the docs](https://w3hc.github.io/gov-docs/deployment.html).
-
-To upload the membership NFT metadata, upload the manifesto, or submit a proposal using the CLI, please check [this section of the docs](https://w3hc.github.io/gov-docs/deployment.html#use).
 
 ## Security
 
