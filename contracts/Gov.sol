@@ -16,6 +16,8 @@ contract Gov is
 {
     string public manifesto;
 
+    uint256[] public proposalIDs;
+
     event ManifestoUpdated(string cid);
 
     constructor(
@@ -64,5 +66,23 @@ contract Gov is
     function setManifesto(string memory cid) public onlyGovernance {
         manifesto = cid;
         emit ManifestoUpdated(cid);
+    }
+
+    /// @notice Adds a proposalId to the proposalIDs array
+    function _propose(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description,
+        address proposer
+    ) internal override returns (uint256 proposalId) {
+        proposalId = super._propose(targets, values, calldatas, description, proposer);
+        proposalIDs.push(proposalId);
+        return proposalId;
+    }
+
+    /// @notice Returns all the proposal IDs
+    function getProposalIDs() public view returns (uint256[] memory) {
+        return proposalIDs;
     }
 }
