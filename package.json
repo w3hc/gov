@@ -14,7 +14,8 @@
         "sourcify:arthera-testnet": "hardhat sourcify --network arthera-testnet",
         "bal": "npx hardhat run scripts/check-my-balance.ts --network",
         "prettier": "prettier --write \"**/*.ts\"",
-        "prettier-check": "prettier --check \"**/*.ts\""
+        "prettier-check": "prettier --check \"**/*.ts\"",
+        "propose": "hardhat run scripts/propose.ts --network sepolia"
     },
     "keywords": [],
     "author": "",
@@ -42,7 +43,7 @@
     },
     "dependencies": {
         "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.4.1",
-        "@openzeppelin/contracts": "^5.0.1",
+        "@openzeppelin/contracts": "^5.0.2",
         "@types/node": "^20.11.10",
         "cli-color": "^2.0.3",
         "dotenv": "^16.4.1",
