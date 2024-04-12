@@ -1,5 +1,5 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers"
-import { expect } from "chai"
+import { assert, expect } from "chai"
 import { ethers } from "hardhat"
 
 describe("Gov", function () {
@@ -179,12 +179,12 @@ describe("Gov", function () {
                     "{ result: { kind: 'valid', asString: '# Simple proposal\n**It's simple.**' } }"
                 )
             )
+
             const propose = await gov
                 .connect(alice)
                 .propose(targets, values, calldatas, descriptionHash)
             const proposeReceipt = await propose.wait(1)
-            // const proposalId =
-            //     proposeReceipt?.events![0].args!.proposalId.toString()
+
             const block: any = proposeReceipt?.blockNumber
             const proposals: any = await gov.queryFilter(
                 "ProposalCreated" as any,
@@ -192,7 +192,6 @@ describe("Gov", function () {
                 block
             )
             const proposalId = proposals[0].args[0]
-            // console.log("proposals:", proposalId)
             await time.increase(2)
             expect(await gov.state(proposalId)).to.be.equal(1)
             await expect(
@@ -200,16 +199,8 @@ describe("Gov", function () {
                     .connect(francis)
                     .propose(targets, values, calldatas, descriptionHash)
             ).to.be.reverted
-            const proposalIDs = await gov.proposalIDs(0)
-            expect(proposalIDs).to.equal(
-                104210512268354292799233343598585452164225647412752746064251384657049622796592n
-            )
-            const getroposalIDs = await gov.getProposalIDs()
-            // console.log("proposalIDs:", proposalIDs2)
-            expect(getroposalIDs).to.eql([
-                104210512268354292799233343598585452164225647412752746064251384657049622796592n,
-                50776644067954285819098193442970317915264074689386315465836191919241029686986n
-            ])
+            expect(await gov.proposalCreatedBlockNumbers(0)).to.equal(6n)
+            expect(await gov.getProposalCreatedBlocks()).to.eql([6n, 11n])
 
             // push another proposal
             const descriptionHash2 = ethers.keccak256(
@@ -221,13 +212,47 @@ describe("Gov", function () {
                 .connect(alice)
                 .propose(targets, values, calldatas, descriptionHash2)
             await propose2.wait(1)
-            const proposalIDs2 = await gov.getProposalIDs()
-            // console.log("proposalIDs:", proposalIDs2)
-            expect(proposalIDs2).to.eql([
-                104210512268354292799233343598585452164225647412752746064251384657049622796592n,
-                50776644067954285819098193442970317915264074689386315465836191919241029686986n,
-                75700853697268684990059796088708054688763886654364060512822699241916776523799n
-            ])
+
+            expect(await gov.getProposalCreatedBlocks()).to.eql([6n, 11n, 14n])
+            const block1 = await gov.getProposalCreatedBlocks()
+            // console.log("block1:", block1)
+
+            const selectedBlock = block1.length - 1
+            // console.log("selectedBlock:", selectedBlock)
+            // console.log(
+            //     "block1[(block1.length - 1)]:",
+            //     block1[block1.length - 1]
+            // )
+            const desc: any = await gov.queryFilter(
+                "ProposalCreated" as any,
+                Number(block1[block1.length - 1])
+            )
+            // console.log("desc:", desc[0].args?.proposalId)
+        })
+
+        it("should propose successfully", async () => {
+            const { nft, gov, alice, francis } = await loadFixture(
+                deployContracts
+            )
+
+            const targets = [await gov.getAddress()]
+            const values = [0]
+            const calldatas = [
+                gov.interface.encodeFunctionData("setManifesto", [
+                    "New Manifesto"
+                ])
+            ]
+            const description = "Proposal to update the manifesto"
+            await gov
+                .connect(alice)
+                .propose(targets, values, calldatas, description)
+
+            const proposalCreatedBlocks = await gov.getProposalCreatedBlocks()
+            assert.equal(
+                proposalCreatedBlocks.length,
+                2,
+                "Proposal creation failed"
+            )
         })
 
         it("Should cast a vote", async function () {
@@ -252,8 +277,6 @@ describe("Gov", function () {
                 .connect(alice)
                 .propose(targets, values, calldatas, descriptionHash)
             const proposeReceipt = await propose.wait(1)
-            // const proposalId =
-            //     proposeReceipt?.events![0].args!.proposalId.toString()
             const block: any = proposeReceipt?.blockNumber
             const proposals: any = await gov.queryFilter(
                 "ProposalCreated" as any,
@@ -261,7 +284,6 @@ describe("Gov", function () {
                 block
             )
             const proposalId = proposals[0].args[0]
-            // console.log("proposals:", proposalId)
             await time.increase(2)
             await gov.connect(alice).castVote(proposalId, 1)
             expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(
@@ -287,8 +309,6 @@ describe("Gov", function () {
                 .connect(alice)
                 .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
             const proposeReceipt = await propose.wait(1)
-            // const proposalId =
-            //     proposeReceipt?.events![0].args!.proposalId.toString()
             const block: any = proposeReceipt?.blockNumber
             const proposals: any = await gov.queryFilter(
                 "ProposalCreated" as any,
@@ -296,7 +316,6 @@ describe("Gov", function () {
                 block
             )
             const proposalId = proposals[0].args[0]
-            // console.log("proposals:", proposalId)
             await time.increase(2)
             await gov.connect(alice).castVote(proposalId, 1)
             await gov.connect(bob).castVote(proposalId, 1)
