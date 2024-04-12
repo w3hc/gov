@@ -53,7 +53,6 @@ const config: HardhatUserConfig = {
                 OP_SEPOLIA_PRIVATE_KEY !== undefined
                     ? [OP_SEPOLIA_PRIVATE_KEY]
                     : []
-            // gasPrice: 5000000000
         },
         "arthera-testnet": {
             chainId: 10243,
@@ -67,7 +66,7 @@ const config: HardhatUserConfig = {
         }
     },
     solidity: {
-        version: "0.8.20",
+        version: "0.8.25",
         settings: {
             optimizer: {
                 enabled: true,
