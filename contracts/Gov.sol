@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
@@ -16,7 +16,7 @@ contract Gov is
 {
     string public manifesto;
 
-    uint256[] public proposalIDs;
+    uint256[] public proposalCreatedBlockNumbers;
 
     event ManifestoUpdated(string cid);
 
@@ -69,20 +69,19 @@ contract Gov is
     }
 
     /// @notice Adds a proposalId to the proposalIDs array
-    function _propose(
+    // Override the propose function
+    function propose(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
-        string memory description,
-        address proposer
-    ) internal override returns (uint256 proposalId) {
-        proposalId = super._propose(targets, values, calldatas, description, proposer);
-        proposalIDs.push(proposalId);
-        return proposalId;
+        string memory description
+    ) public virtual override returns (uint256) {
+        proposalCreatedBlockNumbers.push(block.number);
+        return _propose(targets, values, calldatas, description, _msgSender());
     }
 
-    /// @notice Returns all the proposal IDs
-    function getProposalIDs() public view returns (uint256[] memory) {
-        return proposalIDs;
+    /// @notice Returns all the block numbers when the propose function was called
+    function getProposalCreatedBlocks() public view returns (uint256[] memory) {
+        return proposalCreatedBlockNumbers;
     }
 }
