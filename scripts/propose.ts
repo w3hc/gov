@@ -24,14 +24,16 @@ async function main() {
             gov.interface.encodeFunctionData("setManifesto", ["New Manifesto"])
         ]
         const description =
-            "Proposal to update the manifesto. Test #" + String(x + 1)
-
+            "# Manifesto update #" +
+            String(x + 1) +
+            "\n desc desc desc desc desc desc desc desc desc desc desc desc desc desc desc desc desc "
         const propose = await gov.propose(
             targets,
             values,
             calldatas,
             description
         )
+        await propose.wait(1)
 
         const proposalCreatedBlocks = await gov.getProposalCreatedBlocks()
 
