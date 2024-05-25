@@ -71,8 +71,8 @@ const config: HardhatUserConfig = {
             optimizer: {
                 enabled: true,
                 runs: 200
-            },
-            evmVersion: "shanghai"
+            }
+            // evmVersion: "shanghai"
         }
     },
     etherscan: {
