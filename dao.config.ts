@@ -14,7 +14,7 @@ export const symbol = "MEMBER"
 
 export const manifesto =
     "https://bafkreifnnreoxxgkhty7v2w3qwiie6cfxpv3vcco2xldekfvbiem3nm6dm.ipfs.w3s.link/"
-export const daoName = "Test DAO"
+export const daoName = "Berlin04 Demo DAO"
 export const votingDelay = 1
 export const votingPeriod = 300
 export const votingThreshold = 1

@@ -48,7 +48,7 @@ contract NFT is
     /// @param to The address of the recipient
     /// @param uri The `tokenURI` of the new member's NFT metadata (should be "ipfs://<CID>")
     function safeMint(address to, string memory uri) public {
-        require(balanceOf(msg.sender) < 1, "Caller already owns an NFT");
+        // require(balanceOf(msg.sender) < 1, "Caller already owns an NFT");
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
