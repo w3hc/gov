@@ -194,40 +194,12 @@ describe("Gov", function () {
             const proposalId = proposals[0].args[0]
             await time.increase(2)
             expect(await gov.state(proposalId)).to.be.equal(1)
+
             await expect(
                 gov
                     .connect(francis)
                     .propose(targets, values, calldatas, descriptionHash)
             ).to.be.reverted
-            expect(await gov.proposalCreatedBlockNumbers(0)).to.equal(6n)
-            expect(await gov.getProposalCreatedBlocks()).to.eql([6n, 11n])
-
-            // push another proposal
-            const descriptionHash2 = ethers.keccak256(
-                ethers.toUtf8Bytes(
-                    "{ result: { kind: 'valid', asString: '# Another proposal\n**It's simple.**' } }"
-                )
-            )
-            const propose2 = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, descriptionHash2)
-            await propose2.wait(1)
-
-            expect(await gov.getProposalCreatedBlocks()).to.eql([6n, 11n, 14n])
-            const block1 = await gov.getProposalCreatedBlocks()
-            // console.log("block1:", block1)
-
-            const selectedBlock = block1.length - 1
-            // console.log("selectedBlock:", selectedBlock)
-            // console.log(
-            //     "block1[(block1.length - 1)]:",
-            //     block1[block1.length - 1]
-            // )
-            const desc: any = await gov.queryFilter(
-                "ProposalCreated" as any,
-                Number(block1[block1.length - 1])
-            )
-            // console.log("desc:", desc[0].args?.proposalId)
         })
 
         it("should propose successfully", async () => {
@@ -246,13 +218,6 @@ describe("Gov", function () {
             await gov
                 .connect(alice)
                 .propose(targets, values, calldatas, description)
-
-            const proposalCreatedBlocks = await gov.getProposalCreatedBlocks()
-            assert.equal(
-                proposalCreatedBlocks.length,
-                2,
-                "Proposal creation failed"
-            )
         })
 
         it("Should cast a vote", async function () {

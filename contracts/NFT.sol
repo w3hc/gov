@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -31,8 +31,6 @@ contract NFT is
             safeMint(_firstMembers[i], _uri);
         }
     }
-
-    // Overrides IERC6372 functions to make the token & governor timestamp-based
 
     function clock() public view override returns (uint48) {
         return uint48(block.timestamp);
