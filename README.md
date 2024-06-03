@@ -7,6 +7,9 @@ A DAO framework built with Open Zeppelin's [Governor contract](https://docs.open
 
 Since `v0.10.0`, Gov is using non-tranferable membership NFTs ("SBTs"), it is also timestamp-based by default.
 
+> [!WARNING]
+> Pleas note the `may2024-demo` branch's `safeMint` function is public.
+
 ## Motivation
 
 Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://w3hc.github.io/gov-docs/deployment.html). 

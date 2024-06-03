@@ -809,5 +809,22 @@ describe("Gov", function () {
                 nft.transferFrom(bob.address, alice.address, 1)
             ).to.be.revertedWith("This NFT is not transferable")
         })
+
+        it("Should allow anyone to mint a membership NFT", async function () {
+            const { nft, francis } = await loadFixture(deployContracts)
+            await expect(nft.safeMint(francis.address, "CID")).not.to.be
+                .reverted
+            expect(await nft.balanceOf(francis.address)).to.be.equal(1)
+        })
+
+        it("Should not allow the same wallet to mint twice", async function () {
+            const { nft, francis } = await loadFixture(deployContracts)
+            await expect(nft.safeMint(francis.address, "CID")).not.to.be
+                .reverted
+            expect(await nft.balanceOf(francis.address)).to.be.equal(1)
+            await expect(
+                nft.safeMint(francis.address, "CID")
+            ).to.be.revertedWith("Recipient already owns an NFT")
+        })
     })
 })
