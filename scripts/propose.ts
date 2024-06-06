@@ -1,6 +1,7 @@
 import { ethers } from "hardhat"
 const color = require("cli-color")
 import govContract from "../deployments/sepolia/Gov.json"
+import nftContract from "../deployments/sepolia/NFT.json"
 var msg = color.xterm(39).bgXterm(128)
 
 async function main() {
@@ -10,21 +11,43 @@ async function main() {
 
     try {
         const Gov = await ethers.getContractFactory("Gov")
+        console.log("govContract.address:", govContract.address)
+        console.log("signer.address:", signer.address)
+
         const gov = new ethers.Contract(
             govContract.address,
             Gov.interface,
             signer
         )
 
-        const x = (await gov.getProposalCreatedBlocks()).length
+        const NFT = await ethers.getContractFactory("NFT")
 
-        const targets = [await gov.getAddress()]
-        const values = [0]
+        const nft = new ethers.Contract(
+            nftContract.address,
+            NFT.interface,
+            signer
+        )
+
+        // const delegate = await nft.delegate(signer.address)
+        // const delegateReceipt = await delegate.wait(1)
+        // console.log("delegateReceipt:", delegateReceipt)
+
+        const targets = [govContract.address]
+        const values = ["0"]
         const calldatas = [
             gov.interface.encodeFunctionData("setManifesto", ["New Manifesto"])
         ]
         const description =
-            "Proposal to update the manifesto. Test #" + String(x + 1)
+            "# Manifesto update \n Manifesto update! New CID: " +
+            Math.random() +
+            ")"
+
+        console.log("targets:", targets)
+        console.log("values:", values)
+        console.log("calldatas:", calldatas)
+        console.log("description:", description)
+
+        console.log("name:", await gov.name())
 
         const propose = await gov.propose(
             targets,
@@ -32,30 +55,16 @@ async function main() {
             calldatas,
             description
         )
-
-        const proposalCreatedBlocks = await gov.getProposalCreatedBlocks()
-
-        console.log(await gov.getProposalCreatedBlocks())
-
-        for (let i = 0; i < proposalCreatedBlocks.length; i++) {
-            const proposals = (await gov.queryFilter(
-                "ProposalCreated",
-                proposalCreatedBlocks[i]
-            )) as any
-
-            if (proposals.length > 0) {
-                console.log(
-                    "\n",
-                    Number(proposalCreatedBlocks[i]),
-                    msg(proposals[0].args[0])
-                )
-            } else {
-                console.log(
-                    "\nNo proposals found for block number",
-                    proposalCreatedBlocks[i]
-                )
-            }
-        }
+        const receipt = await propose.wait(1)
+        console.log("receipt:", receipt)
+        const block: any = receipt?.blockNumber
+        const proposals: any = await gov.queryFilter(
+            "ProposalCreated" as any,
+            block,
+            block
+        )
+        const proposalId = proposals[0].args[0]
+        console.log("proposalId:", msg(Number(proposalId)))
     } catch (e) {
         console.log("error:", e)
     }
