@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
+/// @title DAO Contract
+/// @notice This contract implements a voting system using OpenZeppelin's Governor framework
+/// @dev Uses OpenZeppelin contracts v5.0.2
 contract Gov is
     Governor,
     GovernorSettings,
@@ -18,6 +21,14 @@ contract Gov is
 
     event ManifestoUpdated(string cid);
 
+    /// @notice Initializes the governance contract
+    /// @param _token The address of the token used for voting
+    /// @param _manifesto The initial CID of the manifesto
+    /// @param _name The name of the governance contract
+    /// @param _votingDelay The delay before voting starts
+    /// @param _votingPeriod The duration of the voting period
+    /// @param _votingThreshold The minimum number of votes required to create a proposal
+    /// @param _quorum The percentage of total supply that must participate for a vote to succeed
     constructor(
         IVotes _token,
         string memory _manifesto,
@@ -35,20 +46,27 @@ contract Gov is
         manifesto = _manifesto;
     }
 
+    /// @notice Returns the delay before voting on a proposal may take place
     function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingDelay();
     }
 
+    /// @notice Returns the duration of the voting period
     function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingPeriod();
     }
 
+    /// @notice Returns the quorum for a specific block number
+    /// @param blockNumber The block number to check the quorum for
+    /// @return The number of votes required for a quorum
     function quorum(
         uint256 blockNumber
     ) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
         return super.quorum(blockNumber);
     }
 
+    /// @notice Returns the proposal threshold
+    /// @return The minimum number of votes required to create a proposal
     function proposalThreshold()
         public
         view
