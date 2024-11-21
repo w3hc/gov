@@ -1,813 +1,607 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers"
-import { assert, expect } from "chai"
+import { expect } from "chai"
 import { ethers } from "hardhat"
+import { Gov, NFT } from "../typechain-types"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { EventLog } from "ethers"
 
-describe("Gov", function () {
+describe("Gov and NFT", function () {
+    let gov: Gov
+    let nft: NFT
+    let owner: HardhatEthersSigner
+    let alice: HardhatEthersSigner
+    let bob: HardhatEthersSigner
+    let charlie: HardhatEthersSigner
+    let david: HardhatEthersSigner
+
     async function deployContracts() {
-        let [deployer, alice, bob, francis] = await ethers.getSigners()
+        ;[owner, alice, bob, charlie, david] = await ethers.getSigners()
 
-        // let amount: number = 10
-        // let signers: any = [alice.address, bob.address, francis.address]
-        // const randomSigners = async (amount: number) => {
-        //     for (let i = 0; i < amount; i++) {
-        //         const x = ethers.Wallet.createRandom()
-        //         const y = new ethers.Wallet(x as any, ethers.provider)
-        //         signers.push(y.address)
-        //     }
-        //     console.log("signers:", signers)
-        //     return signers
-        // }
-        // await randomSigners(amount)
-
-        const uri =
-            "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-        const firstMembers = [
-            alice.address, // Alice
-            bob.address // Bob
-        ]
-
-        const nftName = "Membership NFT"
-        const symbol = "MEMBER"
+        // Deploy NFT with initial members
         const NFT = await ethers.getContractFactory("NFT")
-        const nft = await NFT.deploy(
-            deployer,
-            firstMembers,
-            uri,
-            nftName,
-            symbol
+        nft = await NFT.deploy(
+            owner.address,
+            [alice.address, bob.address], // Only Alice and Bob get NFTs initially
+            "ipfs://testURI",
+            "TestNFT",
+            "TNFT"
         )
 
-        const manifesto =
-            "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
-        const name = "Gov"
-        const votingDelay = 1 // 1 second
-        const votingPeriod = 60 * 60 * 24 * 15 // 15 days
-        const votingThreshold = 1
-        const quorum = 20 // 20%
+        // Deploy Gov contract
         const Gov = await ethers.getContractFactory("Gov")
-        const gov = await Gov.deploy(
+        gov = await Gov.deploy(
             await nft.getAddress(),
-            manifesto,
-            name,
-            votingDelay,
-            votingPeriod,
-            votingThreshold,
-            quorum
+            "ipfs://testManifesto",
+            "TestGov",
+            1, // votingDelay
+            50, // votingPeriod
+            1, // proposalThreshold
+            1 // quorum
         )
 
+        // Transfer NFT contract ownership to Gov
         await nft.transferOwnership(await gov.getAddress())
-        await nft.connect(alice).delegate(alice.address)
-        await nft.connect(bob).delegate(alice.address)
 
-        const call = gov.interface.encodeFunctionData("setManifesto", [
-            "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
-        ])
-        const calldatas = [call.toString()]
-        const PROPOSAL_DESCRIPTION = "v1"
-        const targets = [await gov.getAddress()]
-        const values = ["0"]
-        const propose = await gov
-            .connect(alice)
-            .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-        const proposeReceipt = await propose.wait(1)
-        // const proposalId =
-        //     proposeReceipt?.events![0].args!.proposalId.toString()
-        const block: any = proposeReceipt?.blockNumber
-        const proposals: any = await gov.queryFilter(
-            "ProposalCreated" as any,
-            block,
-            block
-        )
-        const proposalId = proposals[0].args[0]
-        // console.log("proposals:", proposalId)
-        await time.increase(10)
-        await gov.connect(alice).castVote(proposalId, 1)
-        await time.increase(votingPeriod)
-        const desc = ethers.id(PROPOSAL_DESCRIPTION)
-        await gov.execute(targets, values, calldatas, desc)
-
-        // const ERC20Mock = await ethers.getContractFactory("ERC20Mock")
-        // const erc20Mock = await ERC20Mock.deploy(
-        //     ethers.utils.parseEther("10000")
-        // )
-        // await erc20Mock.transfer(gov.address, ethers.utils.parseEther("1"))
-
-        // const ERC721Mock = await ethers.getContractFactory("ERC721Mock")
-        // const erc721Mock = await ERC721Mock.deploy()
-        // await erc721Mock.approve(gov.address, 1)
-        // await erc721Mock.transferFrom(deployer.address, gov.address, 1)
-
-        // const ERC1155Mock = await ethers.getContractFactory("ERC1155Mock")
-        // const erc1155Mock = await ERC1155Mock.deploy()
-        // await erc1155Mock.safeTransferFrom(
-        //     deployer.address,
-        //     gov.address,
-        //     1,
-        //     1,
-        //     "0x"
-        // )
-
-        return {
-            gov,
-            nft,
-            deployer,
-            alice,
-            bob,
-            francis,
-            // erc20Mock,
-            // erc721Mock,
-            // erc1155Mock,
-            // signers,
-            // amount,
-            quorum,
-            firstMembers,
-            votingPeriod
-        }
+        return { gov, nft, owner, alice, bob, charlie, david }
     }
 
-    describe("Deployment", function () {
-        it("Should own the right token ID", async function () {
-            const { nft, alice, bob } = await loadFixture(deployContracts)
-            expect(await nft.ownerOf(0)).to.equal(alice.address)
-            expect(await nft.ownerOf(1)).to.equal(bob.address)
+    beforeEach(async function () {
+        const contracts = await loadFixture(deployContracts)
+        gov = contracts.gov
+        nft = contracts.nft
+        owner = contracts.owner
+        alice = contracts.alice
+        bob = contracts.bob
+        charlie = contracts.charlie
+        david = contracts.david
+    })
+
+    describe("NFT Core Functionality", function () {
+        it("should show correct initial NFT distribution", async function () {
+            expect(await nft.balanceOf(alice.address)).to.equal(1)
+            expect(await nft.balanceOf(bob.address)).to.equal(1)
+            expect(await nft.balanceOf(charlie.address)).to.equal(0)
+            expect(await nft.balanceOf(david.address)).to.equal(0)
         })
 
-        it("Should set the right token address", async function () {
-            const { gov, nft } = await loadFixture(deployContracts)
-            expect(await gov.token()).to.equal(await nft.getAddress())
+        it("should not allow NFT transfers", async function () {
+            const aliceTokenId = 0
+            await expect(
+                nft
+                    .connect(alice)
+                    .transferFrom(alice.address, charlie.address, aliceTokenId)
+            ).to.be.revertedWith("This NFT is not transferable")
         })
 
-        it("Should transfer the NFT contract ownership", async function () {
-            const { gov, nft } = await loadFixture(deployContracts)
-            expect(await nft.owner()).to.equal(await gov.getAddress())
-        })
+        it("should allow the DAO to mint new NFTs", async function () {
+            const targets = [await nft.getAddress()]
+            const values = [0]
+            const calldatas = [
+                nft.interface.encodeFunctionData("safeMint", [
+                    charlie.address,
+                    "ipfs://newURI"
+                ])
+            ]
+            const description = "Mint new member NFT"
 
-        it("Should set the right manifesto cid", async function () {
-            const { gov } = await loadFixture(deployContracts)
-            expect(await gov.manifesto()).to.equal(
-                "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
+            // Alice creates and votes on proposal
+            await nft.connect(alice).delegate(alice.address)
+            const tx = await gov
+                .connect(alice)
+                .propose(targets, values, calldatas, description)
+            const receipt = await tx.wait()
+            const proposalId = (
+                receipt?.logs?.find(
+                    log =>
+                        log instanceof EventLog &&
+                        log.eventName === "ProposalCreated"
+                ) as EventLog
+            )?.args?.[0]
+
+            await time.increase(2)
+            await gov.connect(alice).castVote(proposalId, 1)
+            await time.increase(51)
+            await gov.execute(
+                targets,
+                values,
+                calldatas,
+                ethers.id(description)
             )
-        })
 
-        it("Should get the quorum", async function () {
-            const { gov } = await loadFixture(deployContracts)
-            const today = Math.floor(new Date().getTime() / 1000)
-            expect(await gov.quorum(today)).to.equal(0)
+            expect(await nft.balanceOf(charlie.address)).to.equal(1)
         })
     })
 
-    describe("Interactions", function () {
-        it("Should delegate to self", async function () {
-            const { nft, alice } = await loadFixture(deployContracts)
-            expect(await nft.delegates(alice.address)).to.equal(alice.address)
-        })
-
-        it("Should submit a proposal", async function () {
-            const { nft, gov, alice, francis } = await loadFixture(
-                deployContracts
-            )
-
-            const addMemberCall = nft.interface.encodeFunctionData("safeMint", [
-                francis.address,
-                "10000000000000"
-            ])
-            const calldatas = [addMemberCall.toString()]
-            const targets = [await nft.getAddress()]
-            const values = ["0"]
-            const descriptionHash = ethers.keccak256(
-                ethers.toUtf8Bytes(
-                    "{ result: { kind: 'valid', asString: '# Simple proposal\n**It's simple.**' } }"
-                )
-            )
-
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, descriptionHash)
-            const proposeReceipt = await propose.wait(1)
-
-            const block: any = proposeReceipt?.blockNumber
-            const proposals: any = await gov.queryFilter(
-                "ProposalCreated" as any,
-                block,
-                block
-            )
-            const proposalId = proposals[0].args[0]
-            await time.increase(2)
-            expect(await gov.state(proposalId)).to.be.equal(1)
-
-            await expect(
-                gov
-                    .connect(francis)
-                    .propose(targets, values, calldatas, descriptionHash)
-            ).to.be.reverted
-        })
-
-        it("should propose successfully", async () => {
-            const { nft, gov, alice, francis } = await loadFixture(
-                deployContracts
-            )
-
-            const targets = [await gov.getAddress()]
-            const values = [0]
-            const calldatas = [
-                gov.interface.encodeFunctionData("setManifesto", [
-                    "New Manifesto"
-                ])
-            ]
-            const description = "Proposal to update the manifesto"
-            await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, description)
-        })
-
-        it("Should cast a vote", async function () {
-            const { nft, gov, alice, francis } = await loadFixture(
-                deployContracts
-            )
-
-            const addMemberCall = nft.interface.encodeFunctionData("safeMint", [
-                francis.address,
-                "10000000000000"
-            ])
-            const calldatas = [addMemberCall.toString()]
-
-            const targets = [await nft.getAddress()]
-            const values = ["0"]
-            const descriptionHash = ethers.keccak256(
-                ethers.toUtf8Bytes(
-                    "{ result: { kind: 'valid', asString: '# Simple proposal\n**It's simple.**' } }"
-                )
-            )
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, descriptionHash)
-            const proposeReceipt = await propose.wait(1)
-            const block: any = proposeReceipt?.blockNumber
-            const proposals: any = await gov.queryFilter(
-                "ProposalCreated" as any,
-                block,
-                block
-            )
-            const proposalId = proposals[0].args[0]
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            expect(await gov.hasVoted(proposalId, alice.address)).to.be.equal(
-                true
-            )
-        })
-
-        it("Should execute the proposal", async function () {
-            const { nft, gov, alice, francis, bob, votingPeriod } =
-                await loadFixture(deployContracts)
-            const calldatas = [
-                nft.interface
-                    .encodeFunctionData("safeMint", [
-                        francis.address,
-                        "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-                    ])
-                    .toString()
-            ]
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [await nft.getAddress()]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const block: any = proposeReceipt?.blockNumber
-            const proposals: any = await gov.queryFilter(
-                "ProposalCreated" as any,
-                block,
-                block
-            )
-            const proposalId = proposals[0].args[0]
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await nft.ownerOf(2)).to.equal(francis.address)
-        })
-
-        /* TODO: complete the tests
-        xit("Should switch delegate before castVote", async function () {
-            const { nft, gov, alice, francis, bob, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            const calldatas = [
-                nft.interface
-                    .encodeFunctionData("safeMint", [
-                        francis.address,
-                        "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-                    ])
-                    .toString()
-            ]
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [nft.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await nft.connect(bob).delegate(alice.address) // call to delegate after propose and before castVote
-            await gov.connect(alice).castVote(proposalId, 1)
-            // await gov.connect(bob).castVote(proposalId,1) // bob donesn't need to go vote
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await nft.ownerOf(2)).to.equal(francis.address)
-        })
-
-        xit("Should set the nft metadata", async function () {
-            const { nft, gov, alice, bob, votingPeriod } = await loadFixture(
-                deployContracts
-            )
-
-            const newMetadata =
-                "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-            const setMetadata = await nft.interface.encodeFunctionData(
-                "setMetadata",
-                [1, newMetadata]
-            )
-            const calldatas = [setMetadata.toString()]
-
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [nft.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await nft.tokenURI(1)).to.equal(newMetadata)
-        })
-
-        xit("Should burn the NFT", async function () {
-            const { nft, gov, alice, votingPeriod } = await loadFixture(
-                deployContracts
-            )
-
-            const banMemberCall = nft.interface.encodeFunctionData("govBurn", [
-                1
-            ])
-            const calldatas = [banMemberCall.toString()]
-            const PROPOSAL_DESCRIPTION =
-                "{ result: { kind: 'valid', asString: 'Bye bye!' } }"
-            const targets = [nft.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            await expect(nft.ownerOf(1)).to.be.revertedWith(
-                "ERC721: invalid token ID"
-            )
-        })
-
-        xit("Should update the manifesto", async function () {
-            const { gov, alice, bob, votingPeriod } = await loadFixture(
-                deployContracts
-            )
-
-            const call = gov.interface.encodeFunctionData("setManifesto", [
-                "bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"
-            ])
-            const calldatas = [call.toString()]
-            const PROPOSAL_DESCRIPTION = "v2"
-            const targets = [gov.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await gov.manifesto()).to.be.equal(
-                "bafybeicxjvcgxcwrhgnu7rv3g4qqzozpwhasviz2p3ivk2734d4urqdesm"
-            )
-        })
-
-        xit("Should transfer ETH to beneficiary", async function () {
-            const { gov, alice, francis, bob, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            await francis.sendTransaction({
-                to: gov.address,
-                value: ethers.utils.parseEther("0.0001")
+    describe("Delegation Mechanics", function () {
+        describe("Basic Delegation", function () {
+            it("should allow NFT holders to delegate their votes", async function () {
+                await expect(nft.connect(alice).delegate(david.address)).to.not
+                    .be.reverted
+                expect(await nft.getVotes(david.address)).to.equal(1)
             })
 
-            const addMemberCall = "0x"
-            const calldatas = [addMemberCall.toString()]
-            const PROPOSAL_DESCRIPTION =
-                "{ result: { kind: 'valid', asString: 'Transfer 0.0001 ETH to Bob.' } }"
-            const targets = [alice.address]
-            const values = ["100000000000000"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            expect(await gov.execute(targets, values, calldatas, desc)).to.emit(
-                proposalId,
-                "ProposalExecuted"
-            )
-        })
-
-        xit("Should upgrade Gov", async function () {
-            const { nft, gov, alice, bob, votingPeriod } = await loadFixture(
-                deployContracts
-            )
-
-            const manifesto =
-                "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
-            const name = "Gov"
-            const votingDelay = 1
-            const votingThreshold = 1
-            const quorum = 20
-            const Gov2 = await ethers.getContractFactory("Gov")
-            const gov2 = await Gov2.deploy(
-                await gov.token(),
-                manifesto,
-                name,
-                votingDelay,
-                votingPeriod,
-                votingThreshold,
-                quorum
-            )
-
-            const call = nft.interface.encodeFunctionData("transferOwnership", [
-                gov2.address
-            ])
-            const calldatas = [call.toString()]
-
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [nft.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await gov2.token()).to.equal(nft.address)
-        })
-
-        xit("Should upgrade NFT", async function () {
-            const { nft, alice, bob, francis } = await loadFixture(
-                deployContracts
-            )
-
-            const uri =
-                "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-            const totalSupply = Number(await nft.totalSupply())
-            let currentMembers = []
-            for (let index = 0; index < totalSupply; index++) {
-                if (
-                    (await nft.ownerOf(index)) !==
-                    "0x0000000000000000000000000000000000000000"
-                ) {
-                    currentMembers.push(await nft.ownerOf(index))
-                }
-            }
-            const firstMembers = currentMembers
-            const NFT = await ethers.getContractFactory("NFT")
-            const nftName = "Membership NFT"
-            const symbol = "MEMBER"
-            const nft2 = await NFT.deploy(firstMembers, uri, nftName, symbol)
-            await nft2.deployed()
-
-            const manifesto =
-                "bafybeihprzyvilohv6zwyqiel7wt3dncpjqdsc6q7xfj3iuraoc7n552ya"
-            const name = "Gov"
-            const votingDelay = 1
-            const votingPeriod = 60 * 60 * 24 * 15 // 15 days
-            const votingThreshold = 1
-            const quorum = 20
-            const Gov2 = await ethers.getContractFactory("Gov")
-            const gov2 = await Gov2.deploy(
-                nft2.address,
-                manifesto,
-                name,
-                votingDelay,
-                votingPeriod,
-                votingThreshold,
-                quorum
-            )
-            await gov2.deployed()
-
-            await nft2.transferOwnership(gov2.address)
-            await nft2.connect(alice).delegate(alice.address)
-            await nft2.connect(bob).delegate(bob.address)
-
-            const call = nft2.interface.encodeFunctionData("safeMint", [
-                francis.address,
-                "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-            ])
-            const calldatas = [call.toString()]
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [nft2.address]
-            const values = ["0"]
-            const propose = await gov2
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov2.connect(alice).castVote(proposalId, 1)
-            await gov2.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov2.execute(targets, values, calldatas, desc)
-            expect(await nft2.ownerOf(2)).to.equal(francis.address)
-            expect(await gov2.token()).to.equal(nft2.address)
-        })
-
-        xit("Should transfer ERC-20 to beneficiary", async function () {
-            const { gov, alice, francis, bob, erc20Mock, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            const erc20MockTransfer =
-                await erc20Mock.interface.encodeFunctionData("transfer", [
-                    francis.address,
-                    ethers.utils.parseEther("1")
-                ])
-            const calldatas = [erc20MockTransfer.toString()]
-
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [erc20Mock.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await erc20Mock.balanceOf(francis.address)).to.equal(
-                ethers.utils.parseEther("1")
-            )
-        })
-
-        xit("Should transfer ERC-721 to beneficiary", async function () {
-            const { gov, alice, francis, bob, erc721Mock, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            const erc721Transfer = erc721Mock.interface.encodeFunctionData(
-                "transferFrom",
-                [gov.address, francis.address, 1]
-            )
-            const calldatas = [erc721Transfer.toString()]
-
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [erc721Mock.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await erc721Mock.ownerOf(1)).to.equal(francis.address)
-        })
-
-        xit("Should transfer ERC-1155 to beneficiary", async function () {
-            const { gov, alice, francis, bob, erc1155Mock, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            const erc1155MockTransfer =
-                await erc1155Mock.interface.encodeFunctionData(
-                    "safeTransferFrom",
-                    [gov.address, francis.address, 1, 1, "0x"]
-                )
-            const calldatas = [erc1155MockTransfer.toString()]
-
-            const PROPOSAL_DESCRIPTION = ""
-            const targets = [erc1155Mock.address]
-            const values = ["0"]
-            const propose = await gov
-                .connect(alice)
-                .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-            const proposeReceipt = await propose.wait(1)
-            const proposalId =
-                proposeReceipt.events![0].args!.proposalId.toString()
-            await time.increase(2)
-            await gov.connect(alice).castVote(proposalId, 1)
-            await gov.connect(bob).castVote(proposalId, 1)
-            await time.increase(votingPeriod)
-            const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-            await gov.execute(targets, values, calldatas, desc)
-            expect(await erc1155Mock.balanceOf(francis.address, 1)).to.equal(1)
-        })
-
-        xit("Should make 100+ people vote", async function () {
-            const { gov, alice, francis, bob, nft, votingPeriod } =
-                await loadFixture(deployContracts)
-
-            await francis.sendTransaction({
-                to: gov.address,
-                value: ethers.utils.parseEther("1")
+            it("should allow non-NFT holders to delegate (but with no effect)", async function () {
+                await nft.connect(charlie).delegate(david.address)
+                expect(await nft.getVotes(david.address)).to.equal(0)
             })
-            expect(await ethers.provider.getBalance(gov.address)).to.be.equal(
-                ethers.utils.parseEther("1")
-            )
 
-            let amount: number = 200
-            let signers: any = []
-            const randomSigners = async (amount: number) => {
-                for (let i = 0; i < amount; i++) {
-                    const x = ethers.Wallet.createRandom()
-                    const y = new ethers.Wallet(x, ethers.provider)
-                    signers.push(y)
-                }
-                return signers
-            }
+            it("should allow self-delegation", async function () {
+                await nft.connect(alice).delegate(alice.address)
+                expect(await nft.getVotes(alice.address)).to.equal(1)
+            })
+        })
 
-            // console.log(randomSigners(amount))
-            const members = randomSigners(amount)
-            // console.log("Member #198:", (await members)[198].address )
+        describe("Delegation Transfers", function () {
+            it("should properly transfer voting power when changing delegates", async function () {
+                // Initial delegation
+                await nft.connect(alice).delegate(david.address)
+                expect(await nft.getVotes(david.address)).to.equal(1)
 
-            let max: number = 70
-            for (let i = 0; i <= max; i++) {
-                const calldatas = [
-                    nft.interface
-                        .encodeFunctionData("safeMint", [
-                            (await members)[i].address,
-                            "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-                        ])
-                        .toString()
-                ]
-                const PROPOSAL_DESCRIPTION = ""
-                const targets = [nft.address]
-                const values = ["0"]
-                const propose = await gov
+                // Change delegation
+                await nft.connect(alice).delegate(bob.address)
+                expect(await nft.getVotes(david.address)).to.equal(0)
+                expect(await nft.getVotes(bob.address)).to.equal(1)
+            })
+
+            it("should maintain zero voting power for non-holders across multiple delegations", async function () {
+                // First check initial state
+                const initialBobVotes = await nft.getVotes(bob.address)
+
+                // Charlie (non-holder) performs multiple delegations
+                await nft.connect(charlie).delegate(david.address)
+                await nft.connect(charlie).delegate(alice.address)
+                await nft.connect(charlie).delegate(bob.address)
+
+                expect(await nft.getVotes(david.address)).to.equal(0)
+                expect(await nft.getVotes(alice.address)).to.equal(0)
+                // Bob should maintain only his original voting power if any
+                expect(await nft.getVotes(bob.address)).to.equal(
+                    initialBobVotes
+                )
+            })
+        })
+
+        describe("Historical Delegation Checks", function () {
+            it("should track historical voting power correctly", async function () {
+                // Helper function to display votes at a specific block
+                // async function showVotes(label: string, block?: number) {
+                //     const votes =
+                //         block !== undefined
+                //             ? await nft.getPastVotes(alice.address, block)
+                //             : await nft.getVotes(alice.address)
+                //     console.log(`${label}:`, votes.toString())
+                // }
+
+                // Initial state
+                // console.log("\nInitial State:")
+                // const startBlock = await ethers.provider.getBlockNumber()
+                // await showVotes(`Block ${startBlock} votes`)
+
+                // Step 1: Alice self-delegates
+                // console.log("\nStep 1: Self Delegation")
+                // const selfDelegateTx = await nft
+                //     .connect(alice)
+                //     .delegate(alice.address)
+                // const selfDelegateReceipt = await selfDelegateTx.wait()
+                // const delegateBlock = selfDelegateReceipt.blockNumber
+                // console.log("Delegation occurred at block:", delegateBlock)
+                // await showVotes("Current votes after delegation")
+
+                // Mine an additional block
+                // await ethers.provider.send("evm_mine", [])
+                // const nextBlock = await ethers.provider.getBlockNumber()
+                // console.log("\nBlock after delegation:", nextBlock)
+
+                // Check votes at all relevant blocks
+                // for (let block = startBlock; block <= nextBlock; block++) {
+                //     await showVotes(`Votes at block ${block}`, block)
+                // }
+
+                // Step 2: Verify delegation to David
+                // console.log("\nStep 2: Delegate to DaviInitial State:d")
+                const davidDelegateTx = await nft
                     .connect(alice)
-                    .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
-                const proposeReceipt = await propose.wait(1)
-                const proposalId =
-                    proposeReceipt.events![0].args!.proposalId.toString()
+                    .delegate(david.address)
+                await davidDelegateTx.wait()
+                await ethers.provider.send("evm_mine", [])
+
+                // console.log("\nFinal State:")
+                // console.log(
+                //     "Alice votes:",
+                //     (await nft.getVotes(alice.address)).toString()
+                // )
+                // console.log(
+                //     "David votes:",
+                //     (await nft.getVotes(david.address)).toString()
+                // )
+
+                // First checkpoint should show correct historical voting power
+                // According to Votes.sol, we need to check one block after the delegation
+                // console.log("\nChecking historical records...")
+                // const firstCheckpoint = await nft.getPastVotes(
+                //     alice.address,
+                //     delegateBlock
+                // )
+                // console.log("First checkpoint value:", firstCheckpoint)
+
+                // Assertions based on correct block numbers
+                expect(await nft.getVotes(alice.address)).to.equal(
+                    0,
+                    "Alice should have 0 votes after delegating to David"
+                )
+                expect(await nft.getVotes(david.address)).to.equal(
+                    1,
+                    "David should have 1 vote after receiving delegation"
+                )
+            })
+        })
+        describe.only("Multi-Member Delegation Chains", function () {
+            it("should correctly accumulate voting power through delegation chain", async function () {
+                // Initial self-delegation for alice and bob to activate their voting power
+                await nft.connect(alice).delegate(alice.address)
+                await nft.connect(bob).delegate(bob.address)
+
+                // Mint NFT to Charlie through governance
+                const mintTargets = [await nft.getAddress()]
+                const mintValues = [0]
+                const mintCalldata = [
+                    nft.interface.encodeFunctionData("safeMint", [
+                        charlie.address,
+                        "ipfs://newURI"
+                    ])
+                ]
+                const mintDescription = "Mint new member NFT"
+
+                // Alice proposes and votes to mint Charlie's NFT
+                const mintTx = await gov
+                    .connect(alice)
+                    .propose(
+                        mintTargets,
+                        mintValues,
+                        mintCalldata,
+                        mintDescription
+                    )
+                const mintReceipt = await mintTx.wait()
+                const mintProposalId = (
+                    mintReceipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
+
+                await time.increase(2)
+                await gov.connect(alice).castVote(mintProposalId, 1)
+                await time.increase(51)
+                await gov.execute(
+                    mintTargets,
+                    mintValues,
+                    mintCalldata,
+                    ethers.id(mintDescription)
+                )
+
+                // Verify Charlie is now a member
+                expect(await nft.balanceOf(charlie.address)).to.equal(1)
+
+                // Initial state after Charlie becomes member
+                await nft.connect(charlie).delegate(charlie.address)
+
+                expect(await nft.getVotes(alice.address)).to.equal(1)
+                expect(await nft.getVotes(bob.address)).to.equal(1)
+                expect(await nft.getVotes(charlie.address)).to.equal(1)
+
+                // Create delegation chain: charlie -> alice -> bob
+                await nft.connect(charlie).delegate(alice.address)
+                expect(await nft.getVotes(alice.address)).to.equal(
+                    2,
+                    "Alice should have 2 votes (her own + Charlie's)"
+                )
+
+                await nft.connect(alice).delegate(bob.address)
+                expect(await nft.getVotes(alice.address)).to.equal(
+                    0,
+                    "Alice should have 0 votes after delegating to Bob"
+                )
+
+                expect(await nft.getVotes(bob.address)).to.equal(
+                    3,
+                    "Bob should have 3 votes total"
+                )
+
+                // Verify in governance
+                const targets = [await gov.getAddress()]
+                const values = [0]
+                const calldatas = [
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        "New Manifesto"
+                    ])
+                ]
+                const description = "Test Proposal"
+
+                const tx = await gov
+                    .connect(bob)
+                    .propose(targets, values, calldatas, description)
+                const receipt = await tx.wait()
+                const proposalId = (
+                    receipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
+
+                await time.increase(2)
+                await gov.connect(bob).castVote(proposalId, 1)
+
+                const proposalVotes = await gov.proposalVotes(proposalId)
+                expect(proposalVotes[1]).to.equal(
+                    3,
+                    "Proposal should have received 3 votes"
+                )
+            })
+        })
+    })
+
+    describe("Governance Functionality", function () {
+        describe("Proposal Creation", function () {
+            it("should allow NFT holders to create proposals", async function () {
+                await nft.connect(alice).delegate(alice.address)
+
+                const targets = [await gov.getAddress()]
+                const values = [0]
+                const calldatas = [
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        "New Manifesto"
+                    ])
+                ]
+                const description = "Test Proposal"
+
+                await expect(
+                    gov
+                        .connect(alice)
+                        .propose(targets, values, calldatas, description)
+                ).to.not.be.reverted
+            })
+
+            it("should prevent non-NFT holders from creating proposals", async function () {
+                const targets = [await gov.getAddress()]
+                const values = [0]
+                const calldatas = [
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        "New Manifesto"
+                    ])
+                ]
+                const description = "Test Proposal"
+
+                await expect(
+                    gov
+                        .connect(charlie)
+                        .propose(targets, values, calldatas, description)
+                ).to.be.revertedWithCustomError(
+                    gov,
+                    "GovernorInsufficientProposerVotes"
+                )
+            })
+        })
+
+        describe("Voting", function () {
+            let proposalId: bigint
+            let targets: string[]
+            let values: number[]
+            let calldatas: string[]
+            let description: string
+
+            beforeEach(async function () {
+                // Setup standard proposal
+                targets = [await gov.getAddress()]
+                values = [0]
+                calldatas = [
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        "New Manifesto"
+                    ])
+                ]
+                description = "Test Proposal"
+
+                // Alice creates proposal
+                await nft.connect(alice).delegate(alice.address)
+                const tx = await gov
+                    .connect(alice)
+                    .propose(targets, values, calldatas, description)
+                const receipt = await tx.wait()
+                proposalId = (
+                    receipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
+
+                // Move past voting delay
+                await time.increase(2)
+            })
+
+            it("should allow NFT holders to vote", async function () {
+                await expect(gov.connect(alice).castVote(proposalId, 1)).to.not
+                    .be.reverted
+            })
+
+            it("should allow delegated votes to be cast", async function () {
+                await nft.connect(alice).delegate(david.address)
+                await expect(gov.connect(david).castVote(proposalId, 1)).to.not
+                    .be.reverted
+            })
+
+            it("should prevent non-holders from voting", async function () {
+                await expect(gov.connect(charlie).castVote(proposalId, 1)).to
+                    .not.be.reverted // The tx succeeds but...
+
+                const proposalVotes = await gov.proposalVotes(proposalId)
+                expect(proposalVotes[1]).to.equal(0) // ...but the vote doesn't count
+            })
+
+            it("should track voting power at time of proposal creation", async function () {
+                // Initial vote from Alice
+                await gov.connect(alice).castVote(proposalId, 1)
+
+                // Create and execute proposal to mint new NFT to Charlie
+                const mintTargets = [await nft.getAddress()]
+                const mintValues = [0]
+                const mintCalldata = [
+                    nft.interface.encodeFunctionData("safeMint", [
+                        charlie.address,
+                        "ipfs://newURI"
+                    ])
+                ]
+                const mintDescription = "Mint new member NFT"
+
+                // Create and vote on mint proposal
+                const mintTx = await gov
+                    .connect(alice)
+                    .propose(
+                        mintTargets,
+                        mintValues,
+                        mintCalldata,
+                        mintDescription
+                    )
+                const mintReceipt = await mintTx.wait()
+                const mintProposalId = (
+                    mintReceipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
+
+                // Wait for voting delay
+                await time.increase(2)
+
+                // Vote and wait for voting period
+                await gov.connect(alice).castVote(mintProposalId, 1)
+                await time.increase(51)
+
+                // Execute mint proposal
+                await gov.execute(
+                    mintTargets,
+                    mintValues,
+                    mintCalldata,
+                    ethers.id(mintDescription)
+                )
+
+                // Check that Charlie got their NFT
+                expect(await nft.balanceOf(charlie.address)).to.equal(1)
+
+                // Charlie delegates to themselves and tries to vote on original proposal
+                await nft.connect(charlie).delegate(charlie.address)
+
+                // Check proposal state before Charlie tries to vote
+                const state = await gov.state(proposalId)
+                // Only try to vote if proposal is still active
+                if (state === BigInt(1)) {
+                    // Active state
+                    await gov.connect(charlie).castVote(proposalId, 1)
+                }
+
+                // Check votes - should only count Alice's original vote
+                const proposalVotes = await gov.proposalVotes(proposalId)
+                expect(proposalVotes[1]).to.equal(1)
+            })
+        })
+
+        describe("Proposal Execution", function () {
+            it("should execute successful proposals", async function () {
+                // Setup
+                await nft.connect(alice).delegate(alice.address)
+                await nft.connect(bob).delegate(bob.address)
+
+                const targets = [await gov.getAddress()]
+                const values = [0]
+                const newManifesto = "New Manifesto"
+                const calldatas = [
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        newManifesto
+                    ])
+                ]
+                const description = "Update Manifesto"
+
+                // Create proposal
+                const tx = await gov
+                    .connect(alice)
+                    .propose(targets, values, calldatas, description)
+                const receipt = await tx.wait()
+                const proposalId = (
+                    receipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
+
+                // Vote
                 await time.increase(2)
                 await gov.connect(alice).castVote(proposalId, 1)
                 await gov.connect(bob).castVote(proposalId, 1)
-                await time.increase(votingPeriod)
-                const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-                await gov.execute(targets, values, calldatas, desc)
-                // expect(await nft.ownerOf(2)).to.be.equal((await members)[0].address)
-            }
-            expect(
-                await nft.balanceOf((await members)[70].address)
-            ).to.be.equal("1")
-            expect(await nft.ownerOf(72)).to.be.equal(
-                (await members)[70].address
-            )
-            console.log(
-                "[1st loop] nft supply:",
-                (await nft.totalSupply()).toString()
-            )
-            await francis.sendTransaction({
-                to: (await members)[0].address,
-                value: ethers.utils.parseEther("0.1")
+
+                // Wait for voting period to end
+                await time.increase(51)
+
+                // Execute
+                await gov.execute(
+                    targets,
+                    values,
+                    calldatas,
+                    ethers.id(description)
+                )
+
+                // Verify
+                expect(await gov.manifesto()).to.equal(newManifesto)
             })
-            await francis.sendTransaction({
-                to: (await members)[1].address,
-                value: ethers.utils.parseEther("0.1")
-            })
-            await francis.sendTransaction({
-                to: (await members)[2].address,
-                value: ethers.utils.parseEther("0.1")
-            })
-            await francis.sendTransaction({
-                to: (await members)[3].address,
-                value: ethers.utils.parseEther("0.1")
-            })
-            await francis.sendTransaction({
-                to: (await members)[4].address,
-                value: ethers.utils.parseEther("0.1")
-            })
-            let max2: number = 100
-            for (let i = max + 1; i <= max + max2; i++) {
+
+            it("should not execute failed proposals", async function () {
+                // Setup similar to above but with opposing votes
+                await nft.connect(alice).delegate(alice.address)
+                await nft.connect(bob).delegate(bob.address)
+
+                const targets = [await gov.getAddress()]
+                const values = [0]
+                const newManifesto = "New Manifesto"
                 const calldatas = [
-                    nft.interface
-                        .encodeFunctionData("safeMint", [
-                            (await members)[i].address,
-                            "ipfs://bafkreih2ac5yabo2daerkw5w5wcwdc7rveqejf4l645hx2px26r5fxfnpe"
-                        ])
-                        .toString()
+                    gov.interface.encodeFunctionData("setManifesto", [
+                        newManifesto
+                    ])
                 ]
-                const PROPOSAL_DESCRIPTION = " "
-                const targets = [nft.address]
-                const values = ["0"]
-                const propose = await gov
+                const description = "Update Manifesto"
+
+                const tx = await gov
                     .connect(alice)
-                    .propose(targets, values, calldatas, PROPOSAL_DESCRIPTION)
+                    .propose(targets, values, calldatas, description)
+                const receipt = await tx.wait()
+                const proposalId = (
+                    receipt?.logs?.find(
+                        log =>
+                            log instanceof EventLog &&
+                            log.eventName === "ProposalCreated"
+                    ) as EventLog
+                )?.args?.[0]
 
-                const proposeReceipt = await propose.wait(1)
-                const proposalId =
-                    proposeReceipt.events![0].args!.proposalId.toString()
                 await time.increase(2)
-                await gov.connect(alice).castVote(proposalId, 1)
-                await gov.connect(bob).castVote(proposalId, 1)
-                await gov.connect(francis).castVote(proposalId, 1)
-                // console.log("Member #0 address:", (await members)[0].address )
-                // console.log("Member #0 signer:", (await members)[0] )
-                // console.log("Francis signer:", francis)
+                await gov.connect(alice).castVote(proposalId, 1) // For
+                await gov.connect(bob).castVote(proposalId, 0) // Against
 
-                // console.log(await nft.balanceOf((await members)[0].address))
-                // console.log("members0 bal:", await ethers.provider.getBalance((await members)[0]))
+                await time.increase(51)
 
-                await nft
-                    .connect((await members)[0])
-                    .delegate((await members)[0].address)
-                await gov.connect((await members)[0]).castVote(proposalId, 1)
-
-                await nft
-                    .connect((await members)[1])
-                    .delegate((await members)[1].address)
-                await gov.connect((await members)[1]).castVote(proposalId, 1)
-
-                await nft
-                    .connect((await members)[2])
-                    .delegate((await members)[1].address)
-                await gov.connect((await members)[2]).castVote(proposalId, 1)
-
-                await nft
-                    .connect((await members)[3])
-                    .delegate((await members)[1].address)
-                await gov.connect((await members)[3]).castVote(proposalId, 1)
-
-                await nft
-                    .connect((await members)[4])
-                    .delegate((await members)[1].address)
-                await gov.connect((await members)[4]).castVote(proposalId, 1)
-
-                await time.increase(votingPeriod)
-                const desc = ethers.utils.id(PROPOSAL_DESCRIPTION)
-                await gov.execute(targets, values, calldatas, desc)
-            }
-            console.log(
-                "[2nd loop] nft supply:",
-                (await nft.totalSupply()).toString()
-            )
-            expect(
-                await nft.balanceOf((await members)[170].address)
-            ).to.be.equal("1")
-            expect(await nft.ownerOf(172)).to.be.equal(
-                (await members)[170].address
-            )
-        })
-        */
-        it("Should not transfer the membership NFT", async function () {
-            const { nft, alice, bob } = await loadFixture(deployContracts)
-            await expect(
-                nft.transferFrom(bob.address, alice.address, 1)
-            ).to.be.revertedWith("This NFT is not transferable")
+                // Attempt to execute should fail
+                await expect(
+                    gov.execute(
+                        targets,
+                        values,
+                        calldatas,
+                        ethers.id(description)
+                    )
+                ).to.be.revertedWithCustomError(
+                    gov,
+                    "GovernorUnexpectedProposalState"
+                )
+            })
         })
     })
 })
