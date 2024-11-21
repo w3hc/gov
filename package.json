@@ -6,12 +6,8 @@
     "scripts": {
         "test": "hardhat test",
         "compile": "hardhat compile",
-        "deploy:arthera": "hardhat deploy --network arthera --reset",
         "deploy:sepolia": "hardhat deploy --network sepolia --reset",
-        "deploy:arthera-testnet": "hardhat deploy --network arthera-testnet && hardhat sourcify --network arthera-testnet --reset",
         "deploy:op-sepolia": "hardhat deploy --network op-sepolia --reset",
-        "sourcify:arthera": "hardhat sourcify --network arthera",
-        "sourcify:arthera-testnet": "hardhat sourcify --network arthera-testnet",
         "bal": "npx hardhat run scripts/check-my-balance.ts --network",
         "prettier": "prettier --write \"**/*.ts\"",
         "prettier-check": "prettier --check \"**/*.ts\"",
