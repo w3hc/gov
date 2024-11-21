@@ -66,7 +66,7 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 ## Versions
 
 - Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)
-- pnpm [v8.7.5](https://pnpm.io/)
+- pnpm [v9.12.2](https://pnpm.io/)
 - OpenZeppelin Contracts [v5.0.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.1)
 
 ## Support

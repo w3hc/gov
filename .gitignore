@@ -10,3 +10,4 @@ artifacts
 
 .env*
 !.env.template
+NOTES.md

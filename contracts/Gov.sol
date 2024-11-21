@@ -7,9 +7,6 @@ import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
-/// @title DAO Contract
-/// @notice This contract implements a voting system using OpenZeppelin's Governor framework
-/// @dev Uses OpenZeppelin contracts v5.0.2
 contract Gov is
     Governor,
     GovernorSettings,
