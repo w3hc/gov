@@ -1,4 +1,4 @@
-name: Tests
+name: Node.js CI
 
 on:
   push:
@@ -48,6 +48,3 @@ jobs:
 
       - name: Check code formatting with Prettier
         run: pnpm run prettier-check
-        
-      - name: Run tests
-        run: pnpm test

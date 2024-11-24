@@ -9,10 +9,13 @@ Since `v0.10.0`, Gov is using non-tranferable membership NFTs ("SBTs"), it is al
 
 ## Motivation
 
-Provide a coordination tool that fits the needs of everyday people. Orgs, federations of orgs, activists, neighborhoods, stewards of the commons, collectives, and other communities are invited to [deploy their own DAO](https://w3hc.github.io/gov-docs/deployment.html). 
+Provide a coordination tool that fits the needs of regular users. 
 
 - [Documentation](https://w3hc.github.io/gov-docs/)
 - [Gov UI](https://gov-ui.netlify.app/)
+- [Gov UI repo](https://github.com/w3hc/gov-ui)
+- [Gov Deployer](https://gov-deployer.netlify.app/)
+- [Gov Deployer repo](https://github.com/w3hc/gov-deployer)
 - [Example DAO on Tally](https://www.tally.xyz/gov/web3-hackers-collective)
 
 ## Install
@@ -63,12 +66,24 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 - `govBurn()` bans a member.
 - `setMetadata()` changes the tokenURI of a given NFT ID.
 
-## Versions
+## Supported Networks
 
-- Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)
-- pnpm [v9.12.2](https://pnpm.io/)
-- OpenZeppelin Contracts [v5.0.1](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.0.1)
+| Network | Chain ID | Documentation |
+|---------|----------|---------------|
+| Optimism Mainnet | 10 | [Documentation](https://docs.optimism.io/chain/networks#op-mainnet) |
+| Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
+| Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
+| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
+| Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
+
+## Core Dependencies
+
+-   Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)
+-   PNPM [v9.10.0](https://pnpm.io/pnpm-vs-npm)
+-   Hardhat [v2.22.16](https://github.com/NomicFoundation/hardhat/releases/)
+-   OpenZeppelin Contracts [v5.1.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.1.0)
+-   Ethers [v6.13.4](https://docs.ethers.org/v6/)
 
 ## Support
 
-You can contact me via [Element](https://matrix.to/#/@julienbrg:matrix.org), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discord.com/invite/uSxzJp3J76), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
+Feel free to reach out to [Julien](https://github.com/julienbrg): [Farcaster](https://warpcast.com/julien-), [Element](https://matrix.to/#/@julienbrg:matrix.org), [Status](https://status.app/u/iwSACggKBkp1bGllbgM=#zQ3shmh1sbvE6qrGotuyNQB22XU5jTrZ2HFC8bA56d5kTS2fy), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discordapp.com/users/julienbrg), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
