@@ -50,6 +50,118 @@ export default async ({ getNamedAccounts, deployments }: any) => {
     })
 
     switch (hre.network.name) {
+        case "optimism":
+            try {
+                console.log(
+                    "NFT contract deployed:",
+                    msg(nft.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await wait(30 * 1000)
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: nft.receipt.contractAddress,
+                    constructorArguments: [
+                        deployer,
+                        firstMembers,
+                        uri,
+                        name,
+                        symbol
+                    ]
+                })
+                console.log("NFT contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            try {
+                console.log(
+                    "DAO contract deployed:",
+                    msg(gov.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: gov.receipt.contractAddress,
+                    constructorArguments: [
+                        nft.address,
+                        manifesto,
+                        daoName,
+                        votingDelay,
+                        votingPeriod,
+                        votingThreshold,
+                        quorum
+                    ]
+                })
+                console.log("DAO contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            break
+
+        case "base":
+            try {
+                console.log(
+                    "NFT contract deployed:",
+                    msg(nft.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await wait(30 * 1000)
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: nft.receipt.contractAddress,
+                    constructorArguments: [
+                        deployer,
+                        firstMembers,
+                        uri,
+                        name,
+                        symbol
+                    ]
+                })
+                console.log("NFT contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            try {
+                console.log(
+                    "DAO contract deployed:",
+                    msg(gov.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: gov.receipt.contractAddress,
+                    constructorArguments: [
+                        nft.address,
+                        manifesto,
+                        daoName,
+                        votingDelay,
+                        votingPeriod,
+                        votingThreshold,
+                        quorum
+                    ]
+                })
+                console.log("DAO contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            break
+
         case "sepolia":
             try {
                 console.log(
@@ -116,7 +228,63 @@ export default async ({ getNamedAccounts, deployments }: any) => {
                 console.log(
                     "\nWaiting for 6 block confirmations (you can skip this part)"
                 )
-                await wait(90 * 1000)
+                await wait(30 * 1000)
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: nft.receipt.contractAddress,
+                    constructorArguments: [
+                        deployer,
+                        firstMembers,
+                        uri,
+                        name,
+                        symbol
+                    ]
+                })
+                console.log("NFT contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            try {
+                console.log(
+                    "DAO contract deployed:",
+                    msg(gov.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await hre.run("verify:verify", {
+                    network: network.name,
+                    address: gov.receipt.contractAddress,
+                    constructorArguments: [
+                        nft.address,
+                        manifesto,
+                        daoName,
+                        votingDelay,
+                        votingPeriod,
+                        votingThreshold,
+                        quorum
+                    ]
+                })
+                console.log("DAO contract verification done. ✅")
+            } catch (error) {
+                console.error(error)
+            }
+
+            break
+
+        case "base-sepolia":
+            try {
+                console.log(
+                    "NFT contract deployed:",
+                    msg(nft.receipt.contractAddress)
+                )
+                console.log("\nEtherscan verification in progress...")
+                console.log(
+                    "\nWaiting for 6 block confirmations (you can skip this part)"
+                )
+                await wait(30 * 1000)
                 await hre.run("verify:verify", {
                     network: network.name,
                     address: nft.receipt.contractAddress,
