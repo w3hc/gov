@@ -50,7 +50,7 @@ Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your
 
 ## Variants
 
-## Crosschain
+### Crosschain
 
 Make sure the contracts are deployed from the same account.
 
