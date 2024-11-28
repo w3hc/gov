@@ -11,6 +11,8 @@
         "deploy:sepolia": "hardhat deploy --network sepolia --reset",
         "deploy:op-sepolia": "hardhat deploy --network op-sepolia --reset",
         "deploy:base-sepolia": "hardhat deploy --network base-sepolia --reset",
+        "crosschain:sepolia": "hardhat deploy --network sepolia --tags CrosschainGov --reset",
+        "crosschain:op-sepolia": "hardhat deploy --network op-sepolia --tags CrosschainGov --reset",
         "mint:optimism": "hardhat mint --network optimism --amount",
         "mint:base": "hardhat mint --network base --amount",
         "mint:sepolia": "hardhat mint --network sepolia --amount",

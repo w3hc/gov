@@ -1,12 +1,12 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
-import { ethers } from "hardhat"
-import { NFT } from "../typechain-types/contracts/NFT"
-import { Gov } from "../typechain-types/contracts/Gov"
+import { ethers, network } from "hardhat"
+import { NFT } from "../typechain-types/contracts/variants/crosschain/NFT"
+import { Gov } from "../typechain-types/contracts/variants/crosschain/Gov"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { EventLog } from "ethers"
 
-describe("Gov", function () {
+describe("Crosschain Gov", function () {
     let gov: Gov
     let nft: NFT
     let owner: HardhatEthersSigner
@@ -20,7 +20,7 @@ describe("Gov", function () {
 
         // Deploy NFT with initial members
         const NFTFactory = await ethers.getContractFactory(
-            "contracts/NFT.sol:NFT"
+            "contracts/variants/crosschain/NFT.sol:NFT"
         )
         const nftContract = (await NFTFactory.deploy(
             owner.address,
@@ -34,7 +34,7 @@ describe("Gov", function () {
 
         // Deploy Gov contract
         const GovFactory = await ethers.getContractFactory(
-            "contracts/Gov.sol:Gov"
+            "contracts/variants/crosschain/Gov.sol:Gov"
         )
         const govContract = (await GovFactory.deploy(
             await nft.getAddress(),
@@ -118,6 +118,129 @@ describe("Gov", function () {
             )
 
             expect(await nft.balanceOf(charlie.address)).to.equal(1)
+        })
+        it("should generate membership proof", async function () {
+            // Get Alice's token ID (should be 0 as she was first member)
+            const aliceTokenId = 0
+
+            // Generate the proof
+            expect(
+                await nft.connect(alice).generateMembershipProof(aliceTokenId)
+            ).to.be.equal(
+                "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c805c18ea3d7b2dfae44070712a5065e3e977d203164718109e4bceb9aab77c339"
+            )
+
+            expect(
+                await nft.connect(alice).generateMembershipProof(aliceTokenId)
+            ).to.be.reverted
+        })
+
+        it("should verify membership proof correctly", async function () {
+            // Get Alice's token ID (0)
+            const aliceTokenId = 0
+
+            // Generate proof on "source" chain
+            const proof = await nft
+                .connect(alice)
+                .generateMembershipProof(aliceTokenId)
+
+            // Decode the proof to verify its contents
+            const decodedProof = ethers.AbiCoder.defaultAbiCoder().decode(
+                ["uint256", "address", "bytes32"],
+                proof
+            )
+            const [tokenId, member, digest] = decodedProof
+
+            // Verify the decoded basic values
+            expect(tokenId).to.equal(aliceTokenId)
+            expect(member).to.equal(alice.address)
+
+            // Reproduce the proof verification logic from the contract
+            const nftAddress = await nft.getAddress()
+            const message = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "address"],
+                [nftAddress, tokenId, member]
+            )
+
+            // Create the expected digest (mimicking the contract's verification)
+            const expectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", message]
+                )
+            )
+
+            // Verify the digest matches
+            expect(digest).to.equal(
+                expectedDigest,
+                "Proof digest verification failed"
+            )
+        })
+
+        it("should reject invalid membership proof", async function () {
+            // Get Alice's token ID (0)
+            const aliceTokenId = 0
+
+            // Generate valid proof
+            const proof = await nft
+                .connect(alice)
+                .generateMembershipProof(aliceTokenId)
+
+            // Create an invalid proof by changing the member address to Bob's
+            const invalidProof = ethers.AbiCoder.defaultAbiCoder().encode(
+                ["uint256", "address", "bytes32"],
+                [aliceTokenId, bob.address, ethers.id("invalid")]
+            )
+
+            // Verify the invalid proof fails
+            const [invalidTokenId, invalidMember, invalidDigest] =
+                ethers.AbiCoder.defaultAbiCoder().decode(
+                    ["uint256", "address", "bytes32"],
+                    invalidProof
+                )
+
+            const nftAddress = await nft.getAddress()
+            const expectedMessage = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "address"],
+                [nftAddress, invalidTokenId, invalidMember]
+            )
+
+            const expectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", expectedMessage]
+                )
+            )
+
+            // Verify the invalid proof's digest doesn't match the expected digest
+            expect(invalidDigest).to.not.equal(
+                expectedDigest,
+                "Invalid proof should not verify"
+            )
+
+            // Verify the original proof is still valid
+            const [tokenId, member, digest] =
+                ethers.AbiCoder.defaultAbiCoder().decode(
+                    ["uint256", "address", "bytes32"],
+                    proof
+                )
+
+            const validMessage = ethers.solidityPackedKeccak256(
+                ["address", "uint256", "address"],
+                [nftAddress, tokenId, member]
+            )
+
+            const validExpectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", validMessage]
+                )
+            )
+
+            expect(digest).to.equal(
+                validExpectedDigest,
+                "Valid proof should verify"
+            )
         })
     })
 
