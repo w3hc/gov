@@ -46,7 +46,22 @@ cp .env.template .env
 pnpm deploy:sepolia
 ```
 
-Then you can interact with your DAO using [Tally](https://www.tally.xyz/).
+Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your own interface using [Gov UI](https://github.com/w3hc/gov-ui). 
+
+## Variants
+
+## Crosschain
+
+Make sure the contracts are deployed from the same account.
+
+```bash
+pnpm crosschain:sepolia
+pnpm crosschain:op-sepolia
+```
+
+Your DAO will be deployed on every networks at the same address.
+
+This is an example of a member generating a membership proof on chain A (Sepolia), and claiming his membership on chain B (OP Seolia): https://sepolia-optimism.etherscan.io/tx/0x4e43854ae6ff26207285286e365dafb075a210a688678fb06fd5e2a854f69a62
 
 ## Security
 
