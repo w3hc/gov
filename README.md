@@ -61,7 +61,26 @@ pnpm crosschain:op-sepolia
 
 Your DAO will be deployed on every networks at the same address.
 
-This is an example of a member generating a membership proof on chain A (Sepolia), and claiming his membership on chain B (OP Seolia): https://sepolia-optimism.etherscan.io/tx/0x4e43854ae6ff26207285286e365dafb075a210a688678fb06fd5e2a854f69a62
+Then you can follow these steps to verify that proofs of `safeMint`, `govBurn`, `setMetadata`, `setManifesto` can be generated on source chain and claimed on foreign chain: 
+
+```
+pnpm crosschain:sepolia
+pnpm crosschain:op-sepolia
+
+npx hardhat run scripts/propose.ts --network sepolia
+npx hardhat run scripts/verify-proof.ts --network sepolia
+npx hardhat run scripts/claim-membership.ts --network op-sepolia
+
+npx hardhat run scripts/gov-burn.ts --network sepolia
+npx hardhat run scripts/verify-gov-burn-proof.ts --network sepolia
+npx hardhat run scripts/claim-gov-burn.ts --network op-sepolia
+
+npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
+npx hardhat run scripts/claim-metadata-update.ts --network op-sepolia
+
+npx hardhat run scripts/verify-manifesto-proof.ts --network sepolia
+npx hardhat run scripts/claim-manifesto-update.ts --network op-sepolia
+``` 
 
 ## Security
 
