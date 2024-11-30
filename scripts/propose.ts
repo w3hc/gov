@@ -51,7 +51,6 @@ async function main() {
 
     try {
         console.log("nft.target:", nft.target)
-        // console.log("nft.address:", await nft.getAddress())
         const targets = [nft.target]
         const values = [0]
 
@@ -72,11 +71,6 @@ async function main() {
 
         console.log("\nSimulating proposal execution...")
         try {
-            // const mintData = nft.interface.encodeFunctionData("safeMint", [
-            //     JUNGLE_ADDRESS,
-            //     "https://bafkreicj62l5xu6pk2xx7x7n6b7rpunxb4ehlh7fevyjapid3556smuz4y.ipfs.w3s.link/"
-            // ])
-
             await provider.call({
                 to: nft.target,
                 data: calldatas[0],

@@ -40,9 +40,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("NFT contract address:", msg(nftAddress))
     await deployNFT()
 
-    // Wait between deployments
-    // await wait(30000)
-
     // Deploy Gov
     const { address: govAddress, deploy: deployGov } = await deterministic(
         "CrosschainGov",
@@ -67,9 +64,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     console.log("Gov contract address:", msg(govAddress))
     await deployGov()
-
-    // Wait before verification
-    // await wait(30000)
 
     // Transfer NFT ownership to Gov
     const nft = await hre.ethers.getContractAt(
