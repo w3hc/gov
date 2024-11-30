@@ -23,6 +23,7 @@ describe("Crosschain Gov", function () {
             "contracts/variants/crosschain/NFT.sol:NFT"
         )
         const nftContract = (await NFTFactory.deploy(
+            1337,
             owner.address,
             [alice.address, bob.address], // Only Alice and Bob get NFTs initially
             "ipfs://testURI",
@@ -37,6 +38,7 @@ describe("Crosschain Gov", function () {
             "contracts/variants/crosschain/Gov.sol:Gov"
         )
         const govContract = (await GovFactory.deploy(
+            1337,
             await nft.getAddress(),
             "ipfs://testManifesto",
             "TestGov",
@@ -79,7 +81,7 @@ describe("Crosschain Gov", function () {
                 nft
                     .connect(alice)
                     .transferFrom(alice.address, charlie.address, aliceTokenId)
-            ).to.be.revertedWith("This NFT is not transferable")
+            ).to.be.revertedWith("NFT is not transferable")
         })
 
         it("should allow the DAO to mint new NFTs", async function () {
@@ -125,14 +127,13 @@ describe("Crosschain Gov", function () {
 
             // Generate the proof
             expect(
-                await nft.connect(alice).generateMembershipProof(aliceTokenId)
+                await nft.connect(alice).generateMintProof(aliceTokenId)
             ).to.be.equal(
-                "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c805c18ea3d7b2dfae44070712a5065e3e977d203164718109e4bceb9aab77c339"
+                "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000805f94c8cd397e8c8823da171013dfc02b9f0d1812fb747295e6b0534f0270bf57000000000000000000000000000000000000000000000000000000000000000e697066733a2f2f74657374555249000000000000000000000000000000000000"
             )
 
-            expect(
-                await nft.connect(alice).generateMembershipProof(aliceTokenId)
-            ).to.be.reverted
+            expect(await nft.connect(alice).generateMintProof(aliceTokenId)).to
+                .be.reverted
         })
 
         it("should verify membership proof correctly", async function () {
@@ -142,24 +143,25 @@ describe("Crosschain Gov", function () {
             // Generate proof on "source" chain
             const proof = await nft
                 .connect(alice)
-                .generateMembershipProof(aliceTokenId)
+                .generateMintProof(aliceTokenId)
 
             // Decode the proof to verify its contents
-            const decodedProof = ethers.AbiCoder.defaultAbiCoder().decode(
-                ["uint256", "address", "bytes32"],
-                proof
-            )
-            const [tokenId, member, digest] = decodedProof
+            const [tokenId, to, uri, digest] =
+                ethers.AbiCoder.defaultAbiCoder().decode(
+                    ["uint256", "address", "string", "bytes32"],
+                    proof
+                )
 
             // Verify the decoded basic values
             expect(tokenId).to.equal(aliceTokenId)
-            expect(member).to.equal(alice.address)
+            expect(to).to.equal(alice.address)
+            expect(uri).to.equal(await nft.tokenURI(aliceTokenId))
 
             // Reproduce the proof verification logic from the contract
             const nftAddress = await nft.getAddress()
             const message = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "address"],
-                [nftAddress, tokenId, member]
+                ["address", "uint8", "uint256", "address", "string"],
+                [nftAddress, 0, tokenId, to, uri]
             )
 
             // Create the expected digest (mimicking the contract's verification)
@@ -184,25 +186,30 @@ describe("Crosschain Gov", function () {
             // Generate valid proof
             const proof = await nft
                 .connect(alice)
-                .generateMembershipProof(aliceTokenId)
+                .generateMintProof(aliceTokenId)
 
-            // Create an invalid proof by changing the member address to Bob's
+            // Create an invalid proof by changing the tokenId and digest
             const invalidProof = ethers.AbiCoder.defaultAbiCoder().encode(
-                ["uint256", "address", "bytes32"],
-                [aliceTokenId, bob.address, ethers.id("invalid")]
+                ["uint256", "address", "string", "bytes32"],
+                [
+                    aliceTokenId + 1,
+                    bob.address,
+                    await nft.tokenURI(aliceTokenId),
+                    ethers.id("invalid")
+                ]
             )
 
-            // Verify the invalid proof fails
-            const [invalidTokenId, invalidMember, invalidDigest] =
+            // Decode the invalid proof
+            const [invalidTokenId, invalidTo, invalidUri, invalidDigest] =
                 ethers.AbiCoder.defaultAbiCoder().decode(
-                    ["uint256", "address", "bytes32"],
+                    ["uint256", "address", "string", "bytes32"],
                     invalidProof
                 )
 
             const nftAddress = await nft.getAddress()
             const expectedMessage = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "address"],
-                [nftAddress, invalidTokenId, invalidMember]
+                ["address", "uint8", "uint256", "address", "string"],
+                [nftAddress, 0, invalidTokenId, invalidTo, invalidUri] // 0 is OperationType.MINT
             )
 
             const expectedDigest = ethers.keccak256(
@@ -219,15 +226,15 @@ describe("Crosschain Gov", function () {
             )
 
             // Verify the original proof is still valid
-            const [tokenId, member, digest] =
+            const [tokenId, to, validUri, digest] =
                 ethers.AbiCoder.defaultAbiCoder().decode(
-                    ["uint256", "address", "bytes32"],
+                    ["uint256", "address", "string", "bytes32"],
                     proof
                 )
 
             const validMessage = ethers.solidityPackedKeccak256(
-                ["address", "uint256", "address"],
-                [nftAddress, tokenId, member]
+                ["address", "uint8", "uint256", "address", "string"],
+                [nftAddress, 0, tokenId, to, validUri]
             )
 
             const validExpectedDigest = ethers.keccak256(
@@ -240,6 +247,124 @@ describe("Crosschain Gov", function () {
             expect(digest).to.equal(
                 validExpectedDigest,
                 "Valid proof should verify"
+            )
+        })
+
+        it("should generate and verify burn proof correctly", async function () {
+            // Get Alice's token ID (0)
+            const aliceTokenId = 0
+
+            // Generate burn proof on "source" chain
+            const proof = await nft
+                .connect(alice)
+                .generateBurnProof(aliceTokenId)
+
+            // Decode the proof to verify its contents
+            const [tokenId, digest] = ethers.AbiCoder.defaultAbiCoder().decode(
+                ["uint256", "bytes32"],
+                proof
+            )
+
+            // Verify the decoded basic values
+            expect(tokenId).to.equal(aliceTokenId)
+
+            // Reproduce the proof verification logic from the contract
+            const nftAddress = await nft.getAddress()
+            const message = ethers.solidityPackedKeccak256(
+                ["address", "uint8", "uint256"],
+                [nftAddress, 1, tokenId] // 1 is OperationType.BURN
+            )
+
+            // Create the expected digest (mimicking the contract's verification)
+            const expectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", message]
+                )
+            )
+
+            // Verify the digest matches
+            expect(digest).to.equal(
+                expectedDigest,
+                "Burn proof digest verification failed"
+            )
+        })
+        it("should generate and verify metadata proof correctly", async function () {
+            const aliceTokenId = 0
+            const newUri = "ipfs://newURI"
+
+            // Generate metadata proof on "source" chain
+            const proof = await nft
+                .connect(alice)
+                .generateMetadataProof(aliceTokenId, newUri)
+
+            // Decode the proof to verify its contents
+            const [tokenId, uri, digest] =
+                ethers.AbiCoder.defaultAbiCoder().decode(
+                    ["uint256", "string", "bytes32"],
+                    proof
+                )
+
+            // Verify the decoded basic values
+            expect(tokenId).to.equal(aliceTokenId)
+            expect(uri).to.equal(newUri)
+
+            // Reproduce the proof verification logic from the contract
+            const nftAddress = await nft.getAddress()
+            const message = ethers.solidityPackedKeccak256(
+                ["address", "uint8", "uint256", "string"],
+                [nftAddress, 2, tokenId, newUri] // 2 is OperationType.SET_METADATA
+            )
+
+            // Create the expected digest (mimicking the contract's verification)
+            const expectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", message]
+                )
+            )
+
+            // Verify the digest matches
+            expect(digest).to.equal(
+                expectedDigest,
+                "Metadata proof digest verification failed"
+            )
+        })
+        it("should generate and verify manifesto proof correctly", async function () {
+            const newManifesto = "ipfs://newManifesto"
+
+            // Generate manifesto proof on "source" chain
+            const proof = await gov.generateManifestoProof(newManifesto)
+
+            // Decode the proof to verify its contents
+            const [manifestoValue, digest] =
+                ethers.AbiCoder.defaultAbiCoder().decode(
+                    ["string", "bytes32"],
+                    proof
+                )
+
+            // Verify the decoded basic values
+            expect(manifestoValue).to.equal(newManifesto)
+
+            // Reproduce the proof verification logic from the contract
+            const govAddress = await gov.getAddress()
+            const message = ethers.solidityPackedKeccak256(
+                ["address", "uint8", "string"],
+                [govAddress, 0, newManifesto] // 0 is OperationType.SET_MANIFESTO
+            )
+
+            // Create the expected digest (mimicking the contract's verification)
+            const expectedDigest = ethers.keccak256(
+                ethers.solidityPacked(
+                    ["string", "bytes32"],
+                    ["\x19Ethereum Signed Message:\n32", message]
+                )
+            )
+
+            // Verify the digest matches
+            expect(digest).to.equal(
+                expectedDigest,
+                "Manifesto proof digest verification failed"
             )
         })
     })
