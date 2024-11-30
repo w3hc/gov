@@ -17,8 +17,8 @@ async function main() {
     }
     const JUNGLE_ADDRESS = "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE"
 
-    const GOV_ADDRESS = "0xf97496c678F19018830CEf981fa48627a253723D"
-    const NFT_ADDRESS = "0xcd4e16B3d3b7f1f13124B650Fb633782009B249F"
+    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
+    const GOV_ADDRESS = "0x76f53bf2ad89DaB4d8b666b9a5C6610C2C2e0EfC"
 
     // Create provider and signers properly
     const provider = new ethers.JsonRpcProvider(
@@ -36,16 +36,16 @@ async function main() {
     const votingPowerBefore = await nft.getVotes(aliceSigner.address)
     console.log("Current voting power:", votingPowerBefore)
 
-    // console.log("Delegating voting power...")
-    // const delegateTx = await nft.delegate(aliceSigner.address)
-    // const delegateReceipt = await delegateTx.wait(1)
-    // console.log("Delegation completed in block:", delegateReceipt?.blockNumber)
+    console.log("Delegating voting power...")
+    const delegateTx = await nft.delegate(aliceSigner.address)
+    const delegateReceipt = await delegateTx.wait(1)
+    console.log("Delegation completed in block:", delegateReceipt?.blockNumber)
 
-    // const votingPowerAfter = await nft.getVotes(aliceSigner.address)
-    // console.log("Final voting power:", votingPowerAfter)
+    const votingPowerAfter = await nft.getVotes(aliceSigner.address)
+    console.log("Final voting power:", votingPowerAfter)
 
-    // const proposalThreshold = await gov.proposalThreshold()
-    // console.log("Proposal threshold:", proposalThreshold)
+    const proposalThreshold = await gov.proposalThreshold()
+    console.log("Proposal threshold:", proposalThreshold)
 
     console.log("Creating proposal to add new member...")
 

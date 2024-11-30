@@ -30,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
-            args: [deployer, firstMembers, uri, name, symbol],
+            args: [11155111, deployer, firstMembers, uri, name, symbol],
             salt: hre.ethers.id("NFT-v2"),
             log: true,
             waitConfirmations: 1
@@ -50,6 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/Gov.sol:Gov",
             args: [
+                11155111,
                 nftAddress,
                 manifesto,
                 daoName,
@@ -85,6 +86,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: nftAddress,
                 contract: "contracts/variants/crosschain/NFT.sol:NFT",
                 constructorArguments: [
+                    11155111,
                     deployer,
                     firstMembers,
                     uri,
@@ -103,6 +105,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: govAddress,
                 contract: "contracts/variants/crosschain/Gov.sol:Gov",
                 constructorArguments: [
+                    11155111,
                     nftAddress,
                     manifesto,
                     daoName,

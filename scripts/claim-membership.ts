@@ -7,8 +7,10 @@ async function main() {
         throw new Error("Please set JUNGLE private key in your .env file")
     }
 
-    const NFT_ADDRESS = "0xcd4e16B3d3b7f1f13124B650Fb633782009B249F"
-    const provider = ethers.provider
+    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
+    const provider = new ethers.JsonRpcProvider(
+        process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+    )
     const jungleSigner = new ethers.Wallet(JUNGLE_PRIVATE_KEY, provider)
 
     console.log("Using address:", jungleSigner.address)
@@ -21,28 +23,19 @@ async function main() {
         )
     }
 
-    // Get contract instance using the factory
     const nft = NFT__factory.connect(NFT_ADDRESS, jungleSigner)
 
-    console.log("Checking if membership exists on OP Sepolia...")
-    const exists = await nft.membershipExistsHere(2)
-    if (exists) {
-        console.log("Membership already exists on this chain!")
-        return
-    }
-
-    // Define the proof and metadata
     const proof =
-        "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bdc0e420ab9ba144213588a95fa1e5e63ceff1be6fe9bdb2e5334af23a74801d92d931a3e1917421104a6ed2861f79aa06de9a09"
-    const metadataUri =
-        "https://bafkreicj62l5xu6pk2xx7x7n6b7rpunxb4ehlh7fevyjapid3556smuz4y.ipfs.w3s.link/"
+        "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bdc0e420ab9ba144213588a95fa1e5e63ceff1be0000000000000000000000000000000000000000000000000000000000000080469f7c23ba8094fc60d812caea153b06cc07e9b5bf2c0bb384ef9ed462f2251b000000000000000000000000000000000000000000000000000000000000005268747470733a2f2f6261666b726569636a36326c35787536706b3278783778376e3662377270756e78623465686c6837666576796a6170696433353536736d757a34792e697066732e7733732e6c696e6b2f0000000000000000000000000000"
 
     try {
-        console.log("Submitting claim transaction...")
+        console.log("Simulating claim transaction...")
+        await nft.claimMint.staticCall(proof)
+        console.log("✅ Simulation successful")
 
-        // Direct contract call
-        const tx = await nft.claimMembership(proof, metadataUri, {
-            gasLimit: 300000
+        console.log("Submitting claim transaction...")
+        const tx = await nft.claimMint(proof, {
+            gasLimit: 500000
         })
 
         console.log("Transaction submitted:", tx.hash)
@@ -51,15 +44,29 @@ async function main() {
         const receipt = await tx.wait()
         console.log("Membership claimed successfully!")
 
-        // Verify the ownership
-        const owner = await nft.ownerOf(2)
-        console.log("Token ID 2 is now owned by:", owner)
+        // Get token ID from event
+        const claimEvent = receipt?.logs.find(log => {
+            try {
+                return nft.interface.parseLog(log)?.name === "MembershipClaimed"
+            } catch {
+                return false
+            }
+        })
+
+        if (claimEvent) {
+            const parsedEvent = nft.interface.parseLog(claimEvent)
+            const tokenId = parsedEvent?.args?.tokenId
+            console.log("Claimed token ID:", tokenId)
+        }
     } catch (error: any) {
         console.error("\nError details:", error)
         if (error.data) {
-            // Get the revert reason
-            const reason = error.data.toString()
-            console.error("Revert reason:", reason)
+            try {
+                const decodedError = nft.interface.parseError(error.data)
+                console.error("Decoded error:", decodedError)
+            } catch (e) {
+                console.error("Raw error data:", error.data)
+            }
         }
         throw error
     }
