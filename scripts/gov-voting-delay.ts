@@ -23,9 +23,9 @@ async function main() {
         throw new Error("Please set required private keys in your .env file")
     }
 
-    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
-    const GOV_ADDRESS = "0x76f53bf2ad89DaB4d8b666b9a5C6610C2C2e0EfC"
-    const TOKEN_ID = 2 // Token ID to burn
+    const NFT_ADDRESS = "0xD48b0a8126FD74b1c4B603E70c8151040ff269A1"
+    const GOV_ADDRESS = "0x66ae98E83247C450919acA3B2DE80D8E655B9478"
+    const NEW_VOTING_DELAY = 48n // 48 blocks
 
     const provider = new ethers.JsonRpcProvider(
         process.env.SEPOLIA_RPC_ENDPOINT_URL
@@ -38,9 +38,9 @@ async function main() {
     const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
 
-    // Check voting power and delegate if needed
+    // Check current voting power
     const votingPower = await nft.getVotes(aliceSigner.address)
-    console.log("Current voting power:", votingPower.toString())
+    console.log("Current voting power:", votingPower)
 
     if (votingPower === 0n) {
         console.log("Delegating voting power...")
@@ -53,12 +53,19 @@ async function main() {
         )
     }
 
-    const burnCall = nft.interface.encodeFunctionData("govBurn", [TOKEN_ID])
-    const description = `Burn token ${TOKEN_ID} ${Date.now()}`
+    const delayCall = gov.interface.encodeFunctionData("setVotingDelay", [
+        NEW_VOTING_DELAY
+    ])
+    const description = `Update voting delay to ${NEW_VOTING_DELAY} blocks ${Date.now()}`
 
     try {
-        console.log("\nCreating proposal to burn token", TOKEN_ID)
-        const tx = await gov.propose([nft.target], [0], [burnCall], description)
+        console.log("\nCreating proposal to update voting delay")
+        const tx = await gov.propose(
+            [gov.target],
+            [0],
+            [delayCall],
+            description
+        )
 
         console.log("Proposal transaction submitted:", tx.hash)
         const receipt = await tx.wait()
@@ -68,7 +75,6 @@ async function main() {
             receipt.logs[0] instanceof ethers.EventLog
                 ? receipt.logs[0].args?.[0]
                 : null
-
         console.log("Proposal ID:", proposalId)
         if (!proposalId) throw new Error("No proposal ID found")
 
@@ -89,14 +95,13 @@ async function main() {
         if (currentState === "Active") {
             console.log("\nCasting vote...")
             const voteTx = await gov.castVote(proposalId, 1)
-            console.log("Vote transaction submitted:", voteTx.hash)
             await voteTx.wait()
             console.log("Vote cast successfully")
 
             // Wait for proposal to succeed
             console.log("\nWaiting for proposal to succeed...")
             let successCounter = 0
-            const maxAttempts = 60 // 5 minutes with 5s intervals
+            const maxAttempts = 60
 
             while (successCounter < maxAttempts) {
                 state = await gov.state(proposalId)
@@ -129,13 +134,12 @@ async function main() {
             console.log("\nExecuting proposal...")
             const executeTx = await gov
                 .connect(sepoliaSigner)
-                .execute([nft.target], [0], [burnCall], ethers.id(description))
+                .execute([gov.target], [0], [delayCall], ethers.id(description))
 
             console.log("Execution transaction submitted:", executeTx.hash)
             await executeTx.wait()
-            console.log("\nToken burned successfully! 🎉")
-        } else {
-            throw new Error(`Unexpected proposal state: ${currentState}`)
+            console.log("\nVoting delay updated successfully! 🎉")
+            console.log("New voting delay:", await gov.votingDelay())
         }
     } catch (error: any) {
         console.error("\nError details:", error)

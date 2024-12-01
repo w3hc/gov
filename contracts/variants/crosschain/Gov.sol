@@ -1,4 +1,6 @@
-// Gov.sol
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.20;
+
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
@@ -8,8 +10,8 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFractio
 /**
  * @title Cross-chain Governance Contract
  * @author Web3 Hackers Collective
- * @notice Implements DAO governance with cross-chain support
- * @dev Extends OpenZeppelin Governor with cross-chain manifesto updates
+ * @notice Implementation of a DAO with cross-chain synchronization capabilities
+ * @dev Extends OpenZeppelin's Governor contract with cross-chain parameter updates
  * @custom:security-contact julien@strat.cc
  */
 contract Gov is
@@ -22,24 +24,34 @@ contract Gov is
     /// @notice Chain ID where this contract was originally deployed
     uint256 public immutable home;
 
-    /// @notice CID of the DAO's manifesto
+    /// @notice IPFS CID of the DAO's manifesto
     string public manifesto;
 
-    /// @dev Operation types for cross-chain actions
-    enum OperationType {
-        SET_MANIFESTO
-    }
-
-    /**
-     * @notice Emitted when the manifesto is updated
-     * @param oldManifesto Previous manifesto CID
-     * @param newManifesto New manifesto CID
-     */
+    /// @notice Emitted when the manifesto is updated
+    /// @param oldManifesto Previous manifesto CID
+    /// @param newManifesto New manifesto CID
     event ManifestoUpdated(string oldManifesto, string newManifesto);
 
-    /**
-     * @notice Restricts operations to the home chain
-     */
+    /// @notice Types of operations that can be synchronized across chains
+    enum OperationType {
+        SET_MANIFESTO,
+        UPDATE_VOTING_DELAY,
+        UPDATE_VOTING_PERIOD,
+        UPDATE_PROPOSAL_THRESHOLD,
+        UPDATE_QUORUM
+    }
+
+    /// @notice Emitted when a governance parameter is updated
+    /// @param operationType Type of parameter that was updated
+    /// @param oldValue Previous value of the parameter
+    /// @param newValue New value of the parameter
+    event GovernanceParameterUpdated(
+        OperationType indexed operationType,
+        uint256 oldValue,
+        uint256 newValue
+    );
+
+    /// @notice Restricts functions to be called only on the home chain
     modifier onlyHomeChain() {
         require(block.chainid == home, "Operation only allowed on home chain");
         _;
@@ -47,47 +59,51 @@ contract Gov is
 
     /**
      * @notice Initializes the governance contract
+     * @dev Sets up initial governance parameters and manifesto
      * @param _home Chain ID where this contract is considered home
-     * @param _token The voting token contract
-     * @param _manifesto Initial manifesto CID
+     * @param _token The voting token contract address
+     * @param _manifestoCid Initial manifesto CID
      * @param _name Name of the governance contract
      * @param _votingDelay Time before voting begins
-     * @param _votingPeriod Duration of voting
-     * @param _votingThreshold Minimum votes needed for proposal
-     * @param _quorum Minimum participation percentage
+     * @param _votingPeriod Duration of voting period
+     * @param _proposalThreshold Minimum votes needed to create a proposal
+     * @param _quorum Minimum participation percentage required
      */
     constructor(
         uint256 _home,
         IVotes _token,
-        string memory _manifesto,
+        string memory _manifestoCid,
         string memory _name,
         uint48 _votingDelay,
         uint32 _votingPeriod,
-        uint256 _votingThreshold,
+        uint256 _proposalThreshold,
         uint256 _quorum
     )
         Governor(_name)
-        GovernorSettings(_votingDelay, _votingPeriod, _votingThreshold)
+        GovernorSettings(_votingDelay, _votingPeriod, _proposalThreshold)
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(_quorum)
     {
         home = _home;
-        manifesto = _manifesto;
+        manifesto = _manifestoCid;
     }
 
     /**
-     * @notice Updates the manifesto CID on home chain
-     * @dev Only callable through governance on home chain
+     * @notice Updates the DAO's manifesto
+     * @dev Can only be called through governance on home chain
      * @param newManifesto New manifesto CID
      */
     function setManifesto(string memory newManifesto) public onlyGovernance onlyHomeChain {
-        _setManifestoOriginal(newManifesto);
+        string memory oldManifesto = manifesto;
+        manifesto = newManifesto;
+        emit ManifestoUpdated(oldManifesto, newManifesto);
     }
 
     /**
-     * @notice Generates proof for cross-chain manifesto updates
-     * @param newManifesto New manifesto CID
-     * @return Encoded proof data
+     * @notice Generates proof for cross-chain manifesto update
+     * @dev Can only be called on home chain
+     * @param newManifesto New manifesto CID to generate proof for
+     * @return Encoded proof data for manifesto update
      */
     function generateManifestoProof(
         string memory newManifesto
@@ -102,7 +118,8 @@ contract Gov is
 
     /**
      * @notice Claims a manifesto update on a foreign chain
-     * @param proof Proof generated on home chain
+     * @dev Verifies and applies manifesto updates from home chain
+     * @param proof Proof generated by home chain
      */
     function claimManifestoUpdate(bytes memory proof) external {
         (string memory newManifesto, bytes32 digest) = abi.decode(proof, (string, bytes32));
@@ -115,41 +132,154 @@ contract Gov is
         );
         require(digest == expectedDigest, "Invalid manifesto proof");
 
-        _setManifestoOriginal(newManifesto);
-    }
-
-    /**
-     * @notice Internal function to update manifesto
-     * @param newManifesto New manifesto CID
-     */
-    function _setManifestoOriginal(string memory newManifesto) private {
         string memory oldManifesto = manifesto;
         manifesto = newManifesto;
         emit ManifestoUpdated(oldManifesto, newManifesto);
     }
 
-    // Required Governor Overrides
+    /**
+     * @notice Updates the voting delay parameter
+     * @dev Can only be called through governance on home chain
+     * @param newVotingDelay New voting delay value (in blocks)
+     */
+    function setVotingDelay(
+        uint48 newVotingDelay
+    ) public virtual override onlyGovernance onlyHomeChain {
+        uint256 oldValue = votingDelay();
+        _setVotingDelay(newVotingDelay);
+        emit GovernanceParameterUpdated(
+            OperationType.UPDATE_VOTING_DELAY,
+            oldValue,
+            newVotingDelay
+        );
+    }
 
     /**
-     * @notice Returns the voting delay
-     * @return Delay before voting starts
+     * @notice Updates the voting period parameter
+     * @dev Can only be called through governance on home chain
+     * @param newVotingPeriod New voting period value (in blocks)
+     */
+    function setVotingPeriod(
+        uint32 newVotingPeriod
+    ) public virtual override onlyGovernance onlyHomeChain {
+        uint256 oldValue = votingPeriod();
+        _setVotingPeriod(newVotingPeriod);
+        emit GovernanceParameterUpdated(
+            OperationType.UPDATE_VOTING_PERIOD,
+            oldValue,
+            newVotingPeriod
+        );
+    }
+
+    /**
+     * @notice Updates the proposal threshold parameter
+     * @dev Can only be called through governance on home chain
+     * @param newProposalThreshold New proposal threshold value
+     */
+    function setProposalThreshold(
+        uint256 newProposalThreshold
+    ) public virtual override onlyGovernance onlyHomeChain {
+        uint256 oldValue = proposalThreshold();
+        _setProposalThreshold(newProposalThreshold);
+        emit GovernanceParameterUpdated(
+            OperationType.UPDATE_PROPOSAL_THRESHOLD,
+            oldValue,
+            newProposalThreshold
+        );
+    }
+
+    /**
+     * @notice Updates the quorum numerator
+     * @dev Can only be called through governance on home chain
+     * @param newQuorumNumerator New quorum numerator value (percentage * 100)
+     */
+    function updateQuorumNumerator(
+        uint256 newQuorumNumerator
+    ) public virtual override(GovernorVotesQuorumFraction) onlyGovernance onlyHomeChain {
+        uint256 oldValue = quorumNumerator();
+        _updateQuorumNumerator(newQuorumNumerator);
+        emit GovernanceParameterUpdated(OperationType.UPDATE_QUORUM, oldValue, newQuorumNumerator);
+    }
+
+    /**
+     * @notice Generates proof for cross-chain parameter updates
+     * @dev Can only be called on home chain
+     * @param operationType Type of parameter being updated
+     * @param value Encoded value for the parameter update
+     * @return Encoded proof data for parameter update
+     */
+    function generateParameterProof(
+        OperationType operationType,
+        bytes memory value
+    ) external view returns (bytes memory) {
+        require(block.chainid == home, "Proofs can only be generated on home chain");
+        bytes32 message = keccak256(abi.encodePacked(address(this), uint8(operationType), value));
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+        return abi.encode(operationType, value, digest);
+    }
+
+    /**
+     * @notice Claims a parameter update on a foreign chain
+     * @dev Verifies and applies parameter updates from home chain
+     * @param proof Proof generated by home chain
+     */
+    function claimParameterUpdate(bytes memory proof) external {
+        (OperationType operationType, bytes memory value, bytes32 digest) = abi.decode(
+            proof,
+            (OperationType, bytes, bytes32)
+        );
+
+        bytes32 message = keccak256(abi.encodePacked(address(this), uint8(operationType), value));
+        bytes32 expectedDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
+        );
+        require(digest == expectedDigest, "Invalid parameter update proof");
+
+        if (operationType == OperationType.UPDATE_VOTING_DELAY) {
+            uint48 newValue = uint48(bytes6(value));
+            uint256 oldValue = votingDelay();
+            _setVotingDelay(newValue);
+            emit GovernanceParameterUpdated(operationType, oldValue, newValue);
+        } else if (operationType == OperationType.UPDATE_VOTING_PERIOD) {
+            uint32 newValue = uint32(bytes4(value));
+            uint256 oldValue = votingPeriod();
+            _setVotingPeriod(newValue);
+            emit GovernanceParameterUpdated(operationType, oldValue, newValue);
+        } else if (operationType == OperationType.UPDATE_PROPOSAL_THRESHOLD) {
+            uint256 newValue = abi.decode(value, (uint256));
+            uint256 oldValue = proposalThreshold();
+            _setProposalThreshold(newValue);
+            emit GovernanceParameterUpdated(operationType, oldValue, newValue);
+        } else if (operationType == OperationType.UPDATE_QUORUM) {
+            uint256 newValue = abi.decode(value, (uint256));
+            uint256 oldValue = quorumNumerator();
+            _updateQuorumNumerator(newValue);
+            emit GovernanceParameterUpdated(operationType, oldValue, newValue);
+        }
+    }
+
+    // Required overrides
+
+    /**
+     * @notice Gets the current voting delay
+     * @return Current voting delay in blocks
      */
     function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingDelay();
     }
 
     /**
-     * @notice Returns the voting period duration
-     * @return Duration of the voting period
+     * @notice Gets the current voting period
+     * @return Current voting period in blocks
      */
     function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingPeriod();
     }
 
     /**
-     * @notice Returns the quorum requirement
+     * @notice Gets the quorum required for a specific block
      * @param blockNumber Block number to check quorum for
-     * @return Required number of votes for quorum
+     * @return Minimum number of votes required for quorum
      */
     function quorum(
         uint256 blockNumber
@@ -158,8 +288,8 @@ contract Gov is
     }
 
     /**
-     * @notice Returns the proposal threshold
-     * @return Minimum votes needed to create a proposal
+     * @notice Gets the current proposal threshold
+     * @return Minimum number of votes required to create a proposal
      */
     function proposalThreshold()
         public

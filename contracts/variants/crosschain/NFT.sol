@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-// NFT.sol
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -35,11 +34,12 @@ contract NFT is
     /// @notice Tracks token existence on each chain
     mapping(uint256 => bool) public existsOnChain;
 
-    /// @dev Operation types for cross-chain actions
+    /// @notice Operation types for cross-chain message verification
+    /// @dev Used to differentiate between different types of cross-chain operations
     enum OperationType {
-        MINT,
-        BURN,
-        SET_METADATA
+        MINT, // Mint new token
+        BURN, // Burn existing token
+        SET_METADATA // Update token metadata
     }
 
     /**
@@ -70,6 +70,7 @@ contract NFT is
 
     /**
      * @notice Restricts operations to the home chain
+     * @dev Used to ensure certain operations only occur on the chain where the contract was originally deployed
      */
     modifier onlyHomeChain() {
         require(block.chainid == home, "Operation only allowed on home chain");
@@ -128,15 +129,16 @@ contract NFT is
      * @param uri New metadata URI
      */
     function setMetadata(uint256 tokenId, string memory uri) public onlyOwner onlyHomeChain {
-        _setMetada(tokenId, uri);
+        _updateTokenMetadata(tokenId, uri);
     }
 
     // Cross-chain Operation Proofs
 
     /**
      * @notice Generates proof for cross-chain minting
+     * @dev Creates a signed message proving token ownership and metadata
      * @param tokenId ID of token
-     * @return Encoded proof data
+     * @return Encoded proof data containing token details and signature
      */
     function generateMintProof(uint256 tokenId) external view returns (bytes memory) {
         require(block.chainid == home, "Proofs can only be generated on home chain");
@@ -153,8 +155,9 @@ contract NFT is
 
     /**
      * @notice Generates proof for cross-chain burning
+     * @dev Creates a signed message proving burn authorization
      * @param tokenId ID of token to burn
-     * @return Encoded proof data
+     * @return Encoded proof data containing burn details and signature
      */
     function generateBurnProof(uint256 tokenId) external view returns (bytes memory) {
         require(block.chainid == home, "Proofs can only be generated on home chain");
@@ -167,9 +170,10 @@ contract NFT is
 
     /**
      * @notice Generates proof for cross-chain metadata updates
+     * @dev Creates a signed message proving metadata update authorization
      * @param tokenId Token ID to update
      * @param uri New metadata URI
-     * @return Encoded proof data
+     * @return Encoded proof data containing update details and signature
      */
     function generateMetadataProof(
         uint256 tokenId,
@@ -185,6 +189,7 @@ contract NFT is
 
     /**
      * @notice Claims a membership on a foreign chain
+     * @dev Verifies proof and mints token on foreign chain
      * @param proof Proof generated on home chain
      */
     function claimMint(bytes memory proof) external {
@@ -212,6 +217,7 @@ contract NFT is
 
     /**
      * @notice Claims a burn operation on a foreign chain
+     * @dev Verifies proof and burns token on foreign chain
      * @param proof Proof generated on home chain
      */
     function claimBurn(bytes memory proof) external {
@@ -234,6 +240,7 @@ contract NFT is
 
     /**
      * @notice Claims a metadata update on a foreign chain
+     * @dev Verifies proof and updates token metadata on foreign chain
      * @param proof Proof generated on home chain
      */
     function claimMetadataUpdate(bytes memory proof) external {
@@ -257,6 +264,11 @@ contract NFT is
 
     // Internal Functions
 
+    /**
+     * @dev Internal function to mint new token with metadata
+     * @param to Address receiving the token
+     * @param uri Metadata URI for the token
+     */
     function _mint(address to, string memory uri) private {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
@@ -264,6 +276,10 @@ contract NFT is
         existsOnChain[tokenId] = true;
     }
 
+    /**
+     * @dev Internal function to burn token through governance
+     * @param tokenId ID of token to burn
+     */
     function _govBurn(uint256 tokenId) private {
         address owner = ownerOf(tokenId);
         _update(address(0), tokenId, owner);
@@ -271,13 +287,25 @@ contract NFT is
         emit MembershipRevoked(tokenId, owner);
     }
 
-    function _setMetada(uint256 tokenId, string memory uri) private {
+    /**
+     * @dev Internal function to update token metadata
+     * @param tokenId ID of token to update
+     * @param uri New metadata URI
+     */
+    function _updateTokenMetadata(uint256 tokenId, string memory uri) private {
         _setTokenURI(tokenId, uri);
         emit MetadataUpdated(tokenId, uri);
     }
 
     // Required Overrides
 
+    /**
+     * @dev Override of ERC721's _update to make tokens non-transferable
+     * @param to Target address (only allowed to be zero address for burns)
+     * @param tokenId Token ID being updated
+     * @param auth Address initiating the update
+     * @return Previous owner of the token
+     */
     function _update(
         address to,
         uint256 tokenId,
@@ -287,10 +315,12 @@ contract NFT is
         return super._update(to, tokenId, auth);
     }
 
-    /// @notice Increases an account's token balance
-    /// @dev Internal function required by inherited contracts
-    /// @param account Address to increase balance for
-    /// @param value Amount to increase by
+    /**
+     * @notice Increases an account's token balance
+     * @dev Internal function required by inherited contracts
+     * @param account Address to increase balance for
+     * @param value Amount to increase by
+     */
     function _increaseBalance(
         address account,
         uint128 value
@@ -298,25 +328,44 @@ contract NFT is
         super._increaseBalance(account, value);
     }
 
-    /// @notice Gets the token URI
-    /// @param tokenId ID of the token
-    /// @return URI string for the token metadata
+    /**
+     * @notice Gets the token URI
+     * @dev Returns the metadata URI for a given token
+     * @param tokenId ID of the token
+     * @return URI string for the token metadata
+     */
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
+    /**
+     * @notice Checks if the contract supports a given interface
+     * @dev Implements interface detection for ERC721 and extensions
+     * @param interfaceId Interface identifier to check
+     * @return bool True if the interface is supported
+     */
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(ERC721, ERC721Enumerable, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @notice Gets the current timestamp
+     * @dev Used for voting snapshots, returns block timestamp as uint48
+     * @return Current block timestamp
+     */
     function clock() public view override returns (uint48) {
         return uint48(block.timestamp);
     }
 
+    /**
+     * @notice Gets the clock mode for voting snapshots
+     * @dev Returns a description of how the clock value should be interpreted
+     * @return String indicating timestamp-based clock mode
+     */
     function CLOCK_MODE() public pure override returns (string memory) {
         return "mode=timestamp";
     }
