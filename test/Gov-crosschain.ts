@@ -367,6 +367,185 @@ describe("Crosschain Gov", function () {
                 "Manifesto proof digest verification failed"
             )
         })
+        describe("Governance Parameter Proofs", () => {
+            it("should verify voting delay proof correctly", async function () {
+                const newVotingDelay = 48n
+                const value = ethers.solidityPacked(
+                    ["uint48"],
+                    [newVotingDelay]
+                )
+
+                // Generate proof on home chain
+                const proof = await gov.generateParameterProof(
+                    1, // UPDATE_VOTING_DELAY
+                    value
+                )
+
+                // Decode the proof to verify its contents
+                const [operationType, proofValue, digest] =
+                    ethers.AbiCoder.defaultAbiCoder().decode(
+                        ["uint8", "bytes", "bytes32"],
+                        proof
+                    )
+
+                // Verify the decoded basic values
+                expect(operationType).to.equal(1) // UPDATE_VOTING_DELAY
+                expect(proofValue).to.equal(value)
+
+                // Reproduce the proof verification logic from the contract
+                const govAddress = await gov.getAddress()
+                const message = ethers.solidityPackedKeccak256(
+                    ["address", "uint8", "bytes"],
+                    [govAddress, operationType, value]
+                )
+
+                // Create the expected digest (mimicking the contract's verification)
+                const expectedDigest = ethers.keccak256(
+                    ethers.solidityPacked(
+                        ["string", "bytes32"],
+                        ["\x19Ethereum Signed Message:\n32", message]
+                    )
+                )
+
+                // Verify the digest matches
+                expect(digest).to.equal(
+                    expectedDigest,
+                    "Proof digest verification failed"
+                )
+            })
+
+            it("should verify voting period proof correctly", async function () {
+                const newVotingPeriod = 50400n
+                const value = ethers.solidityPacked(
+                    ["uint32"],
+                    [newVotingPeriod]
+                )
+
+                // Generate proof on home chain
+                const proof = await gov.generateParameterProof(
+                    2, // UPDATE_VOTING_PERIOD
+                    value
+                )
+
+                // Decode the proof to verify its contents
+                const [operationType, proofValue, digest] =
+                    ethers.AbiCoder.defaultAbiCoder().decode(
+                        ["uint8", "bytes", "bytes32"],
+                        proof
+                    )
+
+                // Verify the decoded basic values
+                expect(operationType).to.equal(2) // UPDATE_VOTING_PERIOD
+                expect(proofValue).to.equal(value)
+
+                // Reproduce the proof verification logic from the contract
+                const govAddress = await gov.getAddress()
+                const message = ethers.solidityPackedKeccak256(
+                    ["address", "uint8", "bytes"],
+                    [govAddress, operationType, value]
+                )
+
+                const expectedDigest = ethers.keccak256(
+                    ethers.solidityPacked(
+                        ["string", "bytes32"],
+                        ["\x19Ethereum Signed Message:\n32", message]
+                    )
+                )
+
+                expect(digest).to.equal(
+                    expectedDigest,
+                    "Proof digest verification failed"
+                )
+            })
+
+            it("should verify proposal threshold proof correctly", async function () {
+                const newThreshold = ethers.parseEther("100")
+                const value = ethers.AbiCoder.defaultAbiCoder().encode(
+                    ["uint256"],
+                    [newThreshold]
+                )
+
+                // Generate proof on home chain
+                const proof = await gov.generateParameterProof(
+                    3, // UPDATE_PROPOSAL_THRESHOLD
+                    value
+                )
+
+                // Decode the proof to verify its contents
+                const [operationType, proofValue, digest] =
+                    ethers.AbiCoder.defaultAbiCoder().decode(
+                        ["uint8", "bytes", "bytes32"],
+                        proof
+                    )
+
+                // Verify the decoded basic values
+                expect(operationType).to.equal(3) // UPDATE_PROPOSAL_THRESHOLD
+                expect(proofValue).to.equal(value)
+
+                // Reproduce the proof verification logic from the contract
+                const govAddress = await gov.getAddress()
+                const message = ethers.solidityPackedKeccak256(
+                    ["address", "uint8", "bytes"],
+                    [govAddress, operationType, value]
+                )
+
+                const expectedDigest = ethers.keccak256(
+                    ethers.solidityPacked(
+                        ["string", "bytes32"],
+                        ["\x19Ethereum Signed Message:\n32", message]
+                    )
+                )
+
+                expect(digest).to.equal(
+                    expectedDigest,
+                    "Proof digest verification failed"
+                )
+            })
+
+            it("should verify quorum proof correctly", async function () {
+                const newQuorum = 20n
+                const value = ethers.AbiCoder.defaultAbiCoder().encode(
+                    ["uint256"],
+                    [newQuorum]
+                )
+
+                // Generate proof on home chain
+                const proof = await gov.generateParameterProof(
+                    4, // UPDATE_QUORUM
+                    value
+                )
+
+                // Decode the proof to verify its contents
+                const [operationType, proofValue, digest] =
+                    ethers.AbiCoder.defaultAbiCoder().decode(
+                        ["uint8", "bytes", "bytes32"],
+                        proof
+                    )
+
+                // Verify the decoded basic values
+                expect(operationType).to.equal(4) // UPDATE_QUORUM
+                expect(proofValue).to.equal(value)
+
+                // Reproduce the proof verification logic from the contract
+                const govAddress = await gov.getAddress()
+                const message = ethers.solidityPackedKeccak256(
+                    ["address", "uint8", "bytes"],
+                    [govAddress, operationType, value]
+                )
+
+                const expectedDigest = ethers.keccak256(
+                    ethers.solidityPacked(
+                        ["string", "bytes32"],
+                        ["\x19Ethereum Signed Message:\n32", message]
+                    )
+                )
+
+                expect(digest).to.equal(
+                    expectedDigest,
+                    "Proof digest verification failed"
+                )
+            })
+        })
     })
 
     describe("Delegation Mechanics", function () {

@@ -33,19 +33,19 @@ async function main() {
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
 
     // Check current voting power
-    const votingPowerBefore = await nft.getVotes(aliceSigner.address)
-    console.log("Current voting power:", votingPowerBefore)
+    const votingPower = await nft.getVotes(aliceSigner.address)
+    console.log("Current voting power:", votingPower)
 
-    console.log("Delegating voting power...")
-    const delegateTx = await nft.delegate(aliceSigner.address)
-    const delegateReceipt = await delegateTx.wait(1)
-    console.log("Delegation completed in block:", delegateReceipt?.blockNumber)
-
-    const votingPowerAfter = await nft.getVotes(aliceSigner.address)
-    console.log("Final voting power:", votingPowerAfter)
-
-    const proposalThreshold = await gov.proposalThreshold()
-    console.log("Proposal threshold:", proposalThreshold)
+    if (votingPower === 0n) {
+        console.log("Delegating voting power...")
+        const tx = await nft.delegate(aliceSigner.address)
+        await tx.wait(3)
+        console.log("Delegation completed")
+        console.log(
+            "New voting power:",
+            (await nft.getVotes(aliceSigner.address)).toString()
+        )
+    }
 
     console.log("Creating proposal to add new member...")
 

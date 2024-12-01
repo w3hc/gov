@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
             args: [11155111, deployer, firstMembers, uri, name, symbol],
-            salt: hre.ethers.id("NFT-v2"),
+            salt: hre.ethers.id("NFT"),
             log: true,
             waitConfirmations: 1
         }
@@ -56,14 +56,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 votingThreshold,
                 quorum
             ],
-            salt: hre.ethers.id("Gov-v2"),
+            salt: hre.ethers.id("Gov"),
             log: true,
             waitConfirmations: 5
         }
     )
 
-    console.log("Gov contract address:", msg(govAddress))
     await deployGov()
+    console.log("Gov contract address:", msg(govAddress))
 
     // Transfer NFT ownership to Gov
     const nft = await hre.ethers.getContractAt(

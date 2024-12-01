@@ -25,7 +25,7 @@ async function main() {
 
     const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
     const GOV_ADDRESS = "0x76f53bf2ad89DaB4d8b666b9a5C6610C2C2e0EfC"
-    const TOKEN_ID = 2 // Token ID to burn
+    const NEW_MANIFESTO = "ipfs://newManifestoCID" // Replace with your new manifesto CID
 
     const provider = new ethers.JsonRpcProvider(
         process.env.SEPOLIA_RPC_ENDPOINT_URL
@@ -45,7 +45,7 @@ async function main() {
     if (votingPower === 0n) {
         console.log("Delegating voting power...")
         const tx = await nft.delegate(aliceSigner.address)
-        await tx.wait(3)
+        await tx.wait()
         console.log("Delegation completed")
         console.log(
             "New voting power:",
@@ -53,12 +53,24 @@ async function main() {
         )
     }
 
-    const burnCall = nft.interface.encodeFunctionData("govBurn", [TOKEN_ID])
-    const description = `Burn token ${TOKEN_ID} ${Date.now()}`
+    // Get current manifesto for reference
+    const currentManifesto = await gov.manifesto()
+    console.log("\nCurrent manifesto:", currentManifesto)
+    console.log("New manifesto:", NEW_MANIFESTO)
+
+    const manifestoCall = gov.interface.encodeFunctionData("setManifesto", [
+        NEW_MANIFESTO
+    ])
+    const description = `Update manifesto to ${NEW_MANIFESTO} ${Date.now()}`
 
     try {
-        console.log("\nCreating proposal to burn token", TOKEN_ID)
-        const tx = await gov.propose([nft.target], [0], [burnCall], description)
+        console.log("\nCreating proposal to update manifesto...")
+        const tx = await gov.propose(
+            [gov.target],
+            [0],
+            [manifestoCall],
+            description
+        )
 
         console.log("Proposal transaction submitted:", tx.hash)
         const receipt = await tx.wait()
@@ -129,11 +141,20 @@ async function main() {
             console.log("\nExecuting proposal...")
             const executeTx = await gov
                 .connect(sepoliaSigner)
-                .execute([nft.target], [0], [burnCall], ethers.id(description))
+                .execute(
+                    [gov.target],
+                    [0],
+                    [manifestoCall],
+                    ethers.id(description)
+                )
 
             console.log("Execution transaction submitted:", executeTx.hash)
             await executeTx.wait()
-            console.log("\nToken burned successfully! 🎉")
+
+            // Verify the update
+            const newManifesto = await gov.manifesto()
+            console.log("\nManifesto updated successfully!")
+            console.log("New manifesto value:", newManifesto)
         } else {
             throw new Error(`Unexpected proposal state: ${currentState}`)
         }
