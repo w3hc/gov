@@ -64,7 +64,7 @@ async function main() {
         newVotingDelay: 250n,
         rpcUrl: process.env.SEPOLIA_RPC_ENDPOINT_URL,
         aliceKey: process.env.ALICE,
-        sepoliaKey: process.env.SEPOLIA_PRIVATE_KEY
+        sepoliaKey: process.env.SIGNER_PRIVATE_KEY
     }
 
     // Validate environment

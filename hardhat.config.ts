@@ -6,19 +6,15 @@ import * as dotenv from "dotenv"
 dotenv.config()
 
 const {
+    SIGNER_PRIVATE_KEY,
     OPTIMISM_MAINNET_RPC_ENDPOINT_URL,
-    OPTIMISM_MAINNET_PRIVATE_KEY,
     OP_ETHERSCAN_API_KEY,
     BASE_MAINNET_RPC_ENDPOINT_URL,
-    BASE_MAINNET_PRIVATE_KEY,
     BASE_ETHERSCAN_API_KEY,
     SEPOLIA_RPC_ENDPOINT_URL,
-    SEPOLIA_PRIVATE_KEY,
     ETHERSCAN_API_KEY,
     OP_SEPOLIA_RPC_ENDPOINT_URL,
-    OP_SEPOLIA_PRIVATE_KEY,
-    BASE_SEPOLIA_RPC_ENDPOINT_URL,
-    BASE_SEPOLIA_PRIVATE_KEY
+    BASE_SEPOLIA_RPC_ENDPOINT_URL
 } = process.env
 
 const config: HardhatUserConfig = {
@@ -37,7 +33,7 @@ const config: HardhatUserConfig = {
                 SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SEPOLIA_PRIVATE_KEY !== undefined ? [SEPOLIA_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         optimism: {
             chainId: 10,
@@ -45,17 +41,13 @@ const config: HardhatUserConfig = {
                 OPTIMISM_MAINNET_RPC_ENDPOINT_URL ||
                 "https://mainnet.optimism.io",
             accounts:
-                OPTIMISM_MAINNET_PRIVATE_KEY !== undefined
-                    ? [OPTIMISM_MAINNET_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         base: {
             chainId: 8453,
             url: BASE_MAINNET_RPC_ENDPOINT_URL || "https://mainnet.base.org",
             accounts:
-                BASE_MAINNET_PRIVATE_KEY !== undefined
-                    ? [BASE_MAINNET_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         "op-sepolia": {
             chainId: 11155420,
@@ -63,17 +55,13 @@ const config: HardhatUserConfig = {
                 OP_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                OP_SEPOLIA_PRIVATE_KEY !== undefined
-                    ? [OP_SEPOLIA_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         "base-sepolia": {
             chainId: 84532,
             url: BASE_SEPOLIA_RPC_ENDPOINT_URL || "https://sepolia.base.org",
             accounts:
-                BASE_SEPOLIA_PRIVATE_KEY !== undefined
-                    ? [BASE_SEPOLIA_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         }
     },
     solidity: {

@@ -52,7 +52,13 @@ Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your
 
 ### Crosschain
 
-Make sure the contracts are deployed from the same account. 
+Make sure that the deployer wallet address is funded on each notwork you want to deploy to: 
+
+```
+pnpm bal
+```
+
+Then, you can go ahead and deploy: 
 
 ```bash
 pnpm crosschain:sepolia
@@ -61,7 +67,7 @@ pnpm crosschain:op-sepolia
 
 Your DAO will be deployed on every networks at the same address.
 
-Then you can follow these steps to verify that proofs of `safeMint`, `govBurn`, `setMetadata`, `setManifesto`, `setVotingDelay`, and `delegate` can be generated on source chain and claimed on foreign chain: 
+Then you can follow these steps to verify that proofs can be generated on home chain and claimed on foreign chain: 
 
 ```bash
 npx hardhat run scripts/propose.ts --network sepolia
@@ -81,6 +87,9 @@ npx hardhat run scripts/claim-manifesto-update.ts --network op-sepolia
 npx hardhat run scripts/gov-voting-delay.ts --network sepolia
 npx hardhat run scripts/verify-voting-delay-proof.ts --network sepolia
 npx hardhat run scripts/claim-voting-delay.ts --network op-sepolia
+
+npx hardhat run scripts/verify-delegation-proof.ts --network sepolia
+npx hardhat run scripts/claim-delegation.ts --network op-sepolia
 ``` 
 
 ## Security

@@ -38,6 +38,7 @@ contract NFT is
     ) ERC721(_name, _symbol) Ownable(initialOwner) EIP712(_name, "1") {
         for (uint i; i < _firstMembers.length; i++) {
             safeMint(_firstMembers[i], _uri);
+            _delegate(_firstMembers[i], _firstMembers[i]);
         }
     }
 
@@ -63,6 +64,7 @@ contract NFT is
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        _delegate(to, to);
     }
 
     /// @notice Updates the NFT ownership
