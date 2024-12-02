@@ -3,11 +3,20 @@ import { NFT__factory } from "../typechain-types/factories/contracts/variants/cr
 import { NFT } from "../typechain-types/contracts/variants/crosschain/NFT"
 
 async function main() {
-    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
+    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
     const TOKEN_ID = 2 // Token ID that was burned
 
+    // Add the ProofHandler library address
+    const PROOF_HANDLER_ADDRESS = "0x0152ee45780385dACCCCB128D816031CfFe5F36B"
+
+    // Get contract factory with library linking
     const NFTFactory = await ethers.getContractFactory(
-        "contracts/variants/crosschain/NFT.sol:NFT"
+        "contracts/variants/crosschain/NFT.sol:NFT",
+        {
+            libraries: {
+                ProofHandler: PROOF_HANDLER_ADDRESS
+            }
+        }
     )
     const nft = NFT__factory.connect(NFT_ADDRESS, NFTFactory.runner) as NFT
 
@@ -26,7 +35,16 @@ async function main() {
 
     try {
         console.log("\nGenerating burn proof...")
-        const proof = await nft.generateBurnProof(TOKEN_ID)
+
+        const validParams = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["address", "string"],
+            [
+                "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE",
+                "https://bafkreicj62l5xu6pk2xx7x7n6b7rpunxb4ehlh7fevyjapid3556smuz4y.ipfs.w3s.link/"
+            ]
+        )
+
+        const proof = await nft.generateOperationProof(TOKEN_ID, validParams)
         console.log("\nProof for claiming burn on other chains:", proof)
 
         // Log instructions for next steps

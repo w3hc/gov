@@ -7,7 +7,7 @@ async function main() {
         throw new Error("Please set ALICE private key in your .env file")
     }
 
-    const GOV_ADDRESS = "0x66ae98E83247C450919acA3B2DE80D8E655B9478"
+    const GOV_ADDRESS = "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0"
     const provider = new ethers.JsonRpcProvider(
         process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
     )
@@ -15,24 +15,45 @@ async function main() {
 
     const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
 
-    // Replace with actual proof from verify-voting-delay-proof.ts
+    // The proof with nonce 1 we just generated
     const proof =
-        "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000060af755be48da3c6b4e4b637b4bf5df990ea1f0efd338550f5cb38c8e8eb4e89bd00000000000000000000000000000000000000000000000000000000000000060000000000300000000000000000000000000000000000000000000000000000"
+        "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001d6e24169a86f648dc2eb3d5607c83873e546b036409af044ff2fe5cfcf32e56300000000000000000000000000000000000000000000000000000000000000060000000000fa0000000000000000000000000000000000000000000000000000"
+
+    console.log("Starting claim process...")
+    console.log("\nCurrent state:")
+    console.log("Address:", aliceSigner.address)
+    console.log("Current voting delay:", await gov.votingDelay())
+
+    // Decode proof for logging
+    const decodedProof = ethers.AbiCoder.defaultAbiCoder().decode(
+        ["uint8", "bytes", "uint256", "bytes32"],
+        proof
+    )
+    console.log("\nProof details:")
+    console.log("Operation type:", decodedProof[0])
+    console.log("Value:", decodedProof[1])
+    console.log("Nonce:", decodedProof[2])
+    console.log("Digest:", decodedProof[3])
 
     try {
-        console.log("Simulating voting delay update claim...")
+        console.log("\nSimulating claim...")
         await gov.claimParameterUpdate.staticCall(proof)
         console.log("✅ Simulation successful")
 
-        console.log("Submitting voting delay update claim...")
+        console.log("\nSubmitting claim transaction...")
         const tx = await gov.claimParameterUpdate(proof, {
             gasLimit: 500000
         })
 
         console.log("Transaction submitted:", tx.hash)
-        await tx.wait()
-        console.log("Voting delay updated successfully!")
-        console.log("New voting delay:", await gov.votingDelay())
+        const receipt = await tx.wait()
+
+        if (receipt?.status === 1) {
+            console.log("\n🎉 Claim successful!")
+            console.log("New voting delay:", await gov.votingDelay())
+        } else {
+            throw new Error("Transaction failed")
+        }
     } catch (error: any) {
         console.error("\nError details:", error)
         if (error.data) {
