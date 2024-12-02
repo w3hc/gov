@@ -87,6 +87,9 @@ npx hardhat run scripts/claim-manifesto-update.ts --network op-sepolia
 npx hardhat run scripts/gov-voting-delay.ts --network sepolia
 npx hardhat run scripts/verify-voting-delay-proof.ts --network sepolia
 npx hardhat run scripts/claim-voting-delay.ts --network op-sepolia
+
+npx hardhat run scripts/verify-delegation-proof.ts --network sepolia
+npx hardhat run scripts/claim-delegation.ts --network op-sepolia
 ``` 
 
 ## Security
