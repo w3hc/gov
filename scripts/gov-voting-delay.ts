@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { Gov__factory } from "../typechain-types/factories/contracts/variants/crosschain/Gov__factory"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
 
+// Utility functions
 function getProposalState(state: number): string {
     const states = [
         "Pending",
@@ -16,133 +17,150 @@ function getProposalState(state: number): string {
     return states[state]
 }
 
-async function main() {
-    const ALICE_PRIVATE_KEY = process.env.ALICE
-    const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY
-    if (!ALICE_PRIVATE_KEY || !SEPOLIA_PRIVATE_KEY) {
-        throw new Error("Please set required private keys in your .env file")
+async function sleep(ms: number) {
+    return new Promise(r => setTimeout(r, ms))
+}
+
+async function waitForProposalState(
+    gov: any,
+    proposalId: bigint,
+    targetState: string,
+    maxAttempts = 60
+) {
+    let currentState = ""
+    let attempt = 0
+
+    while (attempt < maxAttempts) {
+        const state = await gov.state(proposalId)
+        currentState = getProposalState(Number(state))
+
+        process.stdout.write(
+            `Current state: ${currentState} (Attempt ${
+                attempt + 1
+            }/${maxAttempts})\r`
+        )
+
+        if (currentState === targetState) {
+            console.log(`\nReached ${targetState} state!`)
+            return true
+        }
+
+        if (["Defeated", "Expired", "Canceled"].includes(currentState)) {
+            throw new Error(`Proposal ${currentState.toLowerCase()}`)
+        }
+
+        attempt++
+        await sleep(5000)
     }
 
-    const NFT_ADDRESS = "0xD48b0a8126FD74b1c4B603E70c8151040ff269A1"
-    const GOV_ADDRESS = "0x66ae98E83247C450919acA3B2DE80D8E655B9478"
-    const NEW_VOTING_DELAY = 48n // 48 blocks
+    throw new Error(`Timeout waiting for ${targetState} state`)
+}
 
-    const provider = new ethers.JsonRpcProvider(
-        process.env.SEPOLIA_RPC_ENDPOINT_URL
-    )
-    const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SEPOLIA_PRIVATE_KEY, provider)
+async function main() {
+    // Configuration
+    const config = {
+        nftAddress: "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620",
+        govAddress: "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0",
+        newVotingDelay: 250n,
+        rpcUrl: process.env.SEPOLIA_RPC_ENDPOINT_URL,
+        aliceKey: process.env.ALICE,
+        sepoliaKey: process.env.SEPOLIA_PRIVATE_KEY
+    }
 
+    // Validate environment
+    if (!config.aliceKey || !config.sepoliaKey) {
+        throw new Error("Missing required environment variables")
+    }
+
+    // Setup providers and signers
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl)
+    const aliceSigner = new ethers.Wallet(config.aliceKey, provider)
+    const sepoliaSigner = new ethers.Wallet(config.sepoliaKey, provider)
+
+    console.log("Network:", await provider.getNetwork())
     console.log("Connected with address:", aliceSigner.address)
+    console.log("Block number:", await provider.getBlockNumber())
 
-    const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
-    const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
+    // Contract connections
+    const gov = Gov__factory.connect(config.govAddress, aliceSigner)
+    const nft = NFT__factory.connect(config.nftAddress, aliceSigner)
 
-    // Check current voting power
+    // Check voting power
     const votingPower = await nft.getVotes(aliceSigner.address)
-    console.log("Current voting power:", votingPower)
+    console.log("Current voting power:", votingPower.toString())
 
     if (votingPower === 0n) {
-        console.log("Delegating voting power...")
+        console.log("\nDelegating voting power...")
         const tx = await nft.delegate(aliceSigner.address)
+        console.log("Delegation tx:", tx.hash)
         await tx.wait(3)
-        console.log("Delegation completed")
-        console.log(
-            "New voting power:",
-            (await nft.getVotes(aliceSigner.address)).toString()
-        )
+        const newPower = await nft.getVotes(aliceSigner.address)
+        console.log("New voting power:", newPower.toString())
     }
 
+    // Prepare proposal
+    const description = `Update voting delay to ${
+        config.newVotingDelay
+    } blocks [${Date.now()}]`
     const delayCall = gov.interface.encodeFunctionData("setVotingDelay", [
-        NEW_VOTING_DELAY
+        config.newVotingDelay
     ])
-    const description = `Update voting delay to ${NEW_VOTING_DELAY} blocks ${Date.now()}`
 
     try {
-        console.log("\nCreating proposal to update voting delay")
-        const tx = await gov.propose(
+        // Create proposal
+        console.log("\nCreating proposal...")
+        console.log("Description:", description)
+
+        const proposeTx = await gov.propose(
             [gov.target],
             [0],
             [delayCall],
             description
         )
+        console.log("Proposal tx submitted:", proposeTx.hash)
 
-        console.log("Proposal transaction submitted:", tx.hash)
-        const receipt = await tx.wait()
+        const receipt = await proposeTx.wait()
         if (!receipt) throw new Error("No receipt received")
 
         const proposalId =
             receipt.logs[0] instanceof ethers.EventLog
                 ? receipt.logs[0].args?.[0]
                 : null
-        console.log("Proposal ID:", proposalId)
+
         if (!proposalId) throw new Error("No proposal ID found")
+        console.log("Proposal ID:", proposalId)
 
-        // Wait for proposal to become active
+        // Wait for active state
         console.log("\nWaiting for proposal to become active...")
-        let state = await gov.state(proposalId)
-        let currentState = getProposalState(Number(state))
-        console.log("Current state:", currentState)
+        await waitForProposalState(gov, proposalId, "Active")
 
-        while (currentState === "Pending") {
-            await new Promise(r => setTimeout(r, 5000))
-            state = await gov.state(proposalId)
-            currentState = getProposalState(Number(state))
-            process.stdout.write(`Current state: ${currentState}\r`)
-        }
-        console.log("\nProposal is now", currentState)
+        // Cast vote
+        console.log("\nCasting vote...")
+        const voteTx = await gov.castVote(proposalId, 1) // 1 = For
+        await voteTx.wait()
+        console.log("Vote cast successfully:", voteTx.hash)
 
-        if (currentState === "Active") {
-            console.log("\nCasting vote...")
-            const voteTx = await gov.castVote(proposalId, 1)
-            await voteTx.wait()
-            console.log("Vote cast successfully")
+        // Wait for success
+        console.log("\nWaiting for proposal to succeed...")
+        await waitForProposalState(gov, proposalId, "Succeeded")
 
-            // Wait for proposal to succeed
-            console.log("\nWaiting for proposal to succeed...")
-            let successCounter = 0
-            const maxAttempts = 60
+        // Execute proposal
+        console.log("\nExecuting proposal...")
+        const executeTx = await gov
+            .connect(sepoliaSigner)
+            .execute([gov.target], [0], [delayCall], ethers.id(description))
 
-            while (successCounter < maxAttempts) {
-                state = await gov.state(proposalId)
-                currentState = getProposalState(Number(state))
-                process.stdout.write(
-                    `Current state: ${currentState} (Attempt ${
-                        successCounter + 1
-                    }/${maxAttempts})\r`
-                )
+        console.log("Execute tx submitted:", executeTx.hash)
+        await executeTx.wait()
 
-                if (currentState === "Succeeded") {
-                    console.log("\nProposal has succeeded!")
-                    break
-                } else if (
-                    currentState === "Defeated" ||
-                    currentState === "Expired"
-                ) {
-                    throw new Error(`Proposal ${currentState.toLowerCase()}`)
-                }
-
-                successCounter++
-                await new Promise(r => setTimeout(r, 5000))
-            }
-
-            if (successCounter >= maxAttempts) {
-                throw new Error("Timeout waiting for proposal to succeed")
-            }
-
-            // Execute proposal
-            console.log("\nExecuting proposal...")
-            const executeTx = await gov
-                .connect(sepoliaSigner)
-                .execute([gov.target], [0], [delayCall], ethers.id(description))
-
-            console.log("Execution transaction submitted:", executeTx.hash)
-            await executeTx.wait()
-            console.log("\nVoting delay updated successfully! 🎉")
-            console.log("New voting delay:", await gov.votingDelay())
-        }
+        // Verify result
+        const newDelay = await gov.votingDelay()
+        console.log("\nVoting delay updated successfully! 🎉")
+        console.log("New voting delay:", newDelay.toString(), "blocks")
     } catch (error: any) {
-        console.error("\nError details:", error)
+        console.error("\nError details:")
+        console.error("Message:", error.message)
+
         if (error.data) {
             try {
                 const decodedError = gov.interface.parseError(error.data)
@@ -151,6 +169,13 @@ async function main() {
                 console.error("Raw error data:", error.data)
             }
         }
+
+        if (error.transaction) {
+            console.error("\nTransaction details:")
+            console.error("To:", error.transaction.to)
+            console.error("Data:", error.transaction.data)
+        }
+
         throw error
     }
 }

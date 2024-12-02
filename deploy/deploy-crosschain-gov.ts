@@ -24,6 +24,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         return new Promise(resolve => setTimeout(resolve, ms))
     }
 
+    // Deploy ProofHandler library
+    const { address: proofHandlerAddress, deploy: deployProofHandler } =
+        await deterministic("ProofHandler", {
+            from: deployer,
+            contract:
+                "contracts/variants/crosschain/ProofHandler.sol:ProofHandler",
+            salt: hre.ethers.id("ProofHandler"),
+            log: true,
+            waitConfirmations: 1
+        })
+
+    console.log("ProofHandler library address:", msg(proofHandlerAddress))
+    await deployProofHandler()
+
     // Deploy NFT
     const { address: nftAddress, deploy: deployNFT } = await deterministic(
         "CrosschainNFT",
@@ -31,6 +45,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
             args: [11155111, deployer, firstMembers, uri, name, symbol],
+            libraries: {
+                ProofHandler: proofHandlerAddress
+            },
             salt: hre.ethers.id("NFT"),
             log: true,
             waitConfirmations: 1
@@ -56,6 +73,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 votingThreshold,
                 quorum
             ],
+            libraries: {
+                ProofHandler: proofHandlerAddress
+            },
             salt: hre.ethers.id("Gov"),
             log: true,
             waitConfirmations: 5
@@ -74,6 +94,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("NFT ownership transferred to Gov")
 
     if (hre.network.name !== "hardhat") {
+        console.log("\nVerifying ProofHandler library...")
+        try {
+            await hre.run("verify:verify", {
+                address: proofHandlerAddress,
+                contract:
+                    "contracts/variants/crosschain/ProofHandler.sol:ProofHandler"
+            })
+            console.log("ProofHandler verification done ✅")
+        } catch (err) {
+            console.log("ProofHandler verification failed:", err)
+        }
+
         console.log("\nVerifying NFT contract...")
         try {
             await hre.run("verify:verify", {
