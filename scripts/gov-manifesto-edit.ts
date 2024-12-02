@@ -18,8 +18,8 @@ function getProposalState(state: number): string {
 
 async function main() {
     const ALICE_PRIVATE_KEY = process.env.ALICE
-    const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY
-    if (!ALICE_PRIVATE_KEY || !SEPOLIA_PRIVATE_KEY) {
+    const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
+    if (!ALICE_PRIVATE_KEY || !SIGNER_PRIVATE_KEY) {
         throw new Error("Please set required private keys in your .env file")
     }
 
@@ -31,7 +31,7 @@ async function main() {
         process.env.SEPOLIA_RPC_ENDPOINT_URL
     )
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SEPOLIA_PRIVATE_KEY, provider)
+    const sepoliaSigner = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
 
     console.log("Connected with address:", aliceSigner.address)
 

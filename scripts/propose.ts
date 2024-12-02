@@ -8,12 +8,12 @@ function sleep(ms: number) {
 
 async function main() {
     const ALICE_PRIVATE_KEY = process.env.ALICE
-    const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY
+    const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
     if (!ALICE_PRIVATE_KEY) {
         throw new Error("Please set ALICE private key in your .env file")
     }
-    if (!SEPOLIA_PRIVATE_KEY) {
-        throw new Error("Please set SEPOLIA_PRIVATE_KEY in your .env file")
+    if (!SIGNER_PRIVATE_KEY) {
+        throw new Error("Please set SIGNER_PRIVATE_KEY in your .env file")
     }
     const JUNGLE_ADDRESS = "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE"
 
@@ -25,7 +25,7 @@ async function main() {
         process.env.SEPOLIA_RPC_ENDPOINT_URL
     )
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SEPOLIA_PRIVATE_KEY, provider)
+    const sepoliaSigner = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
     console.log("Using address for proposals:", aliceSigner.address)
     console.log("Using address for execution:", sepoliaSigner.address)
 
