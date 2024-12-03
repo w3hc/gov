@@ -86,12 +86,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("Gov contract address:", msg(govAddress))
 
     // Transfer NFT ownership to Gov
-    const nft = await hre.ethers.getContractAt(
-        "contracts/variants/crosschain/NFT.sol:NFT",
-        nftAddress
-    )
-    await nft.transferOwnership(govAddress)
-    console.log("NFT ownership transferred to Gov")
+    try {
+        let txOptions = {}
+
+        switch (hre.network.name) {
+            case "arbitrum":
+            case "arbitrum-sepolia":
+                txOptions = { gasLimit: 500000 }
+                break
+            default:
+                txOptions = {}
+        }
+
+        const nft = await hre.ethers.getContractAt(
+            "contracts/variants/crosschain/NFT.sol:NFT",
+            nftAddress
+        )
+        await nft.transferOwnership(govAddress, txOptions)
+        console.log("NFT ownership transferred to Gov")
+    } catch (e: any) {
+        console.warn("error during ownership transfer", e)
+    }
 
     if (hre.network.name !== "hardhat") {
         console.log("\nVerifying ProofHandler library...")
