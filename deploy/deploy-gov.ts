@@ -218,7 +218,7 @@ export default async ({ getNamedAccounts, deployments }: any) => {
 
             break
 
-        case "op-sepolia":
+        case "opSepolia":
             try {
                 console.log(
                     "NFT contract deployed:",
@@ -274,7 +274,7 @@ export default async ({ getNamedAccounts, deployments }: any) => {
 
             break
 
-        case "base-sepolia":
+        case "baseSepolia":
             try {
                 console.log(
                     "NFT contract deployed:",
