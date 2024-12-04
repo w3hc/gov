@@ -9,7 +9,7 @@ async function main() {
         "https://bafkreifnnreoxxgkhty7v2w3qwiie6cfxpv3vcco2xldekfvbiem3nm6dm.ipfs.w3s.link/"
 
     // Add the ProofHandler library address
-    const PROOF_HANDLER_ADDRESS = "0x0152ee45780385dACCCCB128D816031CfFe5F36B"
+    const PROOF_HANDLER_ADDRESS = "0x7342BA0E0C855B403287A2EB00d48257b85496a8"
 
     // Get contract factory with library linking
     const NFTFactory = await ethers.getContractFactory(

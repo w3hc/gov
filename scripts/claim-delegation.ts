@@ -7,7 +7,7 @@ async function main() {
         throw new Error("Please set ALICE private key in your .env file")
     }
 
-    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
+    const NFT_ADDRESS = "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE"
     const provider = new ethers.JsonRpcProvider(
         process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
     )

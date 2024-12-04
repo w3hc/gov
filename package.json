@@ -12,11 +12,11 @@
         "deploy:sepolia": "hardhat deploy --network sepolia --reset",
         "deploy:opSepolia": "hardhat deploy --network opSepolia --reset",
         "deploy:baseSepolia": "hardhat deploy --network baseSepolia --reset",
-        "deploy:arbitrum-sepolia": "hardhat deploy --network arbitrum-sepolia --reset",
+        "deploy:arbitrumSepolia": "hardhat deploy --network arbitrumSepolia --reset",
         "crosschain:sepolia": "hardhat deploy --network sepolia --tags CrosschainGov --reset",
         "crosschain:opSepolia": "hardhat deploy --network opSepolia --tags CrosschainGov --reset",
         "crosschain:baseSepolia": "hardhat deploy --network baseSepolia --tags CrosschainGov --reset",
-        "crosschain:arbitrum-sepolia": "hardhat deploy --network arbitrum-sepolia --tags CrosschainGov --reset",
+        "crosschain:arbitrumSepolia": "hardhat deploy --network arbitrumSepolia --tags CrosschainGov --reset",
         "bal": "npx hardhat run scripts/check-my-balance.ts",
         "prettier": "prettier --write \"**/*.ts\"",
         "prettier-check": "prettier --check \"**/*.ts\""

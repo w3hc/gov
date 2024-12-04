@@ -7,7 +7,7 @@ async function main() {
         throw new Error("Please set ALICE private key in your .env file")
     }
 
-    const GOV_ADDRESS = "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0"
+    const GOV_ADDRESS = "0x87b094e13DDe7e8d7F2793bD2Ac8636C7C0EcFD7"
     const provider = new ethers.JsonRpcProvider(
         process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
     )

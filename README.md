@@ -64,17 +64,21 @@ Then, you can go ahead and deploy:
 pnpm crosschain:sepolia
 pnpm crosschain:opSepolia
 pnpm crosschain:baseSepolia
-pnpm crosschain:arbitrum-sepolia
+pnpm crosschain:arbitrumSepolia
 ```
 
-Your DAO will be deployed on every networks at the same address.
+Your DAO will be deployed on every networks at the same address (watch the [Asciinema video](https://asciinema.org/a/rc8bTqbBiW7e0xevewxCwCP7C)).
 
 Then you can follow these steps to verify that proofs can be generated on home chain and claimed on foreign chain: 
 
 ```bash
+
+# Watch the [Asciinema video](https://asciinema.org/a/1iZZQVKU51U86hzYYLfjSVtw6)
 npx hardhat run scripts/propose.ts --network sepolia
 npx hardhat run scripts/verify-proof.ts --network sepolia
 npx hardhat run scripts/claim-membership.ts --network opSepolia
+npx hardhat run scripts/claim-membership.ts --network baseSepolia
+npx hardhat run scripts/claim-membership.ts --network arbitrumSepolia
 
 npx hardhat run scripts/gov-burn.ts --network sepolia
 npx hardhat run scripts/verify-gov-burn-proof.ts --network sepolia

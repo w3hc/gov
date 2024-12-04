@@ -23,8 +23,8 @@ async function main() {
         throw new Error("Please set required private keys in your .env file")
     }
 
-    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
-    const GOV_ADDRESS = "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0"
+    const NFT_ADDRESS = "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE"
+    const GOV_ADDRESS = "0x87b094e13DDe7e8d7F2793bD2Ac8636C7C0EcFD7"
     const TOKEN_ID = 2 // Token ID to burn
 
     const provider = new ethers.JsonRpcProvider(
