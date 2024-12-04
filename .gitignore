@@ -11,3 +11,4 @@ artifacts
 .env*
 !.env.template
 NOTES.md
+deployments
