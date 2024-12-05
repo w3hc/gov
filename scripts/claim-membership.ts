@@ -1,74 +1,129 @@
-import { ethers } from "hardhat"
+import hre, { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
+import * as fs from "fs"
+import * as path from "path"
 
 async function main() {
-    const JUNGLE_PRIVATE_KEY = process.env.JUNGLE
-    if (!JUNGLE_PRIVATE_KEY) {
-        throw new Error("Please set JUNGLE private key in your .env file")
+    if (!process.env.SIGNER_PRIVATE_KEY) {
+        throw new Error("Please set SIGNER_PRIVATE_KEY in your .env file")
     }
 
-    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
-    const provider = new ethers.JsonRpcProvider(
-        process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
-    )
-    const jungleSigner = new ethers.Wallet(JUNGLE_PRIVATE_KEY, provider)
+    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
+    const NFT_ADDRESS = deploymentsNFT.address
+    const network = hre.network.name
 
-    console.log("Using address:", jungleSigner.address)
-    if (
-        jungleSigner.address.toLowerCase() !==
-        "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE".toLowerCase()
-    ) {
+    // Setup provider and signer for target chain
+    const provider = new ethers.JsonRpcProvider(getRpcUrl(network))
+    const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider)
+
+    console.log("Network:", network)
+    console.log("Signer address:", signer.address)
+
+    const nft = NFT__factory.connect(NFT_ADDRESS, signer)
+
+    // Get current nonce state on target chain
+    const OPERATION_TYPE = 0 // MINT operation
+    const proofSlot = ethers.keccak256(
+        ethers.solidityPacked(
+            ["uint8", "uint256"],
+            [OPERATION_TYPE, 0] // mapping key and base slot
+        )
+    )
+    const nonceData = await provider.getStorage(nft.target, proofSlot)
+    const currentNonce = parseInt(nonceData, 16)
+    console.log("\nCurrent nonce on target chain:", currentNonce)
+    const nextNonce = currentNonce + 1
+
+    // Load proofs from file
+    const proofsPath = path.resolve(__dirname, "../proofs.json")
+    if (!fs.existsSync(proofsPath)) {
         throw new Error(
-            "Wrong private key! The signer address doesn't match the token owner address from Sepolia"
+            "proofs.json not found. Please run verify-proof.ts first"
         )
     }
+    const proofs = JSON.parse(fs.readFileSync(proofsPath, "utf8"))
 
-    const nft = NFT__factory.connect(NFT_ADDRESS, jungleSigner)
-
-    const proof =
-        "0x00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000100e58a7fb38517994680fd6b4d390074ae500a12d3e0fcc0b0843e260ff6c80e00000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000bdc0e420ab9ba144213588a95fa1e5e63ceff1be0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005268747470733a2f2f6261666b726569636a36326c35787536706b3278783778376e3662377270756e78623465686c6837666576796a6170696433353536736d757a34792e697066732e7733732e6c696e6b2f0000000000000000000000000000"
-
-    try {
-        console.log("Simulating claim transaction...")
-        await nft.claimOperation.staticCall(proof)
-        console.log("✅ Simulation successful")
-
-        console.log("Submitting claim transaction...")
-        const tx = await nft.claimOperation(proof, {
-            gasLimit: 500000
-        })
-
-        console.log("Transaction submitted:", tx.hash)
-        console.log("Waiting for confirmation...")
-
-        const receipt = await tx.wait()
-        console.log("Membership claimed successfully!")
-
-        // Get token ID from event
-        const claimEvent = receipt?.logs.find(log => {
-            try {
-                return nft.interface.parseLog(log)?.name === "MembershipClaimed"
-            } catch {
-                return false
-            }
-        })
-
-        if (claimEvent) {
-            const parsedEvent = nft.interface.parseLog(claimEvent)
-            const tokenId = parsedEvent?.args?.tokenId
-            console.log("Claimed token ID:", tokenId)
+    // Check which tokens already exist on target chain
+    const existingTokens = new Set()
+    for (const proof of proofs) {
+        try {
+            const owner = await nft.ownerOf(proof.tokenId)
+            existingTokens.add(proof.tokenId)
+            console.log(
+                `Token ${proof.tokenId} already exists, owned by ${owner}`
+            )
+        } catch (e) {
+            // Token doesn't exist
         }
-    } catch (error: any) {
-        console.error("\nError details:", error)
-        if (error.data) {
-            try {
+    }
+
+    // Claim tokens that don't exist yet
+    for (const proof of proofs) {
+        if (existingTokens.has(proof.tokenId)) continue
+
+        console.log(`\nClaiming token ${proof.tokenId}...`)
+        try {
+            // Simulate first
+            await nft.claimOperation.staticCall(proof.proof)
+            console.log("✅ Simulation successful")
+
+            // Submit transaction
+            const tx = await nft.claimOperation(proof.proof, {
+                gasLimit: 500000
+            })
+            console.log("Transaction submitted:", tx.hash)
+
+            const receipt = await tx.wait()
+            if (receipt?.status === 1) {
+                console.log(`Token ${proof.tokenId} claimed successfully!`)
+
+                // Verify the new owner
+                const newOwner = await nft.ownerOf(proof.tokenId)
+                console.log(`New owner: ${newOwner}`)
+                if (newOwner.toLowerCase() !== proof.owner.toLowerCase()) {
+                    console.warn(
+                        "⚠️ Warning: New owner doesn't match expected owner"
+                    )
+                }
+            }
+        } catch (error: any) {
+            console.error(`\nFailed to claim token ${proof.tokenId}:`)
+            if (error.data) {
                 const decodedError = nft.interface.parseError(error.data)
-                console.error("Decoded error:", decodedError)
-            } catch (e) {
-                console.error("Raw error data:", error.data)
+                console.error("Error reason:", decodedError?.args[0])
+            } else {
+                console.error(error)
             }
         }
-        throw error
+    }
+}
+
+function getRpcUrl(network: string): string {
+    switch (network) {
+        case "opSepolia":
+            if (!process.env.OP_SEPOLIA_RPC_ENDPOINT_URL) {
+                throw new Error("OP_SEPOLIA_RPC_ENDPOINT_URL not set in .env")
+            }
+            return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+        case "baseSepolia":
+            if (!process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL) {
+                throw new Error("BASE_SEPOLIA_RPC_ENDPOINT_URL not set in .env")
+            }
+            return process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL
+        case "arbitrumSepolia":
+            if (!process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL) {
+                throw new Error(
+                    "ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL not set in .env"
+                )
+            }
+            return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+        case "sepolia":
+            if (!process.env.SEPOLIA_RPC_ENDPOINT_URL) {
+                throw new Error("SEPOLIA_RPC_ENDPOINT_URL not set in .env")
+            }
+            return process.env.SEPOLIA_RPC_ENDPOINT_URL
+        default:
+            throw new Error(`Unsupported network: ${network}`)
     }
 }
 

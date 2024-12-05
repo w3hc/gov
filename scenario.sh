@@ -1,30 +1,37 @@
 #!/bin/bash
 
-# Run unit tests
 # echo "Running unit tests..."
 # pnpm test
 
-# Run crosschain deployment scripts
 # echo "Deploying to Sepolia..."
 # pnpm crosschain:sepolia
 
 # echo "Deploying to Optimism Sepolia..."
 # pnpm crosschain:opSepolia
 
-# Check token existence
 # echo "Checking token existence..."
 # npx hardhat run scripts/check-token-existence.ts
 
-# Run proposal script
 # echo "Creating proposal..."
 # npx hardhat run scripts/propose.ts --network sepolia
 
-# Check token existence
-echo "Checking token existence..."
+export TOKENID=2
+
 npx hardhat run scripts/check-token-existence.ts
 
-# Set token ID
-export TOKENID=5
+# The propose.ts script writes TOKENID to .env
+# Load the TOKENID from .env
+if [ -f .env ]; then
+    source .env
+    if [ -z "$TOKENID" ]; then
+        echo "Error: TOKENID not found in .env file"
+        exit 1
+    fi
+    echo "Using Token ID: $TOKENID"
+else
+    echo "Error: .env file not found"
+    exit 1
+fi
 
 # Verify proof
 echo "Verifying proof..."
@@ -33,10 +40,6 @@ npx hardhat run scripts/verify-proof.ts --network sepolia
 # Load and display the proof from .env file
 if [ -f .env ]; then
     source .env
-    echo -e "\nGenerated Proof:"
-    echo $PROOF
-else
-    echo "Error: .env file not found"
 fi
 
 echo "Claiming proof..."

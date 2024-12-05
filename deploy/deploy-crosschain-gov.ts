@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
-    const salt = "-v4"
+    const salt = "-v10"
 
     function wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms))
@@ -94,6 +94,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         switch (hre.network.name) {
             case "arbitrum":
             case "arbitrumSepolia":
+            case "sepolia":
+            case "opSepolia":
                 txOptions = { gasLimit: 500000 }
                 break
             default:
