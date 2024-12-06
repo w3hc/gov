@@ -37,7 +37,8 @@ const config: HardhatUserConfig = {
                 SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         optimism: {
             chainId: 10,
@@ -45,13 +46,15 @@ const config: HardhatUserConfig = {
                 OPTIMISM_MAINNET_RPC_ENDPOINT_URL ||
                 "https://mainnet.optimism.io",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         base: {
             chainId: 8453,
             url: BASE_MAINNET_RPC_ENDPOINT_URL || "https://mainnet.base.org",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         arbitrum: {
             chainId: 42161,
@@ -59,7 +62,8 @@ const config: HardhatUserConfig = {
                 ARBITRUM_MAINNET_RPC_ENDPOINT_URL ||
                 "https://endpoints.omniatech.io/v1/arbitrum/one/public",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         opSepolia: {
             chainId: 11155420,
@@ -67,13 +71,15 @@ const config: HardhatUserConfig = {
                 OP_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         baseSepolia: {
             chainId: 84532,
             url: BASE_SEPOLIA_RPC_ENDPOINT_URL || "https://sepolia.base.org",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         },
         arbitrumSepolia: {
             chainId: 421614,
@@ -81,7 +87,8 @@ const config: HardhatUserConfig = {
                 ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://sepolia-rollup.arbitrum.io/rpc",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
+            allowUnlimitedContractSize: true
         }
     },
     solidity: {
@@ -90,7 +97,8 @@ const config: HardhatUserConfig = {
             optimizer: {
                 enabled: true,
                 runs: 200
-            }
+            },
+            viaIR: false
         }
     },
     sourcify: {

@@ -95,20 +95,15 @@ contract NFT is
         home = _home;
         for (uint i; i < _firstMembers.length; i++) {
             _govMint(_firstMembers[i], _uri);
-            _delegate(_firstMembers[i], _firstMembers[i]);
         }
     }
 
-    /**
-     * @notice Adds a new member on home chain
-     * @dev Only callable by owner (governance) on home chain
-     * @param to Address to mint token to
-     * @param uri Token metadata URI
-     */
+    /// @notice Adds a new member to the DAO
+    /// @dev Mints a new NFT to the specified address
+    /// @param to The address of the new member
+    /// @param uri The metadata URI for the new NFT
     function safeMint(address to, string memory uri) public onlyOwner onlyHomeChain {
-        uint256 nonce = _proofStorage.incrementNonce(uint8(OperationType.MINT));
         _govMint(to, uri);
-        emit MembershipClaimed(_nextTokenId - 1, to, nonce);
     }
 
     /**
@@ -173,9 +168,17 @@ contract NFT is
             .verifyAndClaimProof(proof, address(this), _proofStorage);
 
         if (operationType == uint8(OperationType.MINT)) {
-            (address to, string memory uri) = abi.decode(params, (address, string));
-            _govMint(to, uri);
-            emit MembershipClaimed(_nextTokenId - 1, to, nonce);
+            (uint256 tokenId, address owner, string memory uri) = abi.decode(
+                params,
+                (uint256, address, string)
+            );
+
+            try this.ownerOf(tokenId) returns (address) {
+                revert("Token already exists");
+            } catch {
+                _govMint(owner, uri);
+                emit MembershipClaimed(_nextTokenId - 1, owner, nonce);
+            }
         } else if (operationType == uint8(OperationType.BURN)) {
             uint256 tokenId = abi.decode(params, (uint256));
             address owner = ownerOf(tokenId);

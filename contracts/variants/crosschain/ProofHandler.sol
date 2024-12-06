@@ -9,7 +9,7 @@ pragma solidity ^0.8.20;
  * @custom:security-contact julien@strat.cc
  */
 library ProofHandler {
-    /// @notice Tracks which proofs have been applied on each chain
+    /// @notice Tracks which proofs have been applied and nonces for operations that require them
     struct ProofStorage {
         mapping(bytes32 => bool) updateAppliedOnChain;
         mapping(uint8 => uint256) currentNonce;
@@ -23,7 +23,7 @@ library ProofHandler {
      * @param contractAddress Address of contract generating the proof
      * @param operationType Type of operation being performed
      * @param params Operation parameters
-     * @param nonce Current nonce for this operation type
+     * @param nonce Current nonce for this operation type (0 for nonce-free operations)
      * @return proof Encoded proof data
      */
     function generateProof(
@@ -60,10 +60,6 @@ library ProofHandler {
             (uint8, bytes, uint256, bytes32)
         );
 
-        bytes32 proofHash = keccak256(proof);
-        require(!storage_.updateAppliedOnChain[proofHash], "Proof already claimed");
-        require(nonce == storage_.currentNonce[operationType] + 1, "Invalid nonce");
-
         bytes32 message = keccak256(
             abi.encodePacked(contractAddress, operationType, params, nonce)
         );
@@ -72,8 +68,14 @@ library ProofHandler {
         );
         require(digest == expectedDigest, "Invalid proof");
 
-        storage_.updateAppliedOnChain[proofHash] = true;
-        storage_.currentNonce[operationType] = nonce;
+        if (operationType > 1) {
+            bytes32 proofHash = keccak256(proof);
+            require(!storage_.updateAppliedOnChain[proofHash], "Proof already claimed");
+            require(nonce == storage_.currentNonce[operationType] + 1, "Invalid nonce");
+
+            storage_.updateAppliedOnChain[proofHash] = true;
+            storage_.currentNonce[operationType] = nonce;
+        }
 
         emit ProofClaimed(operationType, params, nonce);
 
@@ -90,6 +92,7 @@ library ProofHandler {
         ProofStorage storage storage_,
         uint8 operationType
     ) public view returns (uint256 nonce) {
+        if (operationType <= 1) return 0; // MINT or BURN operations don't use nonces
         return storage_.currentNonce[operationType] + 1;
     }
 
@@ -103,6 +106,7 @@ library ProofHandler {
         ProofStorage storage storage_,
         uint8 operationType
     ) public returns (uint256 nonce) {
+        if (operationType <= 1) return 0; // MINT or BURN operations don't use nonces
         storage_.currentNonce[operationType]++;
         return storage_.currentNonce[operationType];
     }

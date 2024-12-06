@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
-    const salt = "-v10"
+    const salt = "-v1"
 
     function wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms))
@@ -52,7 +52,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             },
             salt: hre.ethers.id("NFT" + salt),
             log: true,
-            waitConfirmations: 1
+            waitConfirmations: 1,
+            gasLimit: 10000000
         }
     )
 

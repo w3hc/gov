@@ -1,5 +1,7 @@
 import { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
+import * as fs from "fs"
+import * as path from "path"
 
 async function main() {
     const ALICE_PRIVATE_KEY = process.env.ALICE
@@ -7,31 +9,55 @@ async function main() {
         throw new Error("Please set ALICE private key in your .env file")
     }
 
-    const NFT_ADDRESS = "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE"
+    // Load contract addresses from deployment files
+    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
+    const NFT_ADDRESS = deploymentsNFT.address
+
     const provider = new ethers.JsonRpcProvider(
         process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
     )
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
 
-    // Replace with actual proof from verify-metadata-proof.ts
-    const proof =
-        "0x000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000600f002a14cdfd971ea21d2bc78be96580ca4abae526da8bd39b594367c772034a000000000000000000000000000000000000000000000000000000000000005268747470733a2f2f6261666b726569666e6e72656f7878676b68747937763277337177696965366366787076337663636f32786c64656b66766269656d336e6d36646d2e697066732e7733732e6c696e6b2f0000000000000000000000000000"
+    // Load proofs from file
+    const proofsPath = path.resolve(__dirname, "../proofs.json")
+    if (!fs.existsSync(proofsPath)) {
+        throw new Error(
+            "proofs.json not found. Please run verify-metadata-proof.ts first"
+        )
+    }
+    const proofs = JSON.parse(fs.readFileSync(proofsPath, "utf8"))
+
+    if (!Array.isArray(proofs) || proofs.length === 0) {
+        throw new Error("No proofs found in proofs.json")
+    }
+
+    // Use the proof from the first entry
+    const proofData = proofs[0]
 
     try {
-        console.log("Simulating metadata update claim...")
-        await nft.claimMetadataUpdate.staticCall(proof)
+        console.log("\nSimulating metadata update claim...")
+        console.log("Using proof for token:", proofData.tokenId)
+        await nft.claimOperation.staticCall(proofData.proof)
         console.log("✅ Simulation successful")
 
-        console.log("Submitting metadata update claim...")
-        const tx = await nft.claimMetadataUpdate(proof, {
+        console.log("\nSubmitting metadata update claim...")
+        const tx = await nft.claimOperation(proofData.proof, {
             gasLimit: 500000
         })
 
         console.log("Transaction submitted:", tx.hash)
-        await tx.wait()
-        console.log("Metadata updated successfully!")
+        const receipt = await tx.wait()
+
+        if (receipt?.status === 1) {
+            console.log("\nMetadata updated successfully! 🎉")
+            try {
+                const tokenURI = await nft.tokenURI(proofData.tokenId)
+                console.log("New token URI:", tokenURI)
+            } catch (e) {
+                console.log("Could not fetch new token URI")
+            }
+        }
     } catch (error: any) {
         console.error("\nError details:", error)
         if (error.data) {

@@ -12,7 +12,7 @@ async function main() {
     const NFT_ADDRESS = deploymentsNFT.address
     const network = hre.network.name
 
-    // Setup provider and signer for target chain
+    // Setup provider and signer
     const provider = new ethers.JsonRpcProvider(getRpcUrl(network))
     const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider)
 
@@ -21,20 +21,7 @@ async function main() {
 
     const nft = NFT__factory.connect(NFT_ADDRESS, signer)
 
-    // Get current nonce state on target chain
-    const OPERATION_TYPE = 0 // MINT operation
-    const proofSlot = ethers.keccak256(
-        ethers.solidityPacked(
-            ["uint8", "uint256"],
-            [OPERATION_TYPE, 0] // mapping key and base slot
-        )
-    )
-    const nonceData = await provider.getStorage(nft.target, proofSlot)
-    const currentNonce = parseInt(nonceData, 16)
-    console.log("\nCurrent nonce on target chain:", currentNonce)
-    const nextNonce = currentNonce + 1
-
-    // Load proofs from file
+    // Load proof from file
     const proofsPath = path.resolve(__dirname, "../proofs.json")
     if (!fs.existsSync(proofsPath)) {
         throw new Error(
@@ -43,24 +30,8 @@ async function main() {
     }
     const proofs = JSON.parse(fs.readFileSync(proofsPath, "utf8"))
 
-    // Check which tokens already exist on target chain
-    const existingTokens = new Set()
+    // Try to claim each proof
     for (const proof of proofs) {
-        try {
-            const owner = await nft.ownerOf(proof.tokenId)
-            existingTokens.add(proof.tokenId)
-            console.log(
-                `Token ${proof.tokenId} already exists, owned by ${owner}`
-            )
-        } catch (e) {
-            // Token doesn't exist
-        }
-    }
-
-    // Claim tokens that don't exist yet
-    for (const proof of proofs) {
-        if (existingTokens.has(proof.tokenId)) continue
-
         console.log(`\nClaiming token ${proof.tokenId}...`)
         try {
             // Simulate first
@@ -89,39 +60,28 @@ async function main() {
         } catch (error: any) {
             console.error(`\nFailed to claim token ${proof.tokenId}:`)
             if (error.data) {
-                const decodedError = nft.interface.parseError(error.data)
-                console.error("Error reason:", decodedError?.args[0])
-            } else {
-                console.error(error)
+                try {
+                    const decodedError = nft.interface.parseError(error.data)
+                    console.error("Error reason:", decodedError)
+                } catch (e) {
+                    console.error(error)
+                }
             }
         }
     }
 }
 
+// Helper to get RPC URL
 function getRpcUrl(network: string): string {
     switch (network) {
         case "opSepolia":
-            if (!process.env.OP_SEPOLIA_RPC_ENDPOINT_URL) {
-                throw new Error("OP_SEPOLIA_RPC_ENDPOINT_URL not set in .env")
-            }
-            return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+            return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL || ""
         case "baseSepolia":
-            if (!process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL) {
-                throw new Error("BASE_SEPOLIA_RPC_ENDPOINT_URL not set in .env")
-            }
-            return process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL
+            return process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL || ""
         case "arbitrumSepolia":
-            if (!process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL) {
-                throw new Error(
-                    "ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL not set in .env"
-                )
-            }
-            return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+            return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL || ""
         case "sepolia":
-            if (!process.env.SEPOLIA_RPC_ENDPOINT_URL) {
-                throw new Error("SEPOLIA_RPC_ENDPOINT_URL not set in .env")
-            }
-            return process.env.SEPOLIA_RPC_ENDPOINT_URL
+            return process.env.SEPOLIA_RPC_ENDPOINT_URL || ""
         default:
             throw new Error(`Unsupported network: ${network}`)
     }

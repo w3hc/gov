@@ -1,26 +1,22 @@
 #!/bin/bash
 
-# echo "Running unit tests..."
-# pnpm test
+pnpm test
 
-# echo "Deploying to Sepolia..."
-# pnpm crosschain:sepolia
+pnpm crosschain:sepolia
 
-# echo "Deploying to Optimism Sepolia..."
-# pnpm crosschain:opSepolia
+pnpm crosschain:opSepolia
 
-# echo "Checking token existence..."
-# npx hardhat run scripts/check-token-existence.ts
+echo "Checking token existence..."
+npx hardhat run scripts/check-token-existence.ts
 
-# echo "Creating proposal..."
-# npx hardhat run scripts/propose.ts --network sepolia
+echo "Creating proposal..."
+npx hardhat run scripts/propose.ts --network sepolia
 
-export TOKENID=2
+# export TOKENID=2
 
 npx hardhat run scripts/check-token-existence.ts
 
-# The propose.ts script writes TOKENID to .env
-# Load the TOKENID from .env
+Load the TOKENID from .env
 if [ -f .env ]; then
     source .env
     if [ -z "$TOKENID" ]; then
@@ -46,5 +42,14 @@ echo "Claiming proof..."
 npx hardhat run scripts/claim-membership.ts --network opSepolia
 
 # Check token existence
-echo "Checking token existence..."
 npx hardhat run scripts/check-token-existence.ts --network sepolia
+
+sed -i.bak '/^TOKENID=/d' .env
+echo "TOKENID=0" >> .env
+source .env
+
+echo "Using Token ID: $TOKENID"
+
+npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
+
+npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
