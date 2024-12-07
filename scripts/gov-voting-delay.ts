@@ -59,8 +59,8 @@ async function waitForProposalState(
 async function main() {
     // Configuration
     const config = {
-        nftAddress: "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620",
-        govAddress: "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0",
+        nftAddress: "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE",
+        govAddress: "0x87b094e13DDe7e8d7F2793bD2Ac8636C7C0EcFD7",
         newVotingDelay: 250n,
         rpcUrl: process.env.SEPOLIA_RPC_ENDPOINT_URL,
         aliceKey: process.env.ALICE,

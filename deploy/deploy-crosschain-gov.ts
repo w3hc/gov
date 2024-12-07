@@ -3,6 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types"
 import color from "cli-color"
 var msg = color.xterm(39).bgXterm(128)
 import {
+    homeChain,
     firstMembers,
     uri,
     name,
@@ -19,6 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
+    const salt = "-v1"
 
     function wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms))
@@ -30,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract:
                 "contracts/variants/crosschain/ProofHandler.sol:ProofHandler",
-            salt: hre.ethers.id("ProofHandler"),
+            salt: hre.ethers.id("ProofHandler" + salt),
             log: true,
             waitConfirmations: 1
         })
@@ -44,13 +46,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
-            args: [11155111, deployer, firstMembers, uri, name, symbol],
+            args: [homeChain, deployer, firstMembers, uri, name, symbol],
             libraries: {
                 ProofHandler: proofHandlerAddress
             },
-            salt: hre.ethers.id("NFT"),
+            salt: hre.ethers.id("NFT" + salt),
             log: true,
-            waitConfirmations: 1
+            waitConfirmations: 1,
+            gasLimit: 10000000
         }
     )
 
@@ -64,7 +67,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/Gov.sol:Gov",
             args: [
-                11155111,
+                homeChain,
                 nftAddress,
                 manifesto,
                 daoName,
@@ -76,7 +79,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             libraries: {
                 ProofHandler: proofHandlerAddress
             },
-            salt: hre.ethers.id("Gov"),
+            salt: hre.ethers.id("Gov" + salt),
             log: true,
             waitConfirmations: 5
         }
@@ -86,12 +89,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("Gov contract address:", msg(govAddress))
 
     // Transfer NFT ownership to Gov
-    const nft = await hre.ethers.getContractAt(
-        "contracts/variants/crosschain/NFT.sol:NFT",
-        nftAddress
-    )
-    await nft.transferOwnership(govAddress)
-    console.log("NFT ownership transferred to Gov")
+    try {
+        let txOptions = {}
+
+        switch (hre.network.name) {
+            case "arbitrum":
+            case "arbitrumSepolia":
+            case "sepolia":
+            case "opSepolia":
+                txOptions = { gasLimit: 500000 }
+                break
+            default:
+                txOptions = {}
+        }
+
+        const nft = await hre.ethers.getContractAt(
+            "contracts/variants/crosschain/NFT.sol:NFT",
+            nftAddress
+        )
+        await nft.transferOwnership(govAddress, txOptions)
+        console.log("NFT ownership transferred to Gov")
+    } catch (e: any) {
+        console.warn("error during ownership transfer", e)
+    }
 
     if (hre.network.name !== "hardhat") {
         console.log("\nVerifying ProofHandler library...")
@@ -112,7 +132,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: nftAddress,
                 contract: "contracts/variants/crosschain/NFT.sol:NFT",
                 constructorArguments: [
-                    11155111,
+                    homeChain,
                     deployer,
                     firstMembers,
                     uri,
@@ -131,7 +151,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: govAddress,
                 contract: "contracts/variants/crosschain/Gov.sol:Gov",
                 constructorArguments: [
-                    11155111,
+                    homeChain,
                     nftAddress,
                     manifesto,
                     daoName,

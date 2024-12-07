@@ -3,9 +3,9 @@ import { Gov__factory } from "../typechain-types/factories/contracts/variants/cr
 import { ProofHandler__factory } from "../typechain-types"
 
 async function main() {
-    const GOV_ADDRESS = "0xB8de4177BAf7365DFc7E6ad860E4B223b40f91A0"
+    const GOV_ADDRESS = "0x87b094e13DDe7e8d7F2793bD2Ac8636C7C0EcFD7"
     const NEW_VOTING_DELAY = 250n
-    const PROOF_HANDLER_ADDRESS = "0x0152ee45780385dACCCCB128D816031CfFe5F36B"
+    const PROOF_HANDLER_ADDRESS = "0x7342BA0E0C855B403287A2EB00d48257b85496a8"
     const OPERATION_TYPE = 1 // UPDATE_VOTING_DELAY
 
     // Connect to contracts

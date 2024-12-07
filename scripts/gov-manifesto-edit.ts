@@ -23,8 +23,8 @@ async function main() {
         throw new Error("Please set required private keys in your .env file")
     }
 
-    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
-    const GOV_ADDRESS = "0x76f53bf2ad89DaB4d8b666b9a5C6610C2C2e0EfC"
+    const NFT_ADDRESS = "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE"
+    const GOV_ADDRESS = "0x87b094e13DDe7e8d7F2793bD2Ac8636C7C0EcFD7"
     const NEW_MANIFESTO = "ipfs://newManifestoCID" // Replace with your new manifesto CID
 
     const provider = new ethers.JsonRpcProvider(

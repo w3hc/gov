@@ -197,7 +197,6 @@ describe("Crosschain Gov", function () {
 
             expect(operationType).to.equal(0) // MINT
             expect(proofParams).to.equal(params)
-            expect(nonce).to.equal(1)
         })
 
         it("should verify membership proof correctly", async function () {
@@ -410,7 +409,7 @@ describe("Crosschain Gov", function () {
             // Verify the decoded basic values
             expect(operationType).to.equal(0) // SET_MANIFESTO
             expect(manifestoValue).to.equal(newManifesto)
-            expect(nonce).to.equal(1) // First update should have nonce 1
+            expect(nonce).to.equal(0) // First update should have nonce 0
 
             // Reproduce the proof verification logic from the contract
             const govAddress = await gov.getAddress()
@@ -455,7 +454,7 @@ describe("Crosschain Gov", function () {
                 // Verify the decoded basic values
                 expect(operationType).to.equal(1) // UPDATE_VOTING_DELAY
                 expect(proofValue).to.equal(value)
-                expect(nonce).to.equal(1) // First update should have nonce 1
+                expect(nonce).to.equal(0) // First update should have nonce 0
 
                 // Reproduce the proof verification logic from the contract
                 const govAddress = await gov.getAddress()

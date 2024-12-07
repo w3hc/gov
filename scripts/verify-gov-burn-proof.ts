@@ -3,11 +3,11 @@ import { NFT__factory } from "../typechain-types/factories/contracts/variants/cr
 import { NFT } from "../typechain-types/contracts/variants/crosschain/NFT"
 
 async function main() {
-    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
+    const NFT_ADDRESS = "0x147613E970bbA94e19a70A8b0f9106a13B4d7cbE"
     const TOKEN_ID = 2 // Token ID that was burned
 
     // Add the ProofHandler library address
-    const PROOF_HANDLER_ADDRESS = "0x0152ee45780385dACCCCB128D816031CfFe5F36B"
+    const PROOF_HANDLER_ADDRESS = "0x7342BA0E0C855B403287A2EB00d48257b85496a8"
 
     // Get contract factory with library linking
     const NFTFactory = await ethers.getContractFactory(

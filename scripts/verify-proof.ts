@@ -1,41 +1,87 @@
 import { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
-import { NFT } from "../typechain-types/contracts/variants/crosschain/NFT"
+import * as fs from "fs"
+import * as dotenv from "dotenv"
 
 async function main() {
-    // Contract address on Sepolia where the NFT was originally minted
-    const NFT_ADDRESS = "0xe74bC6A3Ee4ED824708DD88465BD2CdD6b869620"
+    console.log("\nVerifying and generating proof...")
 
-    // Add the ProofHandler library address
-    const PROOF_HANDLER_ADDRESS = "0x0152ee45780385dACCCCB128D816031CfFe5F36B"
+    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
+    const NFT_ADDRESS = deploymentsNFT.address
+    console.log("\nNFT Address:", NFT_ADDRESS)
 
-    // Get contract factory with library linking
-    const NFTFactory = await ethers.getContractFactory(
-        "contracts/variants/crosschain/NFT.sol:NFT",
-        {
-            libraries: {
-                ProofHandler: PROOF_HANDLER_ADDRESS
-            }
+    // Get token info
+    const tokenId = process.env.TOKENID
+        ? parseInt(process.env.TOKENID)
+        : undefined
+    if (!tokenId) {
+        throw new Error("No token ID specified in .env")
+    }
+
+    try {
+        const sepoliaProvider = new ethers.JsonRpcProvider(
+            process.env.SEPOLIA_RPC_ENDPOINT_URL
+        )
+        const nft = NFT__factory.connect(NFT_ADDRESS, sepoliaProvider)
+
+        // Get owner and URI from chain A
+        const owner = await nft.ownerOf(tokenId)
+        const uri = await nft.tokenURI(tokenId)
+        console.log(`\nToken ${tokenId} on chain A:`)
+        console.log(`Owner: ${owner}`)
+        console.log(`URI: ${uri}`)
+
+        // Package all token data in params
+        const params = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["uint256", "address", "string"],
+            [tokenId, owner, uri]
+        )
+
+        const message = ethers.keccak256(
+            ethers.solidityPacked(
+                ["address", "uint8", "bytes", "uint256"],
+                [NFT_ADDRESS, 0, params, 0] // operationType = 0 (MINT), nonce = 0
+            )
+        )
+
+        const digest = ethers.keccak256(
+            ethers.solidityPacked(
+                ["string", "bytes32"],
+                ["\x19Ethereum Signed Message:\n32", message]
+            )
+        )
+
+        const proof = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["uint8", "bytes", "uint256", "bytes32"],
+            [0, params, 0, digest]
+        )
+
+        // Update .env file with the proof
+        const envPath = ".env"
+        let envContent = ""
+
+        if (fs.existsSync(envPath)) {
+            envContent = fs.readFileSync(envPath, "utf8")
         }
-    )
 
-    const nft = NFT__factory.connect(NFT_ADDRESS, NFTFactory.runner) as NFT
+        // Remove existing PROOF line if it exists
+        envContent = envContent.replace(/^PROOF=.*$/m, "")
 
-    // Rest of your code remains the same
-    const owner = await nft.ownerOf(2)
-    console.log("\nToken owner:", owner)
+        // Add new line if content doesn't end with one
+        if (envContent.length > 0 && !envContent.endsWith("\n")) {
+            envContent += "\n"
+        }
 
-    const validParams = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["address", "string"],
-        [
-            "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE",
-            "https://bafkreicj62l5xu6pk2xx7x7n6b7rpunxb4ehlh7fevyjapid3556smuz4y.ipfs.w3s.link/"
-        ]
-    )
+        // Add the new PROOF
+        envContent += `PROOF=${proof}\n`
 
-    console.log("Generating proof for token ID 2...")
-    const proof = await nft.generateOperationProof(2, validParams)
-    console.log("\nProof:", proof)
+        fs.writeFileSync(envPath, envContent)
+        console.log("\nProof generated and saved to .env:")
+        console.log(proof)
+    } catch (error) {
+        console.error("Error:", error)
+        process.exitCode = 1
+    }
 }
 
 main().catch(error => {
