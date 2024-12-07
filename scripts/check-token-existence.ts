@@ -50,8 +50,7 @@ async function main() {
     const networks = ["sepolia", "opSepolia", "baseSepolia", "arbitrumSepolia"]
     const tokenIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    console.log("\nNFT contract address:", NFT_ADDRESS)
-    console.log("\nChecking token existence across networks...\n")
+    console.log("\nNFT contract address:", NFT_ADDRESS, "\n")
 
     // Create a map of networks to their contract instances
     const contracts = new Map<string, NFT>()

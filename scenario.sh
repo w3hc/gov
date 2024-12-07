@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# pnpm test
+pnpm test
 
-# pnpm crosschain:sepolia
-
-# pnpm crosschain:opSepolia
+pnpm crosschain:sepolia
+pnpm crosschain:opSepolia
+pnpm crosschain:baseSepolia
+pnpm crosschain:arbitrumSepolia
 
 npx hardhat run scripts/check-token-existence.ts
 
 npx hardhat run scripts/propose.ts --network sepolia
 
-# Load the TOKENID from .env
 if [ -f .env ]; then
     source .env
     if [ -z "$TOKENID" ]; then
@@ -33,13 +33,15 @@ if [ -z "$PROOF" ]; then
 fi
 
 npx hardhat run scripts/claim-membership.ts --network opSepolia
+npx hardhat run scripts/claim-membership.ts --network baseSepolia
+npx hardhat run scripts/claim-membership.ts --network arbitrumSepolia
 
 npx hardhat run scripts/check-token-existence.ts --network sepolia
 
-# sed -i.bak '/^TOKENID=/d' .env
-# echo "TOKENID=0" >> .env
-# source .env
+sed -i.bak '/^TOKENID=/d' .env
+echo "TOKENID=2" >> .env
+source .env
 
-# npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
+npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
 
-# npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
+npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
