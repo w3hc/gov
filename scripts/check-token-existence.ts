@@ -42,6 +42,8 @@ async function checkToken(nft: NFT, tokenId: number): Promise<string | null> {
 }
 
 async function main() {
+    console.log("\nChecking token existence...")
+
     // Get deployment information
     const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
     const NFT_ADDRESS = deploymentsNFT.address

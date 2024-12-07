@@ -1,22 +1,16 @@
 #!/bin/bash
 
-pnpm test
+# pnpm test
 
-pnpm crosschain:sepolia
+# pnpm crosschain:sepolia
 
-pnpm crosschain:opSepolia
+# pnpm crosschain:opSepolia
 
-echo "Checking token existence..."
 npx hardhat run scripts/check-token-existence.ts
 
-echo "Creating proposal..."
 npx hardhat run scripts/propose.ts --network sepolia
 
-# export TOKENID=2
-
-npx hardhat run scripts/check-token-existence.ts
-
-Load the TOKENID from .env
+# Load the TOKENID from .env
 if [ -f .env ]; then
     source .env
     if [ -z "$TOKENID" ]; then
@@ -29,27 +23,23 @@ else
     exit 1
 fi
 
-# Verify proof
-echo "Verifying proof..."
 npx hardhat run scripts/verify-proof.ts --network sepolia
 
-# Load and display the proof from .env file
-if [ -f .env ]; then
-    source .env
-fi
-
-echo "Claiming proof..."
-npx hardhat run scripts/claim-membership.ts --network opSepolia
-
-# Check token existence
-npx hardhat run scripts/check-token-existence.ts --network sepolia
-
-sed -i.bak '/^TOKENID=/d' .env
-echo "TOKENID=0" >> .env
 source .env
 
-echo "Using Token ID: $TOKENID"
+if [ -z "$PROOF" ]; then
+    echo "Error: No proof generated"
+    exit 1
+fi
 
-npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
+npx hardhat run scripts/claim-membership.ts --network opSepolia
 
-npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
+npx hardhat run scripts/check-token-existence.ts --network sepolia
+
+# sed -i.bak '/^TOKENID=/d' .env
+# echo "TOKENID=0" >> .env
+# source .env
+
+# npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
+
+# npx hardhat run scripts/claim-metadata-update.ts --network opSepolia

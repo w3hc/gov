@@ -1,9 +1,11 @@
 import { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
 import * as fs from "fs"
-import * as path from "path"
+import * as dotenv from "dotenv"
 
 async function main() {
+    console.log("\nVerifying and generating proof...")
+
     const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
     const NFT_ADDRESS = deploymentsNFT.address
     console.log("\nNFT Address:", NFT_ADDRESS)
@@ -17,7 +19,6 @@ async function main() {
     }
 
     try {
-        // Connect to chain A to get token info
         const sepoliaProvider = new ethers.JsonRpcProvider(
             process.env.SEPOLIA_RPC_ENDPOINT_URL
         )
@@ -55,19 +56,27 @@ async function main() {
             [0, params, 0, digest]
         )
 
-        const proofs = [
-            {
-                tokenId: tokenId,
-                proof,
-                owner: owner,
-                nonce: 0
-            }
-        ]
+        // Update .env file with the proof
+        const envPath = ".env"
+        let envContent = ""
 
-        // Save proof
-        const proofsPath = path.resolve(__dirname, "../proofs.json")
-        fs.writeFileSync(proofsPath, JSON.stringify(proofs, null, 2))
-        console.log(`\nProof generated and saved to proofs.json:`)
+        if (fs.existsSync(envPath)) {
+            envContent = fs.readFileSync(envPath, "utf8")
+        }
+
+        // Remove existing PROOF line if it exists
+        envContent = envContent.replace(/^PROOF=.*$/m, "")
+
+        // Add new line if content doesn't end with one
+        if (envContent.length > 0 && !envContent.endsWith("\n")) {
+            envContent += "\n"
+        }
+
+        // Add the new PROOF
+        envContent += `PROOF=${proof}\n`
+
+        fs.writeFileSync(envPath, envContent)
+        console.log("\nProof generated and saved to .env:")
         console.log(proof)
     } catch (error) {
         console.error("Error:", error)

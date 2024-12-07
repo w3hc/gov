@@ -9,6 +9,8 @@ function sleep(ms: number) {
 }
 
 async function main() {
+    console.log("\nCreating proposal...")
+
     const ALICE_PRIVATE_KEY = process.env.ALICE
     const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
     if (!ALICE_PRIVATE_KEY) {
@@ -24,7 +26,7 @@ async function main() {
     const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
     const NFT_ADDRESS = deploymentsNFT.address
 
-    console.log("Gov address:", GOV_ADDRESS)
+    console.log("\nGov address:", GOV_ADDRESS)
     console.log("NFT address:", NFT_ADDRESS)
 
     // Create provider and signers properly

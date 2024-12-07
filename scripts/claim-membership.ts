@@ -1,11 +1,20 @@
 import hre, { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
-import * as fs from "fs"
-import * as path from "path"
+import * as dotenv from "dotenv"
 
 async function main() {
+    dotenv.config()
+
+    console.log("\nClaiming proof...")
+
     if (!process.env.SIGNER_PRIVATE_KEY) {
         throw new Error("Please set SIGNER_PRIVATE_KEY in your .env file")
+    }
+
+    if (!process.env.PROOF) {
+        throw new Error(
+            "No proof found in .env file. Please run verify-proof.ts first"
+        )
     }
 
     const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
@@ -16,56 +25,50 @@ async function main() {
     const provider = new ethers.JsonRpcProvider(getRpcUrl(network))
     const signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, provider)
 
-    console.log("Network:", network)
+    console.log("\nNetwork:", network)
     console.log("Signer address:", signer.address)
 
     const nft = NFT__factory.connect(NFT_ADDRESS, signer)
 
-    // Load proof from file
-    const proofsPath = path.resolve(__dirname, "../proofs.json")
-    if (!fs.existsSync(proofsPath)) {
-        throw new Error(
-            "proofs.json not found. Please run verify-proof.ts first"
-        )
-    }
-    const proofs = JSON.parse(fs.readFileSync(proofsPath, "utf8"))
+    try {
+        console.log("\nClaiming token...")
+        // Simulate first
+        await nft.claimOperation.staticCall(process.env.PROOF)
+        console.log("✅ Simulation successful")
 
-    // Try to claim each proof
-    for (const proof of proofs) {
-        console.log(`\nClaiming token ${proof.tokenId}...`)
-        try {
-            // Simulate first
-            await nft.claimOperation.staticCall(proof.proof)
-            console.log("✅ Simulation successful")
+        // Submit transaction
+        const tx = await nft.claimOperation(process.env.PROOF, {
+            gasLimit: 500000
+        })
+        console.log("Transaction submitted:", tx.hash)
 
-            // Submit transaction
-            const tx = await nft.claimOperation(proof.proof, {
-                gasLimit: 500000
-            })
-            console.log("Transaction submitted:", tx.hash)
+        const receipt = await tx.wait()
+        if (receipt?.status === 1) {
+            console.log("Token claimed successfully!")
 
-            const receipt = await tx.wait()
-            if (receipt?.status === 1) {
-                console.log(`Token ${proof.tokenId} claimed successfully!`)
-
-                // Verify the new owner
-                const newOwner = await nft.ownerOf(proof.tokenId)
-                console.log(`New owner: ${newOwner}`)
-                if (newOwner.toLowerCase() !== proof.owner.toLowerCase()) {
-                    console.warn(
-                        "⚠️ Warning: New owner doesn't match expected owner"
-                    )
-                }
-            }
-        } catch (error: any) {
-            console.error(`\nFailed to claim token ${proof.tokenId}:`)
-            if (error.data) {
+            // Verify the new owner from the Transfer event
+            const transferEvent = receipt?.logs.find(log => {
                 try {
-                    const decodedError = nft.interface.parseError(error.data)
-                    console.error("Error reason:", decodedError)
-                } catch (e) {
-                    console.error(error)
+                    const parsed = nft.interface.parseLog(log as any)
+                    return parsed?.name === "Transfer"
+                } catch {
+                    return false
                 }
+            })
+
+            if (transferEvent) {
+                const parsedEvent = nft.interface.parseLog(transferEvent as any)
+                console.log(`New owner: ${parsedEvent?.args?.to}`)
+            }
+        }
+    } catch (error: any) {
+        console.error(`\nFailed to claim token:`)
+        if (error.data) {
+            try {
+                const decodedError = nft.interface.parseError(error.data)
+                console.error("Error reason:", decodedError)
+            } catch (e) {
+                console.error(error)
             }
         }
     }
