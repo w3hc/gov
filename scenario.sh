@@ -43,5 +43,5 @@ echo "TOKENID=2" >> .env
 source .env
 
 npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
-
+source .env
 npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
