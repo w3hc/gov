@@ -19,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
+    const salt = hre.ethers.id("Dec-11-v1")
 
     function wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms))
@@ -31,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
             args: [11155111, deployer, firstMembers, uri, name, symbol],
-            salt: hre.ethers.id("NFT"),
+            salt: salt,
             log: true,
             waitConfirmations: 1
         }
@@ -56,7 +57,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 votingThreshold,
                 quorum
             ],
-            salt: hre.ethers.id("Gov"),
+            salt: salt,
             log: true,
             waitConfirmations: 5
         }
