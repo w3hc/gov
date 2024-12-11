@@ -6,19 +6,18 @@ import * as dotenv from "dotenv"
 dotenv.config()
 
 const {
+    SIGNER_PRIVATE_KEY,
     OPTIMISM_MAINNET_RPC_ENDPOINT_URL,
-    OPTIMISM_MAINNET_PRIVATE_KEY,
     OP_ETHERSCAN_API_KEY,
     BASE_MAINNET_RPC_ENDPOINT_URL,
-    BASE_MAINNET_PRIVATE_KEY,
     BASE_ETHERSCAN_API_KEY,
+    ARBITRUM_MAINNET_RPC_ENDPOINT_URL,
+    ARBITRUM_ETHERSCAN_API_KEY,
     SEPOLIA_RPC_ENDPOINT_URL,
-    SEPOLIA_PRIVATE_KEY,
     ETHERSCAN_API_KEY,
     OP_SEPOLIA_RPC_ENDPOINT_URL,
-    OP_SEPOLIA_PRIVATE_KEY,
     BASE_SEPOLIA_RPC_ENDPOINT_URL,
-    BASE_SEPOLIA_PRIVATE_KEY
+    ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
 } = process.env
 
 const config: HardhatUserConfig = {
@@ -37,7 +36,7 @@ const config: HardhatUserConfig = {
                 SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SEPOLIA_PRIVATE_KEY !== undefined ? [SEPOLIA_PRIVATE_KEY] : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         optimism: {
             chainId: 10,
@@ -45,39 +44,48 @@ const config: HardhatUserConfig = {
                 OPTIMISM_MAINNET_RPC_ENDPOINT_URL ||
                 "https://mainnet.optimism.io",
             accounts:
-                OPTIMISM_MAINNET_PRIVATE_KEY !== undefined
-                    ? [OPTIMISM_MAINNET_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         base: {
             chainId: 8453,
             url: BASE_MAINNET_RPC_ENDPOINT_URL || "https://mainnet.base.org",
             accounts:
-                BASE_MAINNET_PRIVATE_KEY !== undefined
-                    ? [BASE_MAINNET_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
+        arbitrum: {
+            chainId: 42161,
+            url:
+                ARBITRUM_MAINNET_RPC_ENDPOINT_URL ||
+                "https://arb1.arbitrum.io/rpc",
+            accounts:
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+        },
+
         "op-sepolia": {
             chainId: 11155420,
             url:
                 OP_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                OP_SEPOLIA_PRIVATE_KEY !== undefined
-                    ? [OP_SEPOLIA_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         "base-sepolia": {
             chainId: 84532,
             url: BASE_SEPOLIA_RPC_ENDPOINT_URL || "https://sepolia.base.org",
             accounts:
-                BASE_SEPOLIA_PRIVATE_KEY !== undefined
-                    ? [BASE_SEPOLIA_PRIVATE_KEY]
-                    : []
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
+        },
+        "arbitrum-sepolia": {
+            chainId: 421614,
+            url:
+                ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL ||
+                "https://sepolia-rollup.arbitrum.io/rpc",
+            accounts:
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         }
     },
     solidity: {
-        version: "0.8.20",
+        version: "0.8.22",
         settings: {
             optimizer: {
                 enabled: true,
@@ -92,10 +100,12 @@ const config: HardhatUserConfig = {
         apiKey: {
             optimism: OP_ETHERSCAN_API_KEY || "",
             base: BASE_ETHERSCAN_API_KEY || "",
+            arbitrum: ARBITRUM_ETHERSCAN_API_KEY || "",
             sepolia: ETHERSCAN_API_KEY || "",
             optimisticEthereum: OP_ETHERSCAN_API_KEY || "",
             "op-sepolia": OP_ETHERSCAN_API_KEY || "",
-            "base-sepolia": BASE_ETHERSCAN_API_KEY || ""
+            "base-sepolia": BASE_ETHERSCAN_API_KEY || "",
+            "arbitrum-sepolia": ARBITRUM_ETHERSCAN_API_KEY || ""
         },
         customChains: [
             {
@@ -112,6 +122,14 @@ const config: HardhatUserConfig = {
                 urls: {
                     apiURL: "https://api-sepolia.basescan.org/api",
                     browserURL: "https://basescan.org/"
+                }
+            },
+            {
+                network: "arbitrum-sepolia",
+                chainId: 421614,
+                urls: {
+                    apiURL: "https://api-sepolia.arbiscan.io/api",
+                    browserURL: "https://sepolia.arbiscan.io"
                 }
             }
         ]
