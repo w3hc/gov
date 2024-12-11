@@ -98,6 +98,7 @@ contract NFT is
         home = _home;
         for (uint i; i < _firstMembers.length; i++) {
             _mint(_firstMembers[i], _uri);
+            _delegate(_firstMembers[i], _firstMembers[i]);
         }
     }
 
@@ -111,6 +112,7 @@ contract NFT is
      */
     function safeMint(address to, string memory uri) public onlyOwner onlyHomeChain {
         _mint(to, uri);
+        _delegate(to, to);
     }
 
     /**
