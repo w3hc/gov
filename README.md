@@ -52,51 +52,19 @@ Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your
 
 ### Crosschain
 
-Make sure that the deployer wallet address is funded on each notwork you want to deploy to: 
+Run the `scenario1.sh` bash script: 
 
 ```
-pnpm bal
+./scenario1.sh
 ```
 
-Then, you can go ahead and deploy: 
+It will: 
 
-```bash
-pnpm crosschain:sepolia
-pnpm crosschain:opSepolia
-pnpm crosschain:baseSepolia
-pnpm crosschain:arbitrumSepolia
-```
-
-Your DAO will be deployed on every networks at the same address (watch the [Asciinema video](https://asciinema.org/a/rc8bTqbBiW7e0xevewxCwCP7C)).
-
-Then you can follow these steps to verify that proofs can be generated on home chain and claimed on foreign chain: 
-
-```bash
-
-# Watch the [Asciinema video](https://asciinema.org/a/1iZZQVKU51U86hzYYLfjSVtw6)
-npx hardhat run scripts/propose.ts --network sepolia
-npx hardhat run scripts/verify-proof.ts --network sepolia
-npx hardhat run scripts/claim-membership.ts --network opSepolia
-npx hardhat run scripts/claim-membership.ts --network baseSepolia
-npx hardhat run scripts/claim-membership.ts --network arbitrumSepolia
-
-npx hardhat run scripts/gov-burn.ts --network sepolia
-npx hardhat run scripts/verify-gov-burn-proof.ts --network sepolia
-npx hardhat run scripts/claim-gov-burn.ts --network opSepolia
-
-npx hardhat run scripts/verify-metadata-proof.ts --network sepolia
-npx hardhat run scripts/claim-metadata-update.ts --network opSepolia
-
-npx hardhat run scripts/verify-manifesto-proof.ts --network sepolia
-npx hardhat run scripts/claim-manifesto-update.ts --network opSepolia
-
-npx hardhat run scripts/gov-voting-delay.ts --network sepolia
-npx hardhat run scripts/verify-voting-delay-proof.ts --network sepolia
-npx hardhat run scripts/claim-voting-delay.ts --network opSepolia
-
-npx hardhat run scripts/verify-delegation-proof.ts --network sepolia
-npx hardhat run scripts/claim-delegation.ts --network opSepolia
-``` 
+- Deploy to OP Sepolia
+- Deploy to Arbitrum Sepolia
+- Submit a proposal and add a member
+- Generate a membership proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
 
 ## Security
 
@@ -122,9 +90,23 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 |---------|----------|---------------|
 | Optimism Mainnet | 10 | [Documentation](https://docs.optimism.io/chain/networks#op-mainnet) |
 | Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
+| Arbitrum One | 42161 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
 | Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
-| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#opSepolia) |
+| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
 | Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
+| Arbitrum Sepolia | 421614 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
+
+## Contract Verification
+
+| Network | Explorer URL | API URL | API Key Variable |
+|---------|--------------|---------|-----------------|
+| Optimism | https://optimistic.etherscan.io | https://api-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
+| Base | https://basescan.org | https://api.basescan.org/api | BASE_ETHERSCAN_API_KEY |
+| Arbitrum One | https://arbiscan.io | https://api.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
+| Sepolia | https://sepolia.etherscan.io | https://api-sepolia.etherscan.io/api | ETHERSCAN_API_KEY |
+| OP Sepolia | https://sepolia-optimism.etherscan.io | https://api-sepolia-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
+| Base Sepolia | https://sepolia.basescan.org | https://api-sepolia.basescan.org/api | BASE_ETHERSCAN_API_KEY |
+| Arbitrum Sepolia | https://sepolia.arbiscan.io | https://api-sepolia.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
 
 ## Core Dependencies
 
@@ -136,4 +118,4 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ## Support
 
-Feel free to reach out to [Julien](https://github.com/julienbrg): [Farcaster](https://warpcast.com/julien-), [Element](https://matrix.to/#/@julienbrg:matrix.org), [Status](https://status.app/u/iwSACggKBkp1bGllbgM=#zQ3shmh1sbvE6qrGotuyNQB22XU5jTrZ2HFC8bA56d5kTS2fy), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discordapp.com/users/julienbrg), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
+Feel free to reach out to [Julien](https://github.com/julienbrg) on [Farcaster](https://warpcast.com/julien-), [Element](https://matrix.to/#/@julienbrg:matrix.org), [Status](https://status.app/u/iwSACggKBkp1bGllbgM=#zQ3shmh1sbvE6qrGotuyNQB22XU5jTrZ2HFC8bA56d5kTS2fy), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discordapp.com/users/julienbrg), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
