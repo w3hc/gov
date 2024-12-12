@@ -147,6 +147,31 @@ It will:
 - Generate a metadata proof on OP Sepolia
 - Claim that proof on Arbitrum Sepolia
 
+Edit the manifesto:
+
+```
+./scripts/manifesto.sh
+```
+
+It will: 
+
+- Submit a proposal to edit the manifesto on OP Sepolia
+- Generate a manifesto proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
+
+Change the voting delay:
+
+```
+./scripts/voting-delay.sh
+```
+
+It will: 
+
+- Submit a proposal to change the voting delay on OP Sepolia
+- Generate a voting delay proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
+
+
 ## Core Dependencies
 
 -   Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)

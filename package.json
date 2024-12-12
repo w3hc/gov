@@ -6,7 +6,7 @@
     "scripts": {
         "compile": "hardhat compile",
         "test": "hardhat test",
-        "test:all": "./scripts/deploy.sh && ./scripts/mint.sh && ./scripts/burn.sh && ./scripts/metadata.sh",
+        "test:all": "./scripts/deploy.sh && ./scripts/mint.sh && ./scripts/burn.sh && ./scripts/metadata.sh && ./scripts/manifesto.sh && ./scripts/voting-delay.sh",
         "test:crosschain": "hardhat test test/Gov-crosschain.ts",
         "deploy:optimism": "hardhat deploy --network optimism --reset",
         "deploy:base": "hardhat deploy --network base --reset",
