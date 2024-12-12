@@ -63,12 +63,13 @@ async function main() {
     console.log("\nUsing proof:", proof)
 
     try {
-        console.log("Simulating claim transaction...")
-        await nft.claimMint.staticCall(proof)
+        console.log("\nClaiming token...")
+        // Simulate first
+        await nft.claimOperation.staticCall(process.env.PROOF)
         console.log("✅ Simulation successful")
 
-        console.log("Submitting claim transaction...")
-        const tx = await nft.claimMint(proof, {
+        // Submit transaction
+        const tx = await nft.claimOperation(process.env.PROOF, {
             gasLimit: 500000
         })
 
@@ -76,33 +77,50 @@ async function main() {
         console.log("Waiting for confirmation...")
 
         const receipt = await tx.wait()
-        console.log("Membership claimed successfully!")
+        if (receipt?.status === 1) {
+            console.log("Token claimed successfully!")
 
-        // Get token ID from event
-        const claimEvent = receipt?.logs.find(log => {
-            try {
-                return nft.interface.parseLog(log)?.name === "MembershipClaimed"
-            } catch {
-                return false
+            // Verify the new owner from the Transfer event
+            const transferEvent = receipt?.logs.find(log => {
+                try {
+                    const parsed = nft.interface.parseLog(log as any)
+                    return parsed?.name === "Transfer"
+                } catch {
+                    return false
+                }
+            })
+
+            if (transferEvent) {
+                const parsedEvent = nft.interface.parseLog(transferEvent as any)
+                console.log(`New owner: ${parsedEvent?.args?.to}`)
             }
-        })
-
-        if (claimEvent) {
-            const parsedEvent = nft.interface.parseLog(claimEvent)
-            const tokenId = parsedEvent?.args?.tokenId
-            console.log("Claimed token ID:", tokenId)
         }
     } catch (error: any) {
-        console.error("\nError details:", error)
+        console.error(`\nFailed to claim token:`)
         if (error.data) {
             try {
                 const decodedError = nft.interface.parseError(error.data)
-                console.error("Decoded error:", decodedError)
+                console.error("Error reason:", decodedError)
             } catch (e) {
-                console.error("Raw error data:", error.data)
+                console.error(error)
             }
         }
-        throw error
+    }
+}
+
+// Helper to get RPC URL
+function getRpcUrl(network: string): string {
+    switch (network) {
+        case "opSepolia":
+            return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL || ""
+        case "baseSepolia":
+            return process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL || ""
+        case "arbitrumSepolia":
+            return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL || ""
+        case "sepolia":
+            return process.env.SEPOLIA_RPC_ENDPOINT_URL || ""
+        default:
+            throw new Error(`Unsupported network: ${network}`)
     }
 }
 

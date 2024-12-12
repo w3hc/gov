@@ -28,15 +28,17 @@ async function main() {
 
     console.log("Using NFT contract address:", NFT_ADDRESS)
 
-    // Get contract factory and instance
-    const NFTFactory = await ethers.getContractFactory(
-        "contracts/variants/crosschain/NFT.sol:NFT"
-    )
-    const nft = NFT__factory.connect(NFT_ADDRESS, NFTFactory.runner) as NFT
+    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
+    const NFT_ADDRESS = deploymentsNFT.address
+    console.log("\nNFT Address:", NFT_ADDRESS)
 
-    // Get owner of token ID 2 for verification
-    const owner = await nft.ownerOf(2)
-    console.log("\nToken owner:", owner)
+    // Get token info
+    const tokenId = process.env.TOKENID
+        ? parseInt(process.env.TOKENID)
+        : undefined
+    if (!tokenId) {
+        throw new Error("No token ID specified in .env")
+    }
 
     // Generate proof for token ID 2
     console.log("Generating proof for token ID 2...")

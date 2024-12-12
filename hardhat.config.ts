@@ -2,10 +2,12 @@ import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@nomicfoundation/hardhat-verify"
 import "hardhat-deploy"
+import "@typechain/hardhat"
 import * as dotenv from "dotenv"
 dotenv.config()
 
 const {
+    SIGNER_PRIVATE_KEY,
     SIGNER_PRIVATE_KEY,
     OPTIMISM_MAINNET_RPC_ENDPOINT_URL,
     OP_ETHERSCAN_API_KEY,
@@ -13,10 +15,13 @@ const {
     BASE_ETHERSCAN_API_KEY,
     ARBITRUM_MAINNET_RPC_ENDPOINT_URL,
     ARBITRUM_ETHERSCAN_API_KEY,
+    ARBITRUM_MAINNET_RPC_ENDPOINT_URL,
+    ARBITRUM_ETHERSCAN_API_KEY,
     SEPOLIA_RPC_ENDPOINT_URL,
     ETHERSCAN_API_KEY,
     OP_SEPOLIA_RPC_ENDPOINT_URL,
     BASE_SEPOLIA_RPC_ENDPOINT_URL,
+    ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
     ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
 } = process.env
 
@@ -69,7 +74,7 @@ const config: HardhatUserConfig = {
             accounts:
                 SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
-        "base-sepolia": {
+        baseSepolia: {
             chainId: 84532,
             url: BASE_SEPOLIA_RPC_ENDPOINT_URL || "https://sepolia.base.org",
             accounts:
@@ -90,7 +95,8 @@ const config: HardhatUserConfig = {
             optimizer: {
                 enabled: true,
                 runs: 200
-            }
+            },
+            viaIR: false
         }
     },
     sourcify: {
@@ -101,6 +107,7 @@ const config: HardhatUserConfig = {
             optimism: OP_ETHERSCAN_API_KEY || "",
             base: BASE_ETHERSCAN_API_KEY || "",
             arbitrum: ARBITRUM_ETHERSCAN_API_KEY || "",
+            arbitrum: ARBITRUM_ETHERSCAN_API_KEY || "",
             sepolia: ETHERSCAN_API_KEY || "",
             optimisticEthereum: OP_ETHERSCAN_API_KEY || "",
             "op-sepolia": OP_ETHERSCAN_API_KEY || "",
@@ -109,7 +116,7 @@ const config: HardhatUserConfig = {
         },
         customChains: [
             {
-                network: "op-sepolia",
+                network: "opSepolia",
                 chainId: 11155420,
                 urls: {
                     apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
@@ -117,7 +124,7 @@ const config: HardhatUserConfig = {
                 }
             },
             {
-                network: "base-sepolia",
+                network: "baseSepolia",
                 chainId: 84532,
                 urls: {
                     apiURL: "https://api-sepolia.basescan.org/api",

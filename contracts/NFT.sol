@@ -63,6 +63,7 @@ contract NFT is
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        _delegate(to, to);
     }
 
     /// @notice Updates the NFT ownership

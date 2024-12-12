@@ -149,7 +149,7 @@ describe("Gov", function () {
                 // Change delegation
                 await nft.connect(alice).delegate(bob.address)
                 expect(await nft.getVotes(david.address)).to.equal(0)
-                expect(await nft.getVotes(bob.address)).to.equal(1)
+                expect(await nft.getVotes(bob.address)).to.equal(2)
             })
 
             it("should maintain zero voting power for non-holders across multiple delegations", async function () {
@@ -162,11 +162,35 @@ describe("Gov", function () {
                 await nft.connect(charlie).delegate(bob.address)
 
                 expect(await nft.getVotes(david.address)).to.equal(0)
-                expect(await nft.getVotes(alice.address)).to.equal(0)
+                expect(await nft.getVotes(alice.address)).to.equal(1)
+
                 // Bob should maintain only his original voting power if any
                 expect(await nft.getVotes(bob.address)).to.equal(
                     initialBobVotes
                 )
+            })
+            it("should auto-delegate voting power to initial members on deployment", async function () {
+                const { nft } = await loadFixture(deployContracts)
+
+                // Get current timestamp
+                const startTime = await time.latest()
+
+                // Increase time by only 1 sec in on this network
+                await time.increase(1)
+
+                // Check voting power at the starting timestamp
+                const alicePower = await nft.getPastVotes(
+                    alice.address,
+                    startTime
+                )
+                const bobPower = await nft.getPastVotes(bob.address, startTime)
+
+                expect(alicePower).to.equal(1)
+                expect(bobPower).to.equal(1)
+                expect(await nft.delegates(alice.address)).to.equal(
+                    alice.address
+                )
+                expect(await nft.delegates(bob.address)).to.equal(bob.address)
             })
         })
 

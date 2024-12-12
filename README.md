@@ -92,7 +92,7 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 | Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
 | Arbitrum One | 42161 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
 | Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
-| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
+| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#opSepolia) |
 | Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
 | Arbitrum Sepolia | 421614 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
 

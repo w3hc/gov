@@ -1,3 +1,7 @@
+///// Home chain /////
+
+export const homeChain = 11155111
+
 ///// Membership NFT /////
 
 export const firstMembers = [
