@@ -52,10 +52,28 @@ Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your
 
 ### Crosschain
 
-Run the `scenario1.sh` bash script: 
+Make sure the main account has sufficient balance on OP Sepolia and Arbitrum Sepolia: 
 
 ```
-./scenario1.sh
+pnpm bal
+```
+
+Deploy: 
+
+```
+pnpm deploy:all
+```
+
+Add a member (mint):
+
+```
+./scripts/mint.sh
+```
+
+Ban a member (burn):
+
+```
+./scripts/burn.sh
 ```
 
 It will: 
