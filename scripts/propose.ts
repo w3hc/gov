@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+import hre, { ethers } from "hardhat"
 import { Gov__factory } from "../typechain-types/factories/contracts/variants/crosschain/Gov__factory"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
 import * as fs from "fs"
@@ -6,6 +6,24 @@ import * as path from "path"
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function getDeployedAddress(network: string, contractName: string): string {
+    try {
+        const deploymentPath = path.join(
+            __dirname,
+            "..",
+            "deployments",
+            network,
+            `${contractName}.json`
+        )
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"))
+        return deployment.address
+    } catch (error) {
+        throw new Error(
+            `Failed to read deployment for ${contractName} on ${network}: ${error}`
+        )
+    }
 }
 
 async function main() {
@@ -21,22 +39,34 @@ async function main() {
     }
     const JUNGLE_ADDRESS = "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE"
 
-    const deploymentsGov = require("../deployments/sepolia/CrosschainGov.json")
-    const GOV_ADDRESS = deploymentsGov.address
-    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
-    const NFT_ADDRESS = deploymentsNFT.address
+    // Get the network from hardhat config
+    const networkName = hre.network.name
 
-    console.log("\nGov address:", GOV_ADDRESS)
-    console.log("NFT address:", NFT_ADDRESS)
+    // Get deployed addresses from deployment files
+    const NFT_ADDRESS = getDeployedAddress(networkName, "CrosschainNFT")
+    const GOV_ADDRESS = getDeployedAddress(networkName, "CrosschainGov")
 
-    // Create provider and signers properly
+    console.log("Using contract addresses:")
+    console.log("NFT:", NFT_ADDRESS)
+    console.log("Gov:", GOV_ADDRESS)
+
     const provider = new ethers.JsonRpcProvider(
-        process.env.SEPOLIA_RPC_ENDPOINT_URL
+        (() => {
+            switch (networkName) {
+                case "op-sepolia":
+                    return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+                case "arbitrum-sepolia":
+                    return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+                default:
+                    throw new Error(`Unsupported network: ${networkName}`)
+            }
+        })()
     )
+
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
+    const signerZero = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
     console.log("Using address for proposals:", aliceSigner.address)
-    console.log("Using address for execution:", sepoliaSigner.address)
+    console.log("Using address for execution:", signerZero.address)
 
     const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
@@ -264,11 +294,58 @@ async function main() {
                             let envContent = ""
 
                             try {
-                                // Read existing .env content if file exists
-                                if (fs.existsSync(envPath)) {
-                                    envContent = fs.readFileSync(
-                                        envPath,
-                                        "utf8"
+                                console.log("Execution parameters:")
+                                console.log("- Targets:", targets)
+                                console.log("- Values:", values)
+                                console.log("- Calldatas:", calldatas)
+                                console.log(
+                                    "- Description hash:",
+                                    ethers.id(description)
+                                )
+
+                                console.log(
+                                    "\nSubmitting execution transaction from Sepolia signer..."
+                                )
+
+                                // Connect with sepoliaSigner for execution
+                                const executeTx = await gov
+                                    .connect(signerZero)
+                                    .execute(
+                                        targets,
+                                        values,
+                                        calldatas,
+                                        ethers.id(description)
+                                    )
+
+                                console.log(
+                                    "Execution transaction submitted:",
+                                    executeTx.hash
+                                )
+                                console.log("Waiting for confirmation...")
+
+                                const executeReceipt = await executeTx.wait()
+                                console.log(
+                                    "Proposal executed successfully in block:",
+                                    executeReceipt?.blockNumber
+                                )
+
+                                try {
+                                    const totalSupply = await nft.totalSupply()
+                                    console.log(
+                                        "NFT total supply:",
+                                        totalSupply
+                                    )
+                                    const newOwner = await nft.ownerOf(
+                                        totalSupply - 1n
+                                    )
+                                    console.log(
+                                        "NFT successfully minted to:",
+                                        newOwner
+                                    )
+                                } catch (error) {
+                                    console.log(
+                                        "Could not verify NFT minting:",
+                                        error
                                     )
                                 }
 

@@ -16,23 +16,56 @@ async function main() {
         try {
             console.log(color.magenta(`\nSwitching to network: ${networkName}`))
 
-            // Ensure network has an RPC URL and accounts
-            const { url, accounts } = networkConfig as any
-
-            if (!url || accounts.length === 0) {
-                console.error(
+            // Skip hardhat and localhost networks
+            if (networkName === "hardhat" || networkName === "localhost") {
+                console.log(
                     color.yellow(
-                        `Skipping network "${networkName}" due to missing RPC URL or accounts.`
+                        `Skipping local network "${networkName}" - only checking remote networks.`
                     )
                 )
                 continue
             }
 
-            // Create provider and signer
-            const provider = new ethers.JsonRpcProvider(url)
-            const signer = new ethers.Wallet(accounts[0], provider)
+            // Type assertion for network config
+            const config = networkConfig as {
+                url?: string
+                accounts?: string[]
+            }
 
-            // Get balance
+            // Check if network is properly configured
+            if (
+                !config.url ||
+                !config.accounts ||
+                config.accounts.length === 0
+            ) {
+                console.log(
+                    color.yellow(
+                        `Skipping network "${networkName}" - missing configuration in .env file`
+                    )
+                )
+                continue
+            }
+
+            // Create provider with retry options
+            const provider = new ethers.JsonRpcProvider(config.url, undefined, {
+                maxRetries: 3,
+                timeout: 10000
+            })
+
+            // Test provider connection
+            try {
+                await provider.getNetwork()
+            } catch (error) {
+                console.log(
+                    color.yellow(
+                        `Failed to connect to network "${networkName}" - check RPC URL`
+                    )
+                )
+                continue
+            }
+
+            // Create signer and get balance
+            const signer = new ethers.Wallet(config.accounts[0], provider)
             const balance = await provider.getBalance(signer.address)
 
             console.log(
