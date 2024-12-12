@@ -48,6 +48,48 @@ pnpm deploy:sepolia
 
 Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your own interface using [Gov UI](https://github.com/w3hc/gov-ui). 
 
+## Security
+
+Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
+
+### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
+
+The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
+
+- `setManifesto()` updates the CID.
+
+### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
+
+The following functions are `onlyOwner`, and since the NFT contract ownership is transferred to the Gov contract, they can only be triggered by a vote.
+
+- `safeMint()` adds a new member.
+- `govBurn()` bans a member.
+- `setMetadata()` changes the tokenURI of a given NFT ID.
+
+## Supported Networks
+
+| Network | Chain ID | Documentation |
+|---------|----------|---------------|
+| Optimism Mainnet | 10 | [Documentation](https://docs.optimism.io/chain/networks#op-mainnet) |
+| Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
+| Arbitrum One | 42161 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
+| Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
+| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
+| Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
+| Arbitrum Sepolia | 421614 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
+
+## Contract Verification
+
+| Network | Explorer URL | API URL | API Key Variable |
+|---------|--------------|---------|-----------------|
+| Optimism | https://optimistic.etherscan.io | https://api-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
+| Base | https://basescan.org | https://api.basescan.org/api | BASE_ETHERSCAN_API_KEY |
+| Arbitrum One | https://arbiscan.io | https://api.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
+| Sepolia | https://sepolia.etherscan.io | https://api-sepolia.etherscan.io/api | ETHERSCAN_API_KEY |
+| OP Sepolia | https://sepolia-optimism.etherscan.io | https://api-sepolia-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
+| Base Sepolia | https://sepolia.basescan.org | https://api-sepolia.basescan.org/api | BASE_ETHERSCAN_API_KEY |
+| Arbitrum Sepolia | https://sepolia.arbiscan.io | https://api-sepolia.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
+
 ## Variants
 
 ### Crosschain
@@ -93,47 +135,17 @@ It will:
 - Generate a burn proof on OP Sepolia
 - Claim that proof on Arbitrum Sepolia
 
-## Security
+Edit membership NFT metadata:
 
-Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
+```
+./scripts/metadata.sh
+```
 
-### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
+It will: 
 
-The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
-
-- `setManifesto()` updates the CID.
-
-### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
-
-The following functions are `onlyOwner`, and since the NFT contract ownership is transferred to the Gov contract, they can only be triggered by a vote.
-
-- `safeMint()` adds a new member.
-- `govBurn()` bans a member.
-- `setMetadata()` changes the tokenURI of a given NFT ID.
-
-## Supported Networks
-
-| Network | Chain ID | Documentation |
-|---------|----------|---------------|
-| Optimism Mainnet | 10 | [Documentation](https://docs.optimism.io/chain/networks#op-mainnet) |
-| Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
-| Arbitrum One | 42161 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
-| Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
-| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
-| Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
-| Arbitrum Sepolia | 421614 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
-
-## Contract Verification
-
-| Network | Explorer URL | API URL | API Key Variable |
-|---------|--------------|---------|-----------------|
-| Optimism | https://optimistic.etherscan.io | https://api-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
-| Base | https://basescan.org | https://api.basescan.org/api | BASE_ETHERSCAN_API_KEY |
-| Arbitrum One | https://arbiscan.io | https://api.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
-| Sepolia | https://sepolia.etherscan.io | https://api-sepolia.etherscan.io/api | ETHERSCAN_API_KEY |
-| OP Sepolia | https://sepolia-optimism.etherscan.io | https://api-sepolia-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
-| Base Sepolia | https://sepolia.basescan.org | https://api-sepolia.basescan.org/api | BASE_ETHERSCAN_API_KEY |
-| Arbitrum Sepolia | https://sepolia.arbiscan.io | https://api-sepolia.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
+- Submit a proposal edit the NFT metadata of tokenId 1 on OP Sepolia
+- Generate a metadata proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
 
 ## Core Dependencies
 
