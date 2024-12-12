@@ -12,3 +12,4 @@ artifacts
 !.env.template
 NOTES.md
 deployments
+data.json
