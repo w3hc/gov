@@ -48,42 +48,6 @@ pnpm deploy:sepolia
 
 Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your own interface using [Gov UI](https://github.com/w3hc/gov-ui). 
 
-## Variants
-
-### Crosschain
-
-Make sure the main account has sufficient balance on OP Sepolia and Arbitrum Sepolia: 
-
-```
-pnpm bal
-```
-
-Deploy: 
-
-```
-pnpm deploy:all
-```
-
-Add a member (mint):
-
-```
-./scripts/mint.sh
-```
-
-Ban a member (burn):
-
-```
-./scripts/burn.sh
-```
-
-It will: 
-
-- Deploy to OP Sepolia
-- Deploy to Arbitrum Sepolia
-- Submit a proposal and add a member
-- Generate a membership proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
 ## Security
 
 Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
@@ -125,6 +89,63 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 | OP Sepolia | https://sepolia-optimism.etherscan.io | https://api-sepolia-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
 | Base Sepolia | https://sepolia.basescan.org | https://api-sepolia.basescan.org/api | BASE_ETHERSCAN_API_KEY |
 | Arbitrum Sepolia | https://sepolia.arbiscan.io | https://api-sepolia.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
+
+## Variants
+
+### Crosschain
+
+Make sure the main account has sufficient balance on OP Sepolia and Arbitrum Sepolia: 
+
+```
+pnpm bal
+```
+
+Deploy: 
+
+```
+pnpm deploy:all
+```
+
+It will: 
+
+- Deploy to OP Sepolia
+- Deploy to Arbitrum Sepolia
+
+Add a member (mint):
+
+```
+./scripts/mint.sh
+```
+
+It will: 
+
+- Submit a proposal and add a member on OP Sepolia
+- Generate a membership proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
+
+Ban a member (burn):
+
+```
+./scripts/burn.sh
+```
+
+It will: 
+
+- Submit a proposal and ban a member on OP Sepolia
+- Generate a burn proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
+
+Edit membership NFT metadata:
+
+```
+./scripts/metadata.sh
+```
+
+It will: 
+
+- Submit a proposal edit the NFT metadata of tokenId 1 on OP Sepolia
+- Generate a metadata proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
 
 ## Core Dependencies
 
