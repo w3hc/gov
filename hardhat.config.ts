@@ -2,7 +2,6 @@ import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@nomicfoundation/hardhat-verify"
 import "hardhat-deploy"
-import "@typechain/hardhat"
 import * as dotenv from "dotenv"
 dotenv.config()
 
@@ -37,8 +36,7 @@ const config: HardhatUserConfig = {
                 SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         optimism: {
             chainId: 10,
@@ -46,59 +44,53 @@ const config: HardhatUserConfig = {
                 OPTIMISM_MAINNET_RPC_ENDPOINT_URL ||
                 "https://mainnet.optimism.io",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         base: {
             chainId: 8453,
             url: BASE_MAINNET_RPC_ENDPOINT_URL || "https://mainnet.base.org",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
         arbitrum: {
             chainId: 42161,
             url:
                 ARBITRUM_MAINNET_RPC_ENDPOINT_URL ||
-                "https://endpoints.omniatech.io/v1/arbitrum/one/public",
+                "https://arb1.arbitrum.io/rpc",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
-        opSepolia: {
+
+        "op-sepolia": {
             chainId: 11155420,
             url:
                 OP_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://ethereum-sepolia.publicnode.com",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
-        baseSepolia: {
+        "base-sepolia": {
             chainId: 84532,
             url: BASE_SEPOLIA_RPC_ENDPOINT_URL || "https://sepolia.base.org",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         },
-        arbitrumSepolia: {
+        "arbitrum-sepolia": {
             chainId: 421614,
             url:
                 ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL ||
                 "https://sepolia-rollup.arbitrum.io/rpc",
             accounts:
-                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : [],
-            allowUnlimitedContractSize: true
+                SIGNER_PRIVATE_KEY !== undefined ? [SIGNER_PRIVATE_KEY] : []
         }
     },
     solidity: {
-        version: "0.8.20",
+        version: "0.8.22",
         settings: {
             optimizer: {
                 enabled: true,
                 runs: 200
-            },
-            viaIR: false
+            }
         }
     },
     sourcify: {
@@ -111,13 +103,13 @@ const config: HardhatUserConfig = {
             arbitrum: ARBITRUM_ETHERSCAN_API_KEY || "",
             sepolia: ETHERSCAN_API_KEY || "",
             optimisticEthereum: OP_ETHERSCAN_API_KEY || "",
-            opSepolia: OP_ETHERSCAN_API_KEY || "",
-            baseSepolia: BASE_ETHERSCAN_API_KEY || "",
-            arbitrumSepolia: ARBITRUM_ETHERSCAN_API_KEY || ""
+            "op-sepolia": OP_ETHERSCAN_API_KEY || "",
+            "base-sepolia": BASE_ETHERSCAN_API_KEY || "",
+            "arbitrum-sepolia": ARBITRUM_ETHERSCAN_API_KEY || ""
         },
         customChains: [
             {
-                network: "opSepolia",
+                network: "op-sepolia",
                 chainId: 11155420,
                 urls: {
                     apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
@@ -125,11 +117,19 @@ const config: HardhatUserConfig = {
                 }
             },
             {
-                network: "baseSepolia",
+                network: "base-sepolia",
                 chainId: 84532,
                 urls: {
                     apiURL: "https://api-sepolia.basescan.org/api",
                     browserURL: "https://basescan.org/"
+                }
+            },
+            {
+                network: "arbitrum-sepolia",
+                chainId: 421614,
+                urls: {
+                    apiURL: "https://api-sepolia.arbiscan.io/api",
+                    browserURL: "https://sepolia.arbiscan.io"
                 }
             }
         ]

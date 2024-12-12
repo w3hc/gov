@@ -8,13 +8,12 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Votes.sol";
-import "./ProofHandler.sol";
 
 /**
  * @title Cross-chain Membership NFT Contract
  * @author Web3 Hackers Collective
- * @notice Non-transferable NFT implementation for DAO membership with cross-chain capabilities
- * @dev Extends OpenZeppelin's NFT standards with cross-chain operation support and delegation
+ * @notice A non-transferable NFT implementation for DAO membership with cross-chain capabilities
+ * @dev Extends OpenZeppelin's NFT standards with cross-chain operation support
  * @custom:security-contact julien@strat.cc
  */
 contract NFT is
@@ -26,59 +25,63 @@ contract NFT is
     EIP712,
     ERC721Votes
 {
-    using ProofHandler for ProofHandler.ProofStorage;
-
-    /// @notice Chain ID where contract was originally deployed
+    /// @notice The chain ID where the contract was originally deployed
     uint256 public immutable home;
 
     /// @notice Next token ID to be minted
     uint256 private _nextTokenId;
 
-    /// @notice Storage for proof handling
-    ProofHandler.ProofStorage private _proofStorage;
+    /// @notice Tracks token existence on each chain
+    mapping(uint256 => bool) public existsOnChain;
 
-    /// @notice Types of operations that can be synchronized across chains
+    /// @notice Operation types for cross-chain message verification
+    /// @dev Used to differentiate between different types of cross-chain operations
     enum OperationType {
-        MINT,
-        BURN,
-        SET_METADATA,
-        DELEGATE
+        MINT, // Mint new token
+        BURN, // Burn existing token
+        SET_METADATA // Update token metadata
     }
 
-    /// @notice Emitted when a membership is claimed
-    /// @param tokenId The ID of the claimed token
-    /// @param member The address receiving the membership
-    /// @param nonce Operation sequence number
-    event MembershipClaimed(uint256 indexed tokenId, address indexed member, uint256 nonce);
+    /**
+     * @notice Emitted when a membership is claimed on a new chain
+     * @param tokenId The ID of the claimed token
+     * @param member The address receiving the membership
+     * @param claimer The address executing the claim
+     */
+    event MembershipClaimed(
+        uint256 indexed tokenId,
+        address indexed member,
+        address indexed claimer
+    );
 
-    /// @notice Emitted when a membership is revoked
-    /// @param tokenId The ID of the revoked token
-    /// @param member The address losing membership
-    /// @param nonce Operation sequence number
-    event MembershipRevoked(uint256 indexed tokenId, address indexed member, uint256 nonce);
+    /**
+     * @notice Emitted when a membership is revoked
+     * @param tokenId The ID of the revoked token
+     * @param member The address losing membership
+     */
+    event MembershipRevoked(uint256 indexed tokenId, address indexed member);
 
-    /// @notice Emitted when metadata is updated
-    /// @param tokenId The ID of the updated token
-    /// @param newUri The new metadata URI
-    /// @param nonce Operation sequence number
-    event MetadataUpdated(uint256 indexed tokenId, string newUri, uint256 nonce);
+    /**
+     * @notice Emitted when a token's metadata is updated
+     * @param tokenId The ID of the updated token
+     * @param newUri The new metadata URI
+     */
+    event MetadataUpdated(uint256 indexed tokenId, string newUri);
 
-    /// @notice Emitted when delegation is synchronized across chains
-    /// @param delegator The address delegating their voting power
-    /// @param delegatee The address receiving the delegation
-    /// @param nonce Operation sequence number
-    event DelegationSynced(address indexed delegator, address indexed delegatee, uint256 nonce);
-
-    /// @notice Restricts functions to home chain
+    /**
+     * @notice Restricts operations to the home chain
+     * @dev Used to ensure certain operations only occur on the chain where the contract was originally deployed
+     */
     modifier onlyHomeChain() {
         require(block.chainid == home, "Operation only allowed on home chain");
         _;
     }
 
     /**
-     * @notice Initializes the NFT contract
-     * @param _home Chain ID where contract is considered home
-     * @param initialOwner Initial contract owner
+     * @notice Initializes the NFT contract with initial members
+     * @dev Sets up ERC721 parameters and mints initial tokens
+     * @param _home The chain ID where this contract is considered home
+     * @param initialOwner The initial contract owner (typically governance)
      * @param _firstMembers Array of initial member addresses
      * @param _uri Initial token URI
      * @param _name Token collection name
@@ -94,128 +97,212 @@ contract NFT is
     ) ERC721(_name, _symbol) Ownable(initialOwner) EIP712(_name, "1") {
         home = _home;
         for (uint i; i < _firstMembers.length; i++) {
-            _govMint(_firstMembers[i], _uri);
+            _mint(_firstMembers[i], _uri);
+            _delegate(_firstMembers[i], _firstMembers[i]);
         }
     }
 
-    /// @notice Adds a new member to the DAO
-    /// @dev Mints a new NFT to the specified address
-    /// @param to The address of the new member
-    /// @param uri The metadata URI for the new NFT
+    // Home Chain Operations
+
+    /**
+     * @notice Mints a new membership token
+     * @dev Only callable by owner on home chain
+     * @param to Recipient address
+     * @param uri Token metadata URI
+     */
     function safeMint(address to, string memory uri) public onlyOwner onlyHomeChain {
-        _govMint(to, uri);
+        _mint(to, uri);
+        _delegate(to, to);
     }
 
     /**
-     * @notice Burns token on home chain
-     * @dev Only callable by owner (governance) on home chain
+     * @notice Revokes a membership
+     * @dev Only callable by owner on home chain
      * @param tokenId ID of token to burn
      */
     function govBurn(uint256 tokenId) public onlyOwner onlyHomeChain {
-        uint256 nonce = _proofStorage.incrementNonce(uint8(OperationType.BURN));
-        address owner = ownerOf(tokenId);
-        _burn(tokenId);
-        emit MembershipRevoked(tokenId, owner, nonce);
+        _govBurn(tokenId);
     }
 
     /**
-     * @notice Updates token metadata on home chain
-     * @dev Only callable by owner (governance) on home chain
+     * @notice Updates a token's metadata
+     * @dev Only callable by owner on home chain
      * @param tokenId ID of token to update
      * @param uri New metadata URI
      */
     function setMetadata(uint256 tokenId, string memory uri) public onlyOwner onlyHomeChain {
-        uint256 nonce = _proofStorage.incrementNonce(uint8(OperationType.SET_METADATA));
-        _setTokenURI(tokenId, uri);
-        emit MetadataUpdated(tokenId, uri, nonce);
+        _updateTokenMetadata(tokenId, uri);
+    }
+
+    // Cross-chain Operation Proofs
+
+    /**
+     * @notice Generates proof for cross-chain minting
+     * @dev Creates a signed message proving token ownership and metadata
+     * @param tokenId ID of token
+     * @return Encoded proof data containing token details and signature
+     */
+    function generateMintProof(uint256 tokenId) external view returns (bytes memory) {
+        require(block.chainid == home, "Proofs can only be generated on home chain");
+        address to = ownerOf(tokenId);
+        string memory uri = tokenURI(tokenId);
+
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.MINT), tokenId, to, uri)
+        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+
+        return abi.encode(tokenId, to, uri, digest);
     }
 
     /**
-     * @notice Delegates voting power to another address on home chain
-     * @dev Overrides ERC721Votes delegate function to add cross-chain functionality
-     * @param delegatee Address to delegate voting power to
+     * @notice Generates proof for cross-chain burning
+     * @dev Creates a signed message proving burn authorization
+     * @param tokenId ID of token to burn
+     * @return Encoded proof data containing burn details and signature
      */
-    function delegate(address delegatee) public virtual override onlyHomeChain {
-        uint256 nonce = _proofStorage.incrementNonce(uint8(OperationType.DELEGATE));
-        _delegate(_msgSender(), delegatee);
-        emit DelegationSynced(_msgSender(), delegatee, nonce);
+    function generateBurnProof(uint256 tokenId) external view returns (bytes memory) {
+        require(block.chainid == home, "Proofs can only be generated on home chain");
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.BURN), tokenId)
+        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+        return abi.encode(tokenId, digest);
     }
 
     /**
-     * @notice Generates proof for NFT operations
-     * @dev Only callable on home chain
-     * @param operationType Type of operation
-     * @param params Operation parameters
-     * @return Encoded proof data
+     * @notice Generates proof for cross-chain metadata updates
+     * @dev Creates a signed message proving metadata update authorization
+     * @param tokenId Token ID to update
+     * @param uri New metadata URI
+     * @return Encoded proof data containing update details and signature
      */
-    function generateOperationProof(
-        uint8 operationType,
-        bytes memory params
+    function generateMetadataProof(
+        uint256 tokenId,
+        string memory uri
     ) external view returns (bytes memory) {
-        require(block.chainid == home, "Proofs only generated on home chain");
-        uint256 nextNonce = _proofStorage.getNextNonce(operationType);
-        return ProofHandler.generateProof(address(this), operationType, params, nextNonce);
-    }
-
-    // Claim operations
-
-    /**
-     * @notice Claims an NFT operation on a foreign chain
-     * @param proof Proof generated by home chain
-     */
-    function claimOperation(bytes memory proof) external {
-        (uint8 operationType, bytes memory params, uint256 nonce) = ProofHandler
-            .verifyAndClaimProof(proof, address(this), _proofStorage);
-
-        if (operationType == uint8(OperationType.MINT)) {
-            (uint256 tokenId, address owner, string memory uri) = abi.decode(
-                params,
-                (uint256, address, string)
-            );
-
-            try this.ownerOf(tokenId) returns (address) {
-                revert("Token already exists");
-            } catch {
-                _govMint(owner, uri);
-                emit MembershipClaimed(_nextTokenId - 1, owner, nonce);
-            }
-        } else if (operationType == uint8(OperationType.BURN)) {
-            uint256 tokenId = abi.decode(params, (uint256));
-            address owner = ownerOf(tokenId);
-            _burn(tokenId);
-            emit MembershipRevoked(tokenId, owner, nonce);
-        } else if (operationType == uint8(OperationType.SET_METADATA)) {
-            (uint256 tokenId, string memory uri) = abi.decode(params, (uint256, string));
-            _setTokenURI(tokenId, uri);
-            emit MetadataUpdated(tokenId, uri, nonce);
-        } else if (operationType == uint8(OperationType.DELEGATE)) {
-            (address delegator, address delegatee) = abi.decode(params, (address, address));
-            _delegate(delegator, delegatee);
-            emit DelegationSynced(delegator, delegatee, nonce);
-        }
+        require(block.chainid == home, "Proofs can only be generated on home chain");
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.SET_METADATA), tokenId, uri)
+        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+        return abi.encode(tokenId, uri, digest);
     }
 
     /**
-     * @notice Internal function for minting without proof verification
-     * @param to Address to receive token
-     * @param uri Token metadata URI
+     * @notice Claims a membership on a foreign chain
+     * @dev Verifies proof and mints token on foreign chain
+     * @param proof Proof generated on home chain
      */
-    function _govMint(address to, string memory uri) internal {
+    function claimMint(bytes memory proof) external {
+        (uint256 tokenId, address to, string memory uri, bytes32 digest) = abi.decode(
+            proof,
+            (uint256, address, string, bytes32)
+        );
+
+        require(!existsOnChain[tokenId], "Token already exists on this chain");
+
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.MINT), tokenId, to, uri)
+        );
+        bytes32 expectedDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
+        );
+        require(digest == expectedDigest, "Invalid mint proof");
+        _mint(to, uri);
+        emit MembershipClaimed(tokenId, to, msg.sender);
+    }
+
+    /**
+     * @notice Claims a burn operation on a foreign chain
+     * @dev Verifies proof and burns token on foreign chain
+     * @param proof Proof generated on home chain
+     */
+    function claimBurn(bytes memory proof) external {
+        (uint256 tokenId, bytes32 digest) = abi.decode(proof, (uint256, bytes32));
+
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.BURN), tokenId)
+        );
+        bytes32 expectedDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
+        );
+        require(digest == expectedDigest, "Invalid burn proof");
+
+        address owner = ownerOf(tokenId);
+        _update(address(0), tokenId, owner);
+        existsOnChain[tokenId] = false;
+
+        emit MembershipRevoked(tokenId, owner);
+    }
+
+    /**
+     * @notice Claims a metadata update on a foreign chain
+     * @dev Verifies proof and updates token metadata on foreign chain
+     * @param proof Proof generated on home chain
+     */
+    function claimMetadataUpdate(bytes memory proof) external {
+        (uint256 tokenId, string memory uri, bytes32 digest) = abi.decode(
+            proof,
+            (uint256, string, bytes32)
+        );
+
+        bytes32 message = keccak256(
+            abi.encodePacked(address(this), uint8(OperationType.SET_METADATA), tokenId, uri)
+        );
+        bytes32 expectedDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
+        );
+        require(digest == expectedDigest, "Invalid metadata proof");
+
+        _setTokenURI(tokenId, uri);
+        existsOnChain[tokenId] = true;
+        emit MetadataUpdated(tokenId, uri);
+    }
+
+    // Internal Functions
+
+    /**
+     * @dev Internal function to mint new token with metadata
+     * @param to Address receiving the token
+     * @param uri Metadata URI for the token
+     */
+    function _mint(address to, string memory uri) private {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-        _delegate(to, to);
+        existsOnChain[tokenId] = true;
     }
 
-    // Required overrides
+    /**
+     * @dev Internal function to burn token through governance
+     * @param tokenId ID of token to burn
+     */
+    function _govBurn(uint256 tokenId) private {
+        address owner = ownerOf(tokenId);
+        _update(address(0), tokenId, owner);
+        existsOnChain[tokenId] = false;
+        emit MembershipRevoked(tokenId, owner);
+    }
 
     /**
-     * @notice Updates token data
-     * @dev Overrides ERC721 _update to make NFTs non-transferable
-     * @param to Recipient address
-     * @param tokenId Token ID
-     * @param auth Address authorized for transfer
-     * @return Previous owner address
+     * @dev Internal function to update token metadata
+     * @param tokenId ID of token to update
+     * @param uri New metadata URI
+     */
+    function _updateTokenMetadata(uint256 tokenId, string memory uri) private {
+        _setTokenURI(tokenId, uri);
+        emit MetadataUpdated(tokenId, uri);
+    }
+
+    // Required Overrides
+
+    /**
+     * @dev Override of ERC721's _update to make tokens non-transferable
+     * @param to Target address (only allowed to be zero address for burns)
+     * @param tokenId Token ID being updated
+     * @param auth Address initiating the update
+     * @return Previous owner of the token
      */
     function _update(
         address to,
@@ -227,9 +314,9 @@ contract NFT is
     }
 
     /**
-     * @notice Increments account balance
-     * @dev Internal override to maintain compatibility
-     * @param account Account to update
+     * @notice Increases an account's token balance
+     * @dev Internal function required by inherited contracts
+     * @param account Address to increase balance for
      * @param value Amount to increase by
      */
     function _increaseBalance(
@@ -240,9 +327,10 @@ contract NFT is
     }
 
     /**
-     * @notice Gets token URI
-     * @param tokenId Token ID to query
-     * @return URI string
+     * @notice Gets the token URI
+     * @dev Returns the metadata URI for a given token
+     * @param tokenId ID of the token
+     * @return URI string for the token metadata
      */
     function tokenURI(
         uint256 tokenId
@@ -251,9 +339,10 @@ contract NFT is
     }
 
     /**
-     * @notice Checks interface support
+     * @notice Checks if the contract supports a given interface
+     * @dev Implements interface detection for ERC721 and extensions
      * @param interfaceId Interface identifier to check
-     * @return bool True if interface is supported
+     * @return bool True if the interface is supported
      */
     function supportsInterface(
         bytes4 interfaceId
@@ -262,8 +351,8 @@ contract NFT is
     }
 
     /**
-     * @notice Gets current timestamp
-     * @dev Used for voting snapshots
+     * @notice Gets the current timestamp
+     * @dev Used for voting snapshots, returns block timestamp as uint48
      * @return Current block timestamp
      */
     function clock() public view override returns (uint48) {
@@ -271,8 +360,9 @@ contract NFT is
     }
 
     /**
-     * @notice Gets clock mode description
-     * @return String indicating timestamp-based voting
+     * @notice Gets the clock mode for voting snapshots
+     * @dev Returns a description of how the clock value should be interpreted
+     * @return String indicating timestamp-based clock mode
      */
     function CLOCK_MODE() public pure override returns (string memory) {
         return "mode=timestamp";

@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+import hre, { ethers } from "hardhat"
 import { Gov__factory } from "../typechain-types/factories/contracts/variants/crosschain/Gov__factory"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
 import * as fs from "fs"
@@ -8,9 +8,25 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function main() {
-    console.log("\nCreating proposal...")
+function getDeployedAddress(network: string, contractName: string): string {
+    try {
+        const deploymentPath = path.join(
+            __dirname,
+            "..",
+            "deployments",
+            network,
+            `${contractName}.json`
+        )
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"))
+        return deployment.address
+    } catch (error) {
+        throw new Error(
+            `Failed to read deployment for ${contractName} on ${network}: ${error}`
+        )
+    }
+}
 
+async function main() {
     const ALICE_PRIVATE_KEY = process.env.ALICE
     const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
     if (!ALICE_PRIVATE_KEY) {
@@ -21,22 +37,34 @@ async function main() {
     }
     const JUNGLE_ADDRESS = "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE"
 
-    const deploymentsGov = require("../deployments/sepolia/CrosschainGov.json")
-    const GOV_ADDRESS = deploymentsGov.address
-    const deploymentsNFT = require("../deployments/sepolia/CrosschainNFT.json")
-    const NFT_ADDRESS = deploymentsNFT.address
+    // Get the network from hardhat config
+    const networkName = hre.network.name
 
-    console.log("\nGov address:", GOV_ADDRESS)
-    console.log("NFT address:", NFT_ADDRESS)
+    // Get deployed addresses from deployment files
+    const NFT_ADDRESS = getDeployedAddress(networkName, "CrosschainNFT")
+    const GOV_ADDRESS = getDeployedAddress(networkName, "CrosschainGov")
 
-    // Create provider and signers properly
+    console.log("Using contract addresses:")
+    console.log("NFT:", NFT_ADDRESS)
+    console.log("Gov:", GOV_ADDRESS)
+
     const provider = new ethers.JsonRpcProvider(
-        process.env.SEPOLIA_RPC_ENDPOINT_URL
+        (() => {
+            switch (networkName) {
+                case "op-sepolia":
+                    return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+                case "arbitrum-sepolia":
+                    return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+                default:
+                    throw new Error(`Unsupported network: ${networkName}`)
+            }
+        })()
     )
+
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
+    const signerZero = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
     console.log("Using address for proposals:", aliceSigner.address)
-    console.log("Using address for execution:", sepoliaSigner.address)
+    console.log("Using address for execution:", signerZero.address)
 
     const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
@@ -122,6 +150,7 @@ async function main() {
             throw new Error("Transaction failed - no receipt received")
         }
 
+        console.log("proposalId:", proposalId)
         if (receipt) {
             console.log("Proposal confirmed in block:", receipt.blockNumber)
             const proposalIdFromEvent =
@@ -139,202 +168,145 @@ async function main() {
 
             let currentState = Number(state)
             let attempts = 0
-            const maxAttempts = 50 // 5 seconds * 50 = ~4 minutes max wait
+            const maxAttempts = 10
 
-            while (currentState !== 1 && attempts < maxAttempts) {
-                // Check current state
+            while (currentState === 0 && attempts < maxAttempts) {
+                console.log("Waiting for proposal to become active...")
+                await sleep(30000)
+
                 const newState = await gov.state(proposalId)
                 currentState = Number(newState)
                 console.log(
                     "Current proposal state:",
                     getProposalState(currentState)
                 )
-
-                if (currentState === 1) {
-                    // Active
-                    console.log(
-                        "\nProposal is now active! Performing pre-vote checks..."
-                    )
-
-                    // Check contract and signer
-                    console.log("\nContract checks:")
-                    console.log("- Gov contract address:", gov.target)
-
-                    // Check proposal parameters
-                    console.log("\nProposal parameters:")
-                    console.log("- Proposal ID:", proposalId)
-                    console.log("- Vote support (1 = For):", 1)
-
-                    // Check signer details
-                    const signerBalance = await provider.getBalance(
-                        aliceSigner.address
-                    )
-                    console.log("\nSigner checks:")
-                    console.log("- Address:", aliceSigner.address)
-                    console.log(
-                        "- Balance:",
-                        ethers.formatEther(signerBalance),
-                        "ETH"
-                    )
-                    console.log(
-                        "- Voting power:",
-                        await nft.getVotes(aliceSigner.address)
-                    )
-
-                    // Check if already voted
-                    const hasVoted = await gov.hasVoted(
-                        proposalId,
-                        aliceSigner.address
-                    )
-                    console.log("- Already voted:", hasVoted)
-
-                    console.log("\nCasting vote...")
-                    const voteTx = await gov
-                        .connect(aliceSigner)
-                        .castVote(proposalId, 1)
-                    await voteTx.wait(1)
-                    console.log("Vote cast successfully!")
-                }
-
                 attempts++
-                await sleep(5000) // Wait 5 seconds before next check
-                process.stdout.write("\x1b[1A\x1b[K") // Clear previous line
             }
 
-            let isSucceeded = false
-            console.log("\nStarting to check proposal state...")
+            if (proposalId) {
+                if (currentState === 1) {
+                    console.log("Casting vote...")
+                    const voteTx = await gov.castVote(proposalId, 1)
+                    const voteReceipt = await voteTx.wait()
+                    console.log("Vote cast successfully!")
 
-            while (!isSucceeded) {
-                const state = await gov.state(proposalId)
-                console.log(
-                    "Current proposal state:",
-                    getProposalState(Number(state))
-                )
+                    let isSucceeded = false
+                    console.log("\nStarting to check proposal state...")
 
-                if (getProposalState(Number(state)) === "Succeeded") {
-                    isSucceeded = true
-                    console.log(
-                        "\nProposal succeeded! Preparing for execution..."
-                    )
-
-                    try {
-                        console.log("Execution parameters:")
-                        console.log("- Targets:", targets)
-                        console.log("- Values:", values)
-                        console.log("- Calldatas:", calldatas)
+                    while (!isSucceeded) {
+                        const state = await gov.state(proposalId)
                         console.log(
-                            "- Description hash:",
-                            ethers.id(description)
+                            "Current proposal state:",
+                            getProposalState(Number(state))
                         )
 
-                        console.log(
-                            "\nSubmitting execution transaction from Sepolia signer..."
-                        )
-
-                        // Connect with sepoliaSigner for execution
-                        const executeTx = await gov
-                            .connect(sepoliaSigner)
-                            .execute(
-                                targets,
-                                values,
-                                calldatas,
-                                ethers.id(description)
+                        if (getProposalState(Number(state)) === "Succeeded") {
+                            isSucceeded = true
+                            console.log(
+                                "\nProposal succeeded! Preparing for execution..."
                             )
 
-                        console.log(
-                            "Execution transaction submitted:",
-                            executeTx.hash
-                        )
-                        console.log("Waiting for confirmation...")
-
-                        const executeReceipt = await executeTx.wait()
-                        console.log(
-                            "Proposal executed successfully in block:",
-                            executeReceipt?.blockNumber
-                        )
-
-                        try {
-                            const totalSupply = await nft.totalSupply()
-                            console.log("NFT total supply:", totalSupply)
-                            const newOwner = await nft.ownerOf(totalSupply - 1n)
-                            console.log("NFT successfully minted to:", newOwner)
-
-                            // Add the new token ID to .env file
-                            const envPath = path.resolve(__dirname, "../.env")
-                            let envContent = ""
-
                             try {
-                                // Read existing .env content if file exists
-                                if (fs.existsSync(envPath)) {
-                                    envContent = fs.readFileSync(
-                                        envPath,
-                                        "utf8"
+                                console.log("Execution parameters:")
+                                console.log("- Targets:", targets)
+                                console.log("- Values:", values)
+                                console.log("- Calldatas:", calldatas)
+                                console.log(
+                                    "- Description hash:",
+                                    ethers.id(description)
+                                )
+
+                                console.log(
+                                    "\nSubmitting execution transaction from Sepolia signer..."
+                                )
+
+                                // Connect with sepoliaSigner for execution
+                                const executeTx = await gov
+                                    .connect(signerZero)
+                                    .execute(
+                                        targets,
+                                        values,
+                                        calldatas,
+                                        ethers.id(description)
+                                    )
+
+                                console.log(
+                                    "Execution transaction submitted:",
+                                    executeTx.hash
+                                )
+                                console.log("Waiting for confirmation...")
+
+                                const executeReceipt = await executeTx.wait()
+                                console.log(
+                                    "Proposal executed successfully in block:",
+                                    executeReceipt?.blockNumber
+                                )
+
+                                try {
+                                    const totalSupply = await nft.totalSupply()
+                                    console.log(
+                                        "NFT total supply:",
+                                        totalSupply
+                                    )
+                                    const newOwner = await nft.ownerOf(
+                                        totalSupply - 1n
+                                    )
+                                    console.log(
+                                        "NFT successfully minted to:",
+                                        newOwner
+                                    )
+                                } catch (error) {
+                                    console.log(
+                                        "Could not verify NFT minting:",
+                                        error
                                     )
                                 }
 
-                                // Remove existing TOKENID line if it exists
-                                envContent = envContent.replace(
-                                    /^TOKENID=.*$/m,
-                                    ""
-                                )
+                                break
+                            } catch (error: any) {
+                                console.error("\nError executing proposal:")
+                                console.error("Error message:", error.message)
 
-                                // Add new line if content doesn't end with one
-                                if (
-                                    envContent.length > 0 &&
-                                    !envContent.endsWith("\n")
-                                ) {
-                                    envContent += "\n"
+                                if (error.data) {
+                                    try {
+                                        const decodedError =
+                                            gov.interface.parseError(error.data)
+                                        console.error(
+                                            "Decoded error:",
+                                            decodedError
+                                        )
+                                    } catch (e) {
+                                        console.error(
+                                            "Raw error data:",
+                                            error.data
+                                        )
+                                    }
                                 }
 
-                                // Add the new TOKENID
-                                envContent += `TOKENID=${totalSupply - 1n}\n`
-
-                                // Write back to .env file
-                                fs.writeFileSync(envPath, envContent)
-                                console.log(
-                                    "\nToken ID has been written to .env file"
-                                )
-                            } catch (error) {
-                                console.error(
-                                    "Error updating .env file:",
-                                    error
-                                )
-                            }
-                        } catch (error) {
-                            console.log("Could not verify NFT minting:", error)
-                        }
-
-                        break
-                    } catch (error: any) {
-                        console.error("\nError executing proposal:")
-                        console.error("Error message:", error.message)
-
-                        if (error.data) {
-                            try {
-                                const decodedError = gov.interface.parseError(
-                                    error.data
-                                )
-                                console.error("Decoded error:", decodedError)
-                            } catch (e) {
-                                console.error("Raw error data:", error.data)
+                                if (error.transaction) {
+                                    console.error("\nTransaction details:")
+                                    console.error("To:", error.transaction.to)
+                                    console.error(
+                                        "Data:",
+                                        error.transaction.data
+                                    )
+                                }
+                                throw error
                             }
                         }
 
-                        if (error.transaction) {
-                            console.error("\nTransaction details:")
-                            console.error("To:", error.transaction.to)
-                            console.error("Data:", error.transaction.data)
-                        }
-                        throw error
+                        console.log(
+                            "Waiting 1 minute before next state check..."
+                        )
+                        await sleep(60000)
                     }
+                } else {
+                    console.log(
+                        `Could not reach active state. Current state: ${getProposalState(
+                            currentState
+                        )}`
+                    )
                 }
-
-                console.log("Waiting 1 minute before next state check...")
-                await sleep(60000)
-            }
-
-            if (attempts >= maxAttempts) {
-                throw new Error("Timeout waiting for proposal to become active")
             }
         }
     } catch (error: any) {
