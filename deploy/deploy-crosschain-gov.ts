@@ -19,7 +19,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
-    const salt = hre.ethers.id("Dec-11-v1")
+    const salt = hre.ethers.id("Dec-12-v2")
+    const homeChainId = 11155420
 
     function wait(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms))
@@ -31,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         {
             from: deployer,
             contract: "contracts/variants/crosschain/NFT.sol:NFT",
-            args: [11155111, deployer, firstMembers, uri, name, symbol],
+            args: [homeChainId, deployer, firstMembers, uri, name, symbol],
             salt: salt,
             log: true,
             waitConfirmations: 1
@@ -48,7 +49,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             from: deployer,
             contract: "contracts/variants/crosschain/Gov.sol:Gov",
             args: [
-                11155111,
+                homeChainId,
                 nftAddress,
                 manifesto,
                 daoName,
@@ -81,7 +82,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: nftAddress,
                 contract: "contracts/variants/crosschain/NFT.sol:NFT",
                 constructorArguments: [
-                    11155111,
+                    homeChainId,
                     deployer,
                     firstMembers,
                     uri,
@@ -100,7 +101,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: govAddress,
                 contract: "contracts/variants/crosschain/Gov.sol:Gov",
                 constructorArguments: [
-                    11155111,
+                    homeChainId,
                     nftAddress,
                     manifesto,
                     daoName,

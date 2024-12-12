@@ -1,32 +1,66 @@
-import { ethers } from "hardhat"
+import hre, { ethers } from "hardhat"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
+import * as fs from "fs"
+import * as path from "path"
+import color from "cli-color"
+var msg = color.xterm(39).bgXterm(128)
 
-async function main() {
-    const JUNGLE_PRIVATE_KEY = process.env.JUNGLE
-    if (!JUNGLE_PRIVATE_KEY) {
-        throw new Error("Please set JUNGLE private key in your .env file")
-    }
-
-    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
-    const provider = new ethers.JsonRpcProvider(
-        process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
-    )
-    const jungleSigner = new ethers.Wallet(JUNGLE_PRIVATE_KEY, provider)
-
-    console.log("Using address:", jungleSigner.address)
-    if (
-        jungleSigner.address.toLowerCase() !==
-        "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE".toLowerCase()
-    ) {
+function getDeployedAddress(network: string, contractName: string): string {
+    try {
+        const deploymentPath = path.join(
+            __dirname,
+            "..",
+            "deployments",
+            network,
+            `${contractName}.json`
+        )
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"))
+        return deployment.address
+    } catch (error) {
         throw new Error(
-            "Wrong private key! The signer address doesn't match the token owner address from Sepolia"
+            `Failed to read deployment for ${contractName} on ${network}: ${error}`
         )
     }
+}
 
-    const nft = NFT__factory.connect(NFT_ADDRESS, jungleSigner)
+function getProofFromData(): string {
+    try {
+        const dataPath = path.join(__dirname, "..", "data.json")
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"))
+        return data.proof
+    } catch (error) {
+        throw new Error(`Failed to read proof from data.json: ${error}`)
+    }
+}
 
-    const proof =
-        "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bdc0e420ab9ba144213588a95fa1e5e63ceff1be0000000000000000000000000000000000000000000000000000000000000080469f7c23ba8094fc60d812caea153b06cc07e9b5bf2c0bb384ef9ed462f2251b000000000000000000000000000000000000000000000000000000000000005268747470733a2f2f6261666b726569636a36326c35787536706b3278783778376e3662377270756e78623465686c6837666576796a6170696433353536736d757a34792e697066732e7733732e6c696e6b2f0000000000000000000000000000"
+async function main() {
+    const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
+    if (!SIGNER_PRIVATE_KEY) {
+        throw new Error("Please set SIGNER_PRIVATE_KEY in your .env file")
+    }
+
+    // Get the network from hardhat config
+    const networkName = hre.network.name
+
+    // Get deployed address from deployment files
+    const NFT_ADDRESS = getDeployedAddress(networkName, "CrosschainNFT")
+    console.log("Using NFT contract address:", NFT_ADDRESS)
+
+    // Get RPC URL based on network
+    let provider = new ethers.JsonRpcProvider(
+        networkName === "op-sepolia"
+            ? process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+            : process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+    )
+    const signerZero = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
+
+    console.log("Using address:", signerZero.address)
+
+    const nft = NFT__factory.connect(NFT_ADDRESS, signerZero)
+
+    // Get proof from data.json
+    const proof = getProofFromData()
+    console.log("\nUsing proof:", proof)
 
     try {
         console.log("Simulating claim transaction...")
@@ -38,7 +72,7 @@ async function main() {
             gasLimit: 500000
         })
 
-        console.log("Transaction submitted:", tx.hash)
+        console.log("Transaction submitted:", msg(tx.hash))
         console.log("Waiting for confirmation...")
 
         const receipt = await tx.wait()

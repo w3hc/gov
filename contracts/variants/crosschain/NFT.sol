@@ -209,11 +209,7 @@ contract NFT is
             abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
         );
         require(digest == expectedDigest, "Invalid mint proof");
-
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-        existsOnChain[tokenId] = true;
-
+        _mint(to, uri);
         emit MembershipClaimed(tokenId, to, msg.sender);
     }
 

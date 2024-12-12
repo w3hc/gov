@@ -1,33 +1,70 @@
-import { ethers } from "hardhat"
+import hre, { ethers } from "hardhat"
 import { Gov__factory } from "../typechain-types/factories/contracts/variants/crosschain/Gov__factory"
 import { NFT__factory } from "../typechain-types/factories/contracts/variants/crosschain/NFT__factory"
+import * as fs from "fs"
+import * as path from "path"
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+function getDeployedAddress(network: string, contractName: string): string {
+    try {
+        const deploymentPath = path.join(
+            __dirname,
+            "..",
+            "deployments",
+            network,
+            `${contractName}.json`
+        )
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"))
+        return deployment.address
+    } catch (error) {
+        throw new Error(
+            `Failed to read deployment for ${contractName} on ${network}: ${error}`
+        )
+    }
+}
+
 async function main() {
     const ALICE_PRIVATE_KEY = process.env.ALICE
-    const SEPOLIA_PRIVATE_KEY = process.env.SEPOLIA_PRIVATE_KEY
+    const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY
     if (!ALICE_PRIVATE_KEY) {
         throw new Error("Please set ALICE private key in your .env file")
     }
-    if (!SEPOLIA_PRIVATE_KEY) {
-        throw new Error("Please set SEPOLIA_PRIVATE_KEY in your .env file")
+    if (!SIGNER_PRIVATE_KEY) {
+        throw new Error("Please set SIGNER_PRIVATE_KEY in your .env file")
     }
     const JUNGLE_ADDRESS = "0xBDC0E420aB9ba144213588A95fa1E5e63CEFf1bE"
 
-    const NFT_ADDRESS = "0x3618A08C0f73625140C6C749F91F7f51e769AdBe"
-    const GOV_ADDRESS = "0x76f53bf2ad89DaB4d8b666b9a5C6610C2C2e0EfC"
+    // Get the network from hardhat config
+    const networkName = hre.network.name
 
-    // Create provider and signers properly
+    // Get deployed addresses from deployment files
+    const NFT_ADDRESS = getDeployedAddress(networkName, "CrosschainNFT")
+    const GOV_ADDRESS = getDeployedAddress(networkName, "CrosschainGov")
+
+    console.log("Using contract addresses:")
+    console.log("NFT:", NFT_ADDRESS)
+    console.log("Gov:", GOV_ADDRESS)
+
     const provider = new ethers.JsonRpcProvider(
-        process.env.SEPOLIA_RPC_ENDPOINT_URL
+        (() => {
+            switch (networkName) {
+                case "op-sepolia":
+                    return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
+                case "arbitrum-sepolia":
+                    return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
+                default:
+                    throw new Error(`Unsupported network: ${networkName}`)
+            }
+        })()
     )
+
     const aliceSigner = new ethers.Wallet(ALICE_PRIVATE_KEY, provider)
-    const sepoliaSigner = new ethers.Wallet(SEPOLIA_PRIVATE_KEY, provider)
+    const signerZero = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
     console.log("Using address for proposals:", aliceSigner.address)
-    console.log("Using address for execution:", sepoliaSigner.address)
+    console.log("Using address for execution:", signerZero.address)
 
     const gov = Gov__factory.connect(GOV_ADDRESS, aliceSigner)
     const nft = NFT__factory.connect(NFT_ADDRESS, aliceSigner)
@@ -185,7 +222,7 @@ async function main() {
 
                                 // Connect with sepoliaSigner for execution
                                 const executeTx = await gov
-                                    .connect(sepoliaSigner)
+                                    .connect(signerZero)
                                     .execute(
                                         targets,
                                         values,
