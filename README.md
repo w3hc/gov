@@ -64,11 +64,22 @@ Deploy:
 pnpm deploy:all
 ```
 
+It will: 
+
+- Deploy to OP Sepolia
+- Deploy to Arbitrum Sepolia
+
 Add a member (mint):
 
 ```
 ./scripts/mint.sh
 ```
+
+It will: 
+
+- Submit a proposal and add a member on OP Sepolia
+- Generate a membership proof on OP Sepolia
+- Claim that proof on Arbitrum Sepolia
 
 Ban a member (burn):
 
@@ -78,10 +89,8 @@ Ban a member (burn):
 
 It will: 
 
-- Deploy to OP Sepolia
-- Deploy to Arbitrum Sepolia
-- Submit a proposal and add a member
-- Generate a membership proof on OP Sepolia
+- Submit a proposal and ban a member on OP Sepolia
+- Generate a burn proof on OP Sepolia
 - Claim that proof on Arbitrum Sepolia
 
 ## Security
