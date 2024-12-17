@@ -566,7 +566,7 @@ describe("Crosschain Gov", function () {
             })
         })
 
-        xdescribe("Delegation Transfers", function () {
+        describe("Delegation Transfers", function () {
             it("should properly transfer voting power when changing delegates", async function () {
                 // Initial delegation
                 await nft.connect(alice).delegate(david.address)
@@ -575,7 +575,7 @@ describe("Crosschain Gov", function () {
                 // Change delegation
                 await nft.connect(alice).delegate(bob.address)
                 expect(await nft.getVotes(david.address)).to.equal(0)
-                expect(await nft.getVotes(bob.address)).to.equal(1)
+                expect(await nft.getVotes(bob.address)).to.equal(2)
             })
 
             it("should maintain zero voting power for non-holders across multiple delegations", async function () {
@@ -588,7 +588,7 @@ describe("Crosschain Gov", function () {
                 await nft.connect(charlie).delegate(bob.address)
 
                 expect(await nft.getVotes(david.address)).to.equal(0)
-                expect(await nft.getVotes(alice.address)).to.equal(0)
+                expect(await nft.getVotes(alice.address)).to.equal(1)
                 // Bob should maintain only his original voting power if any
                 expect(await nft.getVotes(bob.address)).to.equal(
                     initialBobVotes

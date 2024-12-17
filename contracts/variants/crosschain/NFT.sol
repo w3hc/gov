@@ -34,12 +34,15 @@ contract NFT is
     /// @notice Tracks token existence on each chain
     mapping(uint256 => bool) public existsOnChain;
 
+    mapping(address => address) public crosschainDelegates;
+
     /// @notice Operation types for cross-chain message verification
     /// @dev Used to differentiate between different types of cross-chain operations
     enum OperationType {
-        MINT, // Mint new token
-        BURN, // Burn existing token
-        SET_METADATA // Update token metadata
+        MINT,
+        BURN,
+        SET_METADATA,
+        SET_DELEGATION
     }
 
     /**
@@ -67,6 +70,13 @@ contract NFT is
      * @param newUri The new metadata URI
      */
     event MetadataUpdated(uint256 indexed tokenId, string newUri);
+
+    event DelegationUpdated(address indexed delegator, address indexed delegate);
+    event CrosschainDelegationClaimed(
+        address indexed delegator,
+        address indexed delegate,
+        address indexed claimer
+    );
 
     /**
      * @notice Restricts operations to the home chain
@@ -189,6 +199,32 @@ contract NFT is
         return abi.encode(tokenId, uri, digest);
     }
 
+    function delegate(address delegatee) public virtual override onlyHomeChain {
+        super.delegate(delegatee);
+        crosschainDelegates[msg.sender] = delegatee;
+        emit DelegationUpdated(msg.sender, delegatee);
+    }
+
+    function generateDelegationProof(
+        address delegator,
+        address delegatee
+    ) external view returns (bytes memory) {
+        require(block.chainid == home, "Proofs can only be generated on home chain");
+        require(crosschainDelegates[delegator] == delegatee, "Invalid delegation state");
+
+        bytes32 message = keccak256(
+            abi.encodePacked(
+                address(this),
+                uint8(OperationType.SET_DELEGATION),
+                delegator,
+                delegatee
+            )
+        );
+        bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
+
+        return abi.encode(delegator, delegatee, digest);
+    }
+
     /**
      * @notice Claims a membership on a foreign chain
      * @dev Verifies proof and mints token on foreign chain
@@ -258,6 +294,30 @@ contract NFT is
         _setTokenURI(tokenId, uri);
         existsOnChain[tokenId] = true;
         emit MetadataUpdated(tokenId, uri);
+    }
+
+    function claimDelegation(bytes memory proof) external {
+        (address delegator, address delegatee, bytes32 digest) = abi.decode(
+            proof,
+            (address, address, bytes32)
+        );
+
+        bytes32 message = keccak256(
+            abi.encodePacked(
+                address(this),
+                uint8(OperationType.SET_DELEGATION),
+                delegator,
+                delegatee
+            )
+        );
+        bytes32 expectedDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", message)
+        );
+        require(digest == expectedDigest, "Invalid delegation proof");
+
+        _delegate(delegator, delegatee);
+        crosschainDelegates[delegator] = delegatee;
+        emit CrosschainDelegationClaimed(delegator, delegatee, msg.sender);
     }
 
     // Internal Functions

@@ -6,7 +6,6 @@
     "scripts": {
         "compile": "hardhat compile",
         "test": "hardhat test",
-        "test:all": "./scripts/deploy.sh && ./scripts/mint.sh && ./scripts/burn.sh && ./scripts/metadata.sh && ./scripts/manifesto.sh && ./scripts/voting-delay.sh",
         "test:crosschain": "hardhat test test/Gov-crosschain.ts",
         "deploy:optimism": "hardhat deploy --network optimism --reset",
         "deploy:base": "hardhat deploy --network base --reset",
@@ -16,6 +15,7 @@
         "deploy:base-sepolia": "hardhat deploy --network base-sepolia --reset",
         "crosschain:sepolia": "hardhat deploy --network sepolia --tags CrosschainGov --reset",
         "crosschain:op-sepolia": "hardhat deploy --network op-sepolia --tags CrosschainGov --reset",
+        "crosschain:arbitrum-sepolia": "hardhat deploy --network arbitrum-sepolia --tags CrosschainGov --reset",
         "deploy:all": "./scripts/deploy.sh",
         "bal": "npx hardhat run scripts/check-my-balance.ts",
         "verify:setup": "hardhat run scripts/verify-crosschain-setup.ts",
