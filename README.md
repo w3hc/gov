@@ -94,83 +94,43 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ### Crosschain
 
-Make sure the main account has sufficient balance on OP Sepolia and Arbitrum Sepolia: 
+Make sure the main account, Bob and Alice have sufficient balance on OP Sepolia and Arbitrum Sepolia: 
 
 ```
-pnpm bal
+# Deploy to OP Sepolia and Arbitrum Sepolia
+pnpm deploy:op-sepolia
+pnpm deploy:arbitrum-sepolia
+
+# Add a new member 
+npx hardhat run scripts/propose.ts --network op-sepolia
+npx hardhat run scripts/verify-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-membership.ts --network arbitrum-sepolia
+
+# Ban a member
+npx hardhat run scripts/propose-burn.ts --network op-sepolia
+npx hardhat run scripts/verify-burn-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-burn.ts --network arbitrum-sepolia
+
+# Edit 1 membership NFT metadata
+npx hardhat run scripts/propose-metadata.ts --network op-sepolia
+npx hardhat run scripts/verify-metadata-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-metadata.ts --network arbitrum-sepolia
+
+# Edit the manifesto
+npx hardhat run scripts/propose-manifesto.ts --network op-sepolia
+npx hardhat run scripts/verify-manifesto-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-manifesto.ts --network arbitrum-sepolia
+
+# Change 1 voting parameter
+npx hardhat run scripts/propose-voting-delay.ts --network op-sepolia
+npx hardhat run scripts/verify-voting-delay-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-voting-delay.ts --network arbitrum-sepolia
+
+# Change delegation
+npx hardhat run scripts/propose-delegation.ts --network op-sepolia
+npx hardhat run scripts/verify-delegation-proof.ts --network op-sepolia
+npx hardhat run scripts/claim-delegation.ts --network arbitrum-sepolia
 ```
-
-Deploy: 
-
-```
-pnpm deploy:all
-```
-
-It will: 
-
-- Deploy to OP Sepolia
-- Deploy to Arbitrum Sepolia
-
-Add a member (mint):
-
-```
-./scripts/mint.sh
-```
-
-It will: 
-
-- Submit a proposal and add a member on OP Sepolia
-- Generate a membership proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
-Ban a member (burn):
-
-```
-./scripts/burn.sh
-```
-
-It will: 
-
-- Submit a proposal and ban a member on OP Sepolia
-- Generate a burn proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
-Edit membership NFT metadata:
-
-```
-./scripts/metadata.sh
-```
-
-It will: 
-
-- Submit a proposal edit the NFT metadata of tokenId 1 on OP Sepolia
-- Generate a metadata proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
-Edit the manifesto:
-
-```
-./scripts/manifesto.sh
-```
-
-It will: 
-
-- Submit a proposal to edit the manifesto on OP Sepolia
-- Generate a manifesto proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
-Change the voting delay:
-
-```
-./scripts/voting-delay.sh
-```
-
-It will: 
-
-- Submit a proposal to change the voting delay on OP Sepolia
-- Generate a voting delay proof on OP Sepolia
-- Claim that proof on Arbitrum Sepolia
-
 
 ## Core Dependencies
 
