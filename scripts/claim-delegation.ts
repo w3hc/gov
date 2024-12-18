@@ -47,11 +47,27 @@ async function main() {
     const NFT_ADDRESS = getDeployedAddress(networkName, "CrosschainNFT")
     console.log("Using NFT contract address:", msg(NFT_ADDRESS))
 
-    const provider = new ethers.JsonRpcProvider(
-        networkName === "op-sepolia"
-            ? process.env.OP_SEPOLIA_RPC_ENDPOINT_URL
-            : process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL
-    )
+    function getRpcUrl(networkName: string): string {
+        switch (networkName) {
+            case "sepolia":
+                return process.env.SEPOLIA_RPC_ENDPOINT_URL || ""
+            case "op-sepolia":
+                return process.env.OP_SEPOLIA_RPC_ENDPOINT_URL || ""
+            case "base-sepolia":
+                return process.env.BASE_SEPOLIA_RPC_ENDPOINT_URL || ""
+            case "arbitrum-sepolia":
+                return process.env.ARBITRUM_SEPOLIA_RPC_ENDPOINT_URL || ""
+            default:
+                throw new Error(`Unsupported network: ${networkName}`)
+        }
+    }
+    const rpcUrl = getRpcUrl(networkName)
+    if (!rpcUrl) {
+        throw new Error(`RPC URL is not configured for network: ${networkName}`)
+    }
+    console.log(`Using RPC URL: ${rpcUrl}`)
+    const provider = new ethers.JsonRpcProvider(rpcUrl)
+
     const signer = new ethers.Wallet(SIGNER_PRIVATE_KEY, provider)
 
     const nft = NFT__factory.connect(NFT_ADDRESS, signer)
