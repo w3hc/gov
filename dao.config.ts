@@ -1,6 +1,6 @@
 ///// Home chain /////
 
-export const homeChain = 11155111
+export const homeChain = 11155420
 
 ///// Membership NFT /////
 

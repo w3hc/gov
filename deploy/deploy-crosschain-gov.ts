@@ -19,7 +19,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
-    const salt = hre.ethers.id("Dec-17-v1")
+
+    const saltArg = process.env.SALT || "Dec-25-v1"
+    const salt = hre.ethers.id(saltArg)
+
+    console.log(`Using salt: ${saltArg} (ID: ${salt})`)
     const homeChainId = 11155420
 
     function wait(ms: number): Promise<void> {

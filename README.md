@@ -40,6 +40,12 @@ cp .env.template .env
 
 - Add your own keys in your `.env` file
 - Edit the `dao.config.ts` file (optional)
+- Check if the main account has a sufficient wallet balance: 
+
+```
+pnpm bal
+```
+
 - Then deploy to Sepolia:
 
 ```bash
@@ -94,42 +100,13 @@ The following functions are `onlyOwner`, and since the NFT contract ownership is
 
 ### Crosschain
 
-Make sure the main account, Bob and Alice have sufficient balance on OP Sepolia and Arbitrum Sepolia: 
+- Make sure the main account, as well as Alice and Bob accounts have a sufficient balance on OP Sepolia, Arbitrum Sepolia and Base Sepolia
+- Set the initial parameters of the test DAO in `dao.config.ts`
+- Run the `deploy-and-test.sh` script:
 
 ```
-# Deploy to OP Sepolia and Arbitrum Sepolia
-pnpm deploy:op-sepolia
-pnpm deploy:arbitrum-sepolia
-
-# Add a new member 
-npx hardhat run scripts/propose.ts --network op-sepolia
-npx hardhat run scripts/verify-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-membership.ts --network arbitrum-sepolia
-
-# Ban a member
-npx hardhat run scripts/propose-burn.ts --network op-sepolia
-npx hardhat run scripts/verify-burn-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-burn.ts --network arbitrum-sepolia
-
-# Edit 1 membership NFT metadata
-npx hardhat run scripts/propose-metadata.ts --network op-sepolia
-npx hardhat run scripts/verify-metadata-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-metadata.ts --network arbitrum-sepolia
-
-# Edit the manifesto
-npx hardhat run scripts/propose-manifesto.ts --network op-sepolia
-npx hardhat run scripts/verify-manifesto-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-manifesto.ts --network arbitrum-sepolia
-
-# Change 1 voting parameter
-npx hardhat run scripts/propose-voting-delay.ts --network op-sepolia
-npx hardhat run scripts/verify-voting-delay-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-voting-delay.ts --network arbitrum-sepolia
-
-# Change delegation
-npx hardhat run scripts/propose-delegation.ts --network op-sepolia
-npx hardhat run scripts/verify-delegation-proof.ts --network op-sepolia
-npx hardhat run scripts/claim-delegation.ts --network arbitrum-sepolia
+chmod +x scripts/deploy-and-test.sh
+./scripts/deploy-and-test.sh --salt "<CUSTOM_SALT_HERE>"
 ```
 
 ## Core Dependencies

@@ -16,7 +16,7 @@
         "crosschain:sepolia": "hardhat deploy --network sepolia --tags CrosschainGov --reset",
         "crosschain:op-sepolia": "hardhat deploy --network op-sepolia --tags CrosschainGov --reset",
         "crosschain:arbitrum-sepolia": "hardhat deploy --network arbitrum-sepolia --tags CrosschainGov --reset",
-        "deploy:all": "./scripts/deploy.sh",
+        "crosschain:base-sepolia": "hardhat deploy --network base-sepolia --tags CrosschainGov --reset",
         "bal": "npx hardhat run scripts/check-my-balance.ts",
         "verify:setup": "hardhat run scripts/verify-crosschain-setup.ts",
         "prettier": "prettier --write \"**/*.ts\"",
