@@ -1,122 +1,78 @@
 # Gov
 
-A DAO framework built with Open Zeppelin's [Governor contract](https://docs.openzeppelin.com/contracts/4.x/governance#governor) in combination with NFTs.
-
-- [`Gov.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/Gov.sol) is the **Governor** contract
-- [`NFT.sol`](https://github.com/web3-hackers-collective/dao-contracts/blob/main/contracts/NFT.sol) is the **NFT** contract (ERC-721)
-
-Since `v0.10.0`, Gov is using non-tranferable membership NFTs ("SBTs"), it is also timestamp-based by default.
+A minimalist onchain voting system built on [OpenZeppelin Governor contracts](https://docs.openzeppelin.com/contracts/5.x/api/governance).
 
 ## Motivation
 
-Provide a coordination tool that fits the needs of regular users. 
+Provide a coordination tool that fits the needs of everyday people. 
 
-- [Documentation](https://w3hc.github.io/gov-docs/)
-- [Gov UI](https://gov-ui.netlify.app/)
-- [Gov UI repo](https://github.com/w3hc/gov-ui)
-- [Gov Deployer](https://gov-deployer.netlify.app/)
-- [Gov Deployer repo](https://github.com/w3hc/gov-deployer)
-- [Example DAO on Tally](https://www.tally.xyz/gov/web3-hackers-collective)
+## Features
 
-## Install
+### Membership & Voting
+- **One member, one vote**: Each NFT grants exactly one vote in governance
+- **Non-transferable membership**: NFTs cannot be transferred between addresses
+- **Self-delegation by default**: Members automatically delegate voting power to themselves upon receiving membership
+- **Vote delegation**: Members can delegate their voting power to other addresses
+- **Membership enumeration**: Track all current members via ERC721Enumerable
 
-```js
-pnpm install
+### Governance
+- **Proposal creation & tracking**: Submit and track governance proposals with full history
+- **Simple majority voting**: For/Against/Abstain voting with GovernorCountingSimple
+- **Proposal execution**: Automatic execution of passed proposals with arbitrary contract calls
+- **Configurable parameters**: Adjust voting delay, voting period, proposal threshold, and quorum
+- **Parameter updates via governance**: All governance parameters can be updated through governance votes
+- **Manifesto management**: Store and update DAO manifesto (IPFS CID) via governance
+
+### Access Control
+- **Operator role**: Designated address can onboard new members without governance approval
+- **Operator expiration**: Configurable time parameter for operator actions
+- **Operator management**: Change or revoke operator through governance vote
+- **Governance-controlled minting**: Owner (governance) can mint new memberships
+- **Membership revocation**: Burn member NFTs through governance vote
+- **Metadata updates**: Update member NFT metadata via governance
+
+> ⚠️ WARNING: The **`operator`** is a significant trust assumption. Until expiry, the operator can mint arbitrarily many memberships — effectively manufacturing votes for future proposals. It is designed to allow a third-party app to easily add new members. If you don't need that, you can disable the operator entirely or set a very short expiration period.
+
+### Build
+
+```shell
+forge build
 ```
 
-## Test
+### Test
 
-```js
-pnpm test
+```shell
+forge test
 ```
 
-## Deploy
+### Deploy
 
-Create a `.env` on the model of `.env.template`:
+The deployment script reads configuration from [config/dao.config.json](config/dao.config.json). Edit this file to customize:
 
-```js
-cp .env.template .env
+- **NFT parameters**: `nftName`, `nftSymbol`, `tokenURI`
+- **Governance parameters**: `govName`, `manifestoCid`, `votingDelay`, `votingPeriod`, `proposalThreshold`, `quorum`
+- **Initial members**: Array of addresses to receive membership NFTs
+
+Launch Anvil local network: 
+
+```shell
+anvil
 ```
 
-- Add your own keys in your `.env` file
-- Edit the `dao.config.ts` file (optional)
-- Check if the main account has a sufficient wallet balance: 
+Then in a new terminal: 
 
-```
-pnpm bal
+```shell
+forge script script/Deploy.s.sol --rpc-url local --broadcast
 ```
 
-- Then deploy to Sepolia:
+## Crosschain Gov
 
-```bash
-pnpm deploy:sepolia
-```
+[Crosschain Gov](https://github.com/w3hc/gov-crosschain) allows you to deploy your DAO to any EVM network. 
 
-Then you can add your DAO in [Tally](https://www.tally.xyz/) and/or spin up your own interface using [Gov UI](https://github.com/w3hc/gov-ui). 
+## License
 
-## Security
+GPL-3.0
 
-Here are the differences between the Governor/ERC-721 implementations suggested by Open Zeppelin and ours:
+## Contact
 
-### [Gov.sol](https://github.com/w3hc/gov/blob/main/contracts/Gov.sol)
-
-The following function is `onlyGovernance`, meaning it can only be triggered by a vote.
-
-- `setManifesto()` updates the CID.
-
-### [NFT.sol](https://github.com/w3hc/gov/blob/main/contracts/NFT.sol)
-
-The following functions are `onlyOwner`, and since the NFT contract ownership is transferred to the Gov contract, they can only be triggered by a vote.
-
-- `safeMint()` adds a new member.
-- `govBurn()` bans a member.
-- `setMetadata()` changes the tokenURI of a given NFT ID.
-
-## Supported Networks
-
-| Network | Chain ID | Documentation |
-|---------|----------|---------------|
-| Optimism Mainnet | 10 | [Documentation](https://docs.optimism.io/chain/networks#op-mainnet) |
-| Base Mainnet | 8453 | [Documentation](https://docs.base.org/docs/network-information#base-mainnet) |
-| Arbitrum One | 42161 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
-| Sepolia Testnet | 11155111 | [Documentation](https://ethereum.org/nb/developers/docs/networks/#sepolia) |
-| OP Sepolia Testnet | 11155420 | [Documentation](https://docs.optimism.io/chain/networks#op-sepolia) |
-| Base Sepolia Testnet | 84532 | [Documentation](https://docs.base.org/docs/network-information/#base-testnet-sepolia) |
-| Arbitrum Sepolia | 421614 | [Documentation](https://docs.arbitrum.io/welcome/get-started) |
-
-## Contract Verification
-
-| Network | Explorer URL | API URL | API Key Variable |
-|---------|--------------|---------|-----------------|
-| Optimism | https://optimistic.etherscan.io | https://api-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
-| Base | https://basescan.org | https://api.basescan.org/api | BASE_ETHERSCAN_API_KEY |
-| Arbitrum One | https://arbiscan.io | https://api.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
-| Sepolia | https://sepolia.etherscan.io | https://api-sepolia.etherscan.io/api | ETHERSCAN_API_KEY |
-| OP Sepolia | https://sepolia-optimism.etherscan.io | https://api-sepolia-optimistic.etherscan.io/api | OP_ETHERSCAN_API_KEY |
-| Base Sepolia | https://sepolia.basescan.org | https://api-sepolia.basescan.org/api | BASE_ETHERSCAN_API_KEY |
-| Arbitrum Sepolia | https://sepolia.arbiscan.io | https://api-sepolia.arbiscan.io/api | ARBITRUM_ETHERSCAN_API_KEY |
-
-## Variants
-
-### Crosschain
-
-- Make sure the main account, as well as Alice and Bob accounts have a sufficient balance on OP Sepolia, Arbitrum Sepolia and Base Sepolia
-- Set the initial parameters of the test DAO in `dao.config.ts`
-- Run the `deploy-and-test.sh` script:
-
-```
-chmod +x scripts/deploy-and-test.sh
-./scripts/deploy-and-test.sh --salt "<CUSTOM_SALT_HERE>"
-```
-
-## Core Dependencies
-
--   Node [v20.9.0](https://nodejs.org/uk/blog/release/v20.9.0/)
--   PNPM [v9.10.0](https://pnpm.io/pnpm-vs-npm)
--   Hardhat [v2.22.16](https://github.com/NomicFoundation/hardhat/releases/)
--   OpenZeppelin Contracts [v5.1.0](https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.1.0)
--   Ethers [v6.13.4](https://docs.ethers.org/v6/)
-
-## Support
-
-Feel free to reach out to [Julien](https://github.com/julienbrg) on [Farcaster](https://warpcast.com/julien-), [Element](https://matrix.to/#/@julienbrg:matrix.org), [Status](https://status.app/u/iwSACggKBkp1bGllbgM=#zQ3shmh1sbvE6qrGotuyNQB22XU5jTrZ2HFC8bA56d5kTS2fy), [Telegram](https://t.me/julienbrg), [Twitter](https://twitter.com/julienbrg), [Discord](https://discordapp.com/users/julienbrg), or [LinkedIn](https://www.linkedin.com/in/julienberanger/).
+https://julienberanger.com/contact

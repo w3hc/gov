@@ -1,15 +1,22 @@
-node_modules
-coverage
-coverage.json
-typechain
-typechain-types
-.DS_Store
+# Compiler files
+cache/
+out/
 
-cache
-artifacts
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
 
-.env*
-!.env.template
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# Lock files
+foundry.lock
+
+# Coverage reports
+lcov.info
 NOTES.md
-deployments
-data.json
+.DS_Store
