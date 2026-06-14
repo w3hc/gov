@@ -3,7 +3,8 @@ cache/
 out/
 
 # Dependencies
-lib/
+lib/*
+!lib/.gitkeep
 
 # Ignores development broadcast logs
 !/broadcast
