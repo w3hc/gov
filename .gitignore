@@ -2,10 +2,6 @@
 cache/
 out/
 
-# Dependencies
-lib/*
-!lib/.gitkeep
-
 # Ignores development broadcast logs
 !/broadcast
 /broadcast/*/31337/
