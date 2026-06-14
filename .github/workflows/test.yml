@@ -29,6 +29,9 @@ jobs:
       - name: Show Forge version
         run: forge --version
 
+      - name: Install dependencies
+        run: forge install
+
       - name: Run Forge fmt
         run: forge fmt --check
 
